@@ -133,14 +133,16 @@ Snowsight Git Workspace (UI for browsing/editing files)
     ↓
 Edit sql/00_config.sql (update email)
     ↓
-Run deploy_all.sql
+Run sql/00_config.sql (creates Git Repository Stage)
     ↓
-Creates Git Repository Stage (database object for deployment)
-    ↓
-Executes modules from stage
+Run deploy_all.sql (executes modules FROM stage)
     ↓
 Working Agent!
 ```
+
+**Key Point**: We run TWO scripts:
+1. **sql/00_config.sql** - Creates the Git Repository Stage
+2. **deploy_all.sql** - Uses that stage to execute modules
 
 ---
 
@@ -187,9 +189,9 @@ Click **Create** in the popup. The new integration now appears in the dropdown.
 
 **Why generic prefix?** The API Integration is an **account-level object** that you'll reuse across many projects. Setting `Allowed Prefixes` to `https://github.com/` means you can create workspaces for any GitHub repo without creating new integrations each time.
 
-#### 2.3: Edit Your Email Configuration
+#### 2.3: Run Configuration Setup (REQUIRED FIRST!)
 
-Now that you have the files in the workspace:
+**This step creates the Git Repository Stage that deploy_all.sql needs.**
 
 1. **In the file browser** (left panel), navigate to: `sql/`
 2. **Click to open**: `00_config.sql`
@@ -201,77 +203,112 @@ Now that you have the files in the workspace:
    ```sql
    SET notification_recipient_email = 'jane.doe@mycompany.com';
    ```
-5. **Save the file**: Press `Ctrl+S` (Windows) or `Cmd+S` (Mac)
-
-**Important**: You're editing the file IN the workspace. This is your personal copy - it won't commit changes to GitHub (that's fine, this is config specific to your deployment).
-
-#### 2.4: Set Your Warehouse Context
-
-Before running the deployment, set your compute context:
-
-1. **At the top of the SQL editor**, you'll see dropdown menus for Role and Warehouse
-2. **Select**:
-   - **Role**: `ACCOUNTADMIN`
-   - **Warehouse**: Any warehouse you have (e.g., `COMPUTE_WH`)
-
-Or run these commands in the SQL editor:
-
-```sql
-USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE COMPUTE_WH;  -- or whatever warehouse you have
-```
+5. **Set your context** at the top of the SQL editor:
+   ```sql
+   USE ROLE ACCOUNTADMIN;
+   USE WAREHOUSE COMPUTE_WH;  -- or your warehouse name
+   ```
+6. **Click** → **Run All** to execute sql/00_config.sql
 
 **Expected output**:
 ```
-Statement executed successfully.
-Statement executed successfully.
+Configuration validation passed. Email: jane.doe@mycompany.com
+Database SNOWFLAKE_EXAMPLE created successfully
+Schema TOOLS created successfully
+API Integration SFE_GITHUB_API_INTEGRATION created successfully
+Git Repository Stage created successfully
+Git repository fetched successfully
+Configuration and Git setup complete
 ```
 
-#### 2.5: Run the Deployment Script
+**What just happened?**
+- ✅ Validated your email address was updated
+- ✅ Created databases and schemas
+- ✅ Created Git API Integration
+- ✅ Created Git Repository Stage at `@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO`
+- ✅ Cloned the repository into Snowflake for deployment
 
-1. **In the file browser**, open: `deploy_all.sql`
-2. **Review the header** - it explains what will happen
-3. **Click** → **Run All** (or press `Cmd+Shift+Enter` / `Ctrl+Shift+Enter`)
-4. **Watch the deployment progress** in the output panel
+**Important**: You're editing the file IN the workspace. This is your personal copy - it won't commit changes to GitHub (that's fine, this is config specific to your deployment).
+
+**Why this matters**: The Git Repository Stage is a full clone of the GitHub repo inside Snowflake. deploy_all.sql uses this stage to execute modules with `EXECUTE IMMEDIATE FROM '@stage/path'`.
+
+#### 2.4: Run the Main Deployment
+
+**Now that the Git Repository Stage exists, we can deploy the agent.**
+
+1. **In the file browser**, navigate back to root and open: `deploy_all.sql`
+2. **Verify your context** is still set (if not, set it again):
+   ```sql
+   USE ROLE ACCOUNTADMIN;
+   USE WAREHOUSE COMPUTE_WH;
+   ```
+3. **Review the prerequisite check** (optional) - the script verifies the Git Repository Stage exists
+4. **Click** → **Run All** (or press `Cmd+Shift+Enter` / `Ctrl+Shift+Enter`)
+5. **Watch the deployment progress** in the output panel
+
+**What you'll see**:
+- Prerequisite check: "Git Repository Stage verified. Proceeding with deployment..."
+- Each module executes sequentially FROM the stage
+- Status messages appear in the results panel
+- Green checkmarks ✓ when modules complete
+- Total runtime: 2-3 minutes
 
 ---
 
 ### What Happens During Deployment
 
-**What happens next** (watch the output panel):
+**Step 2.3** (sql/00_config.sql) - watch the output panel:
 
 ```
-✓ Module 1: Configuration and validation
-  - Email validation passed
-  - Git integration created
-  - Repository cloned and fetched
+✓ Configuration validation
+  - Email address verified
+  - Settings validated
 
-✓ Module 2: Scaffolding
+✓ Database scaffolding
   - SNOWFLAKE_EXAMPLE database created
-  - SNOWFLAKE_INTELLIGENCE database configured
-  - Privileges granted
+  - TOOLS schema created
 
-✓ Module 3: Email Integration
+✓ Git integration
+  - SFE_GITHUB_API_INTEGRATION created (or confirmed existing)
+  - Git Repository Stage created: @SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO
+  - Repository cloned into stage
+  - Latest code fetched
+
+Result: "Configuration and Git setup complete"
+```
+
+**Step 2.4** (deploy_all.sql) - modules execute FROM the stage:
+
+```
+✓ Prerequisite Check
+  - Git Repository Stage verified: ✓
+
+✓ Module 1: Scaffolding
+  - SNOWFLAKE_INTELLIGENCE database created
+  - Additional schemas and privileges
+
+✓ Module 2: Email Integration
   - SFE_EMAIL_INTEGRATION created
   - send_email procedure deployed
-  - Test email sent
+  - Test email sent to your address
 
-✓ Module 4: Semantic Views
+✓ Module 3: Semantic Views
   - query_performance view created
   - cost_analysis view created
   - warehouse_operations view created
 
-✓ Module 5: Marketplace Documentation
+✓ Module 4: Marketplace Documentation
   - Snowflake Documentation installed (may prompt for legal acceptance)
 
-✓ Module 6: Agent Creation
+✓ Module 5: Agent Creation
   - sam_the_snowman agent deployed
+  - All tools and capabilities enabled
 
-✓ Module 7: Validation
-  - All components: PASS ✓
+✓ Module 6: Validation
+  - All components verified: PASS ✓
 ```
 
-**Expected Runtime**: 2-3 minutes
+**Total Runtime**: ~3-4 minutes (1 min config + 2-3 min deployment)
 
 **If prompted about Marketplace terms**: Click "Accept" and the deployment will continue automatically.
 

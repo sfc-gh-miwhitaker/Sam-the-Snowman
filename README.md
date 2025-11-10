@@ -38,10 +38,12 @@ Sam is a Snowflake Intelligence agent that analyzes your actual query history to
 
 ### The Flow: GitHub → Snowsight Workspace → Deploy
 
-**1. Create Git Workspace** in Snowsight (Projects > Workspaces > From Git repository)  
-**2. Edit** `sql/00_config.sql` in the workspace (update your email address)  
-**3. Run** `deploy_all.sql` from the workspace (click "Run All")  
+**1. Create Git Workspace** in Snowsight (Projects > Workspaces > From Git repository)
+**2. Run Configuration** open `sql/00_config.sql`, update email, click "Run All"
+**3. Run Deployment** open `deploy_all.sql`, click "Run All"
 **4. Done!** Navigate to AI & ML > Agents in Snowsight
+
+**Why 2 steps?** Step 2 creates the Git Repository Stage that Step 3 needs to execute modules FROM.
 
 **👉 Detailed walkthrough**: See [`QUICKSTART.md`](QUICKSTART.md) for step-by-step instructions with screenshots.
 

@@ -24,21 +24,22 @@ SHOW WAREHOUSES;
 
 ---
 
-## Step 1: Configure (1 minute)
+## Step 1: Prerequisites (1 minute)
 
-**Edit ONE file**: `sql/00_config.sql`
+Before you begin, make sure you have:
 
-Find this line:
+- [ ] **ACCOUNTADMIN role** access in Snowflake
+- [ ] **Active warehouse** (any size, e.g., `COMPUTE_WH`)
+- [ ] **Your work email address** ready to configure
+
+Quick check:
 ```sql
-SET notification_recipient_email = 'your.email@company.com';
-```
+-- Verify you have ACCOUNTADMIN
+SHOW GRANTS TO USER CURRENT_USER();
 
-Change it to your actual email address:
-```sql
-SET notification_recipient_email = 'jane.doe@mycompany.com';
+-- Verify you have a warehouse
+SHOW WAREHOUSES;
 ```
-
-**That's it!** Everything else uses smart defaults.
 
 ---
 
@@ -100,7 +101,9 @@ Result: Working AI agent!
 - ✅ You can reuse this API integration for future projects
 - ✅ Repository files now appear in the left panel! 🎉
 
-#### 2.2: Edit Your Email Configuration
+#### 2.2: Run Configuration Setup (REQUIRED FIRST!)
+
+**This step creates the Git Repository Stage that deploy_all.sql needs.**
 
 1. **In the workspace file browser** (left panel), navigate to: `sql/00_config.sql`
 2. **Find this line** (around line 46):
@@ -111,83 +114,108 @@ Result: Working AI agent!
    ```sql
    SET notification_recipient_email = 'jane.doe@mycompany.com';
    ```
-4. **Save the file**: Ctrl+S (Windows) or Cmd+S (Mac)
-
-**Note**: You're editing the file IN the workspace - it won't commit to GitHub (that's fine, this is your personal config).
-
-#### 2.3: Run the Deployment
-
-1. **In the workspace file browser**, open: `deploy_all.sql`
-2. **Set your context** (at the top of the SQL editor):
+4. **Set your context** (at the top of the SQL editor):
    ```sql
    USE WAREHOUSE COMPUTE_WH;  -- or any warehouse you have
    USE ROLE ACCOUNTADMIN;
    ```
+5. **Click** → **Run All** to execute sql/00_config.sql
+
+**Expected output**:
+```
+Configuration validation passed. Email: jane.doe@mycompany.com
+Git Repository Stage created successfully
+Configuration and Git setup complete
+```
+
+**What just happened?** The configuration script:
+- ✅ Validated your email address
+- ✅ Created Git API Integration
+- ✅ Created Git Repository Stage at `@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO`
+- ✅ Cloned the repository into Snowflake
+
+**Note**: This is the "scaffolding" step that makes deploy_all.sql work!
+
+#### 2.3: Run the Main Deployment
+
+**Now that the Git Repository Stage exists, we can deploy the agent.**
+
+1. **In the workspace file browser**, open: `deploy_all.sql`
+2. **Verify your context** is still set:
+   ```sql
+   USE WAREHOUSE COMPUTE_WH;
+   USE ROLE ACCOUNTADMIN;
+   ```
 3. **Click** → **Run All** (or press Cmd/Shift+Enter)
-4. **Watch the magic** ✨
+4. **Watch the deployment** ✨
 
 ---
 
 ### What Happens During Deployment?
 
-The script executes in this order:
-
+**Step 2.2** (sql/00_config.sql):
 ```
-Module 0: Configuration (sql/00_config.sql)
-   ↓ Validates your email address was updated
-   ↓ Creates Git API integration
-   ↓ Creates Git Repository STAGE at @SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO
-   ↓ This stage is a clone of the GitHub repo inside Snowflake
+✓ Validates your email address was updated
+✓ Creates Git API Integration (SFE_GITHUB_API_INTEGRATION)
+✓ Creates databases (SNOWFLAKE_EXAMPLE)
+✓ Creates Git Repository STAGE (@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO)
+✓ Clones the GitHub repo into the stage
+✓ Fetches latest code
 
-Module 1-6: (executed FROM the stage)
-   ↓ Now modules run from @stage/branches/main/sql/*.sql
-   ↓ Creates databases, schemas, privileges
-   ↓ Sets up email notifications (sends test email)
-   ↓ Deploys semantic views for query analysis
-   ↓ Installs Snowflake Documentation (Marketplace)
-   ↓ Creates the AI agent
-   ↓ Validates everything worked
+Result: Git Repository Stage ready for deployment!
+```
+
+**Step 2.3** (deploy_all.sql):
+```
+✓ Verifies Git Repository Stage exists
+✓ Module 1: Scaffolding (databases, schemas, privileges)
+✓ Module 2: Email integration (sends test email)
+✓ Module 3: Semantic views (query performance analytics)
+✓ Module 4: Marketplace documentation
+✓ Module 5: AI agent creation
+✓ Module 6: Validation (verifies all components)
 
 Result: ✓ All components deployed successfully!
 ```
 
-**Expected Runtime**: 2-3 minutes
+**Total Runtime**: ~3-4 minutes (1 min config + 2-3 min deployment)
 
 ---
 
-### Key Concept: Workspace vs Stage vs API Integration
+### Key Concept: Why Two Steps?
 
-**Git API Integration** (reusable across projects):
-- Account-level object (not database-specific)
-- Grants Snowflake permission to access GitHub
-- **Allowed Prefixes**: `https://github.com/` (all repos, not just one)
-- Created once, reused forever
-- Example: `GITHUB_API_INTEGRATION`
+**The Deployment Flow Explained**:
 
-**Git Workspace** (per-project UI):
-- Lives in Snowsight UI
-- Lets you browse/edit files for ONE repository
-- Connected to a specific GitHub repository URL
-- Used for development
-- References the API Integration for authentication
-
-**Git Repository Stage** (per-project database object):
-- Lives in Snowflake database as a stage object
-- Used for automated deployment
-- A full clone of the GitHub repo inside Snowflake
-- Created by deployment script
-- Example: `@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO`
-
-**The Flow**:
 ```
-API Integration (once) → allows access to github.com
+Step 2.2: sql/00_config.sql (run from workspace)
     ↓
-Workspace (per project) → browses specific repo
+Creates Git Repository Stage inside Snowflake
     ↓
-Stage (per project) → clones repo for automation
+Step 2.3: deploy_all.sql (runs FROM the stage)
+    ↓
+Modules execute from @stage/branches/main/sql/*.sql
 ```
 
-The script uses `@@sql/00_config.sql` to reference the workspace file, then that file creates the stage, then modules 01-06 execute FROM the stage. Clever! 🧠
+**Why can't we do it in one step?**
+
+The Git Repository Stage must exist BEFORE deploy_all.sql can reference it with `EXECUTE IMMEDIATE FROM '@stage/path'`. By running sql/00_config.sql first, we create the stage, then deploy_all.sql can use it.
+
+**Three Objects Explained**:
+
+1. **Git API Integration** (account-level, reusable)
+   - Grants Snowflake access to github.com
+   - Created once: `GITHUB_API_INTEGRATION`
+   - Allows all repos: `https://github.com/`
+
+2. **Git Workspace** (UI for browsing/editing)
+   - Created in Snowsight
+   - Shows repository files in left panel
+   - Used to run sql/00_config.sql
+
+3. **Git Repository Stage** (database object for automation)
+   - Created by sql/00_config.sql
+   - Full clone of repo: `@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO`
+   - Used by deploy_all.sql to execute modules
 
 ---
 
