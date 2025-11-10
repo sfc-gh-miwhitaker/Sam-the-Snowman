@@ -5,79 +5,110 @@
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
  * Synopsis:
- *   Orchestrates the Sam-the-Snowman deployment by sourcing the modular SQL files.
+ *   Single-command deployment orchestrator for Sam-the-Snowman.
+ *   Designed to be run from a Snowsight Git Workspace.
  *
- * Usage:
- *   - Open this file in Snowsight (Git + Worksheets integration) or any Snowflake SQL client.
- *   - Update configuration values inside `sql/00_config.sql` before running if needed.
- *   - Execute this file top-to-bottom as ACCOUNTADMIN. Before running, fill in the
- *     GIT CONFIGURATION section below with the GitHub organization/repository you
- *     actually use. The script creates the Git repo clone using those values and
- *     runs each module with `EXECUTE IMMEDIATE FROM @<repo>/branches/<branch>/...`.
+ * Prerequisites:
+ *   1. ACCOUNTADMIN role access
+ *   2. Active warehouse context (e.g., USE WAREHOUSE COMPUTE_WH;)
+ *   3. Snowsight Git Workspace connected to this repository
+ *
+ * How to Deploy:
+ *   
+ *   Step 1: Create a Git Workspace in Snowsight
+ *      • Navigate to: Projects > Workspaces
+ *      • Click: "From Git repository"
+ *      • Repository URL: https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git
+ *      • API Integration: 
+ *        - If first time: Create new with these values:
+ *          Name: GITHUB_API_INTEGRATION
+ *          API Provider: git_https_api
+ *          Allowed Prefixes: https://github.com/ (ALL repos, not just this one!)
+ *          Enabled: ✓
+ *        - If exists: Select from dropdown
+ *      • Authentication: Public repository (no credentials needed)
+ *      • Click: Create
+ *
+ *   Step 2: Configure Your Email
+ *      • In the workspace file browser, open: sql/00_config.sql
+ *      • Find: SET notification_recipient_email = 'your.email@company.com';
+ *      • Update with your actual email address
+ *      • Save the file (Ctrl+S / Cmd+S)
+ *
+ *   Step 3: Run This Deployment Script
+ *      • In the workspace file browser, open: deploy_all.sql (this file)
+ *      • Set context: USE WAREHOUSE COMPUTE_WH; USE ROLE ACCOUNTADMIN;
+ *      • Click "Run All" or press Cmd/Shift+Enter
+ *      • Wait ~2-3 minutes for completion
+ *
+ *   Step 4: Access Your Agent
+ *      • Navigate to: AI & ML > Agents
+ *      • Select: Sam-the-Snowman
+ *      • Ask: "What were my top 10 slowest queries today?"
+ *
+ * What This Script Does:
+ *   ✓ Validates configuration (email updated?)
+ *   ✓ Creates Git repository stage for modular deployment
+ *   ✓ Creates databases: SNOWFLAKE_EXAMPLE, SNOWFLAKE_INTELLIGENCE
+ *   ✓ Configures email notifications (sends test email)
+ *   ✓ Deploys semantic views for query analysis
+ *   ✓ Installs Snowflake Documentation (Marketplace)
+ *   ✓ Creates the AI agent with all tools
+ *   ✓ Validates deployment success
+ *
+ * Technical Note:
+ *   This script executes sql/00_config.sql first to create a Git repository
+ *   stage at @SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO. Subsequent 
+ *   modules (01-06) are executed directly from that stage using 
+ *   EXECUTE IMMEDIATE FROM, demonstrating Snowflake's Git integration.
+ *
+ * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
+ * Modified: 2025-11-10
+ * Version: 3.2
+ * License: Apache 2.0
  ******************************************************************************/
- 
+
 -- ============================================================================
--- GIT CONFIGURATION (REQUIRED – UPDATE THESE PLACEHOLDERS BEFORE RUNNING)
+-- DEPLOYMENT ORCHESTRATION
 -- ============================================================================
 
-SET git_api_integration_name = 'SFE_GITHUB_API_INTEGRATION';
-SET git_allowed_prefix = 'https://github.com/YOUR-ORG/';  -- include trailing slash
-SET git_repo_database = 'SNOWFLAKE_EXAMPLE';
-SET git_repo_schema = 'tools';
-SET git_repo_name = 'SAM_THE_SNOWMAN_REPO';
-SET git_repo_origin = 'https://github.com/YOUR-ORG/YOUR-REPO.git';
-SET git_repo_branch = 'main';
-
-SET git_repo_fqn = '"' || $git_repo_database || '"."' || $git_repo_schema || '"."' || $git_repo_name || '"';
-SET git_repo_stage_prefix = '@' || $git_repo_database || '.' || $git_repo_schema || '.' || $git_repo_name || '/branches/' || $git_repo_branch;
-
+-- Ensure ACCOUNTADMIN role is active for deployment
 USE ROLE ACCOUNTADMIN;
 
-EXECUTE IMMEDIATE
-    'CREATE DATABASE IF NOT EXISTS "' || $git_repo_database || '" COMMENT = ''DEMO: Sam-the-Snowman - Shared demo database''';
+-- Module 0: Configuration and Git Repository Stage Setup
+-- IMPORTANT: This module must be run from the workspace files, not from a stage,
+-- because it CREATES the Git repository stage that subsequent modules use.
+-- We use $$ to embed the entire 00_config.sql content inline.
+EXECUTE IMMEDIATE $$
+@@sql/00_config.sql
+$$;
 
-EXECUTE IMMEDIATE
-    'CREATE SCHEMA IF NOT EXISTS "' || $git_repo_database || '"."' || $git_repo_schema || '" COMMENT = ''DEMO: Sam-the-Snowman - Shared demo tooling schema''';
+-- Now that the Git repository stage exists at @SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO,
+-- we can execute remaining modules directly from the cloned repository.
 
-EXECUTE IMMEDIATE
-    'CREATE OR REPLACE API INTEGRATION "' || $git_api_integration_name || '" ' ||
-    'API_PROVIDER = GITHUB ENABLED = TRUE API_ALLOWED_PREFIXES = (''' || $git_allowed_prefix || ''') ' ||
-    'COMMENT = ''DEMO: Sam-the-Snowman - GitHub integration for Git repository access''';
+-- Module 1: Scaffolding
+-- Creates databases, schemas, and grants necessary privileges
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/01_scaffolding.sql';
 
-EXECUTE IMMEDIATE
-    'CREATE OR REPLACE GIT REPOSITORY ' || $git_repo_fqn || ' ' ||
-    'API_INTEGRATION = "' || $git_api_integration_name || '" ' ||
-    'ORIGIN = ''' || $git_repo_origin || ''' ' ||
-    'BRANCH = ''' || $git_repo_branch || ''' ' ||
-    'COMMENT = ''DEMO: Sam-the-Snowman - Git repository clone for modular SQL execution''';
+-- Module 2: Email Integration
+-- Sets up notification integration and email delivery stored procedure
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/02_email_integration.sql';
 
-EXECUTE IMMEDIATE
-    'ALTER GIT REPOSITORY ' || $git_repo_fqn || ' FETCH';
+-- Module 3: Semantic Views
+-- Deploys analytical views for query performance, cost, and warehouse operations
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
 
--- ============================================================================
--- Execute modules from configured Git repository clone
--- ============================================================================
+-- Module 4: Marketplace Documentation
+-- Installs Snowflake Documentation for Cortex Search
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/04_marketplace.sql';
 
-EXECUTE IMMEDIATE
-    'EXECUTE IMMEDIATE FROM ' || $git_repo_stage_prefix || '/sql/00_config.sql';
+-- Module 5: Agent Creation
+-- Creates the Sam-the-Snowman AI agent with all tools configured
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/05_agent.sql';
 
-EXECUTE IMMEDIATE
-    'EXECUTE IMMEDIATE FROM ' || $git_repo_stage_prefix || '/sql/01_scaffolding.sql';
-
-EXECUTE IMMEDIATE
-    'EXECUTE IMMEDIATE FROM ' || $git_repo_stage_prefix || '/sql/02_email_integration.sql';
-
-EXECUTE IMMEDIATE
-    'EXECUTE IMMEDIATE FROM ' || $git_repo_stage_prefix || '/sql/03_semantic_views.sql';
-
-EXECUTE IMMEDIATE
-    'EXECUTE IMMEDIATE FROM ' || $git_repo_stage_prefix || '/sql/04_marketplace.sql';
-
-EXECUTE IMMEDIATE
-    'EXECUTE IMMEDIATE FROM ' || $git_repo_stage_prefix || '/sql/05_agent.sql';
-
-EXECUTE IMMEDIATE
-    'EXECUTE IMMEDIATE FROM ' || $git_repo_stage_prefix || '/sql/06_validation.sql';
+-- Module 6: Validation
+-- Verifies all components deployed successfully
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
  
  
  

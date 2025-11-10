@@ -108,7 +108,7 @@ INSERT INTO deployment_log (component, status) VALUES
     ('semantic_view.cost_analysis', 'MISSING'),
     ('semantic_view.query_performance', 'MISSING'),
     ('semantic_view.warehouse_operations', 'MISSING'),
-    ('database.snowflake_documentation', 'MISSING');
+    ('database.snowflake_documentation', 'PRESERVED');
 
 -- Mark Git integration and repository as deployed (created in deploy_all.sql)
 EXECUTE IMMEDIATE

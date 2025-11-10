@@ -108,11 +108,25 @@ UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE compone
 -- ============================================================================
 
 -- Test the email integration using configured recipient
+-- This will send a test email to verify the notification integration works
 CALL SNOWFLAKE_EXAMPLE.tools.send_email(
     $notification_recipient_email,
     'Sam-the-Snowman - Test Email',
     '<h1>Email Integration Test</h1><p>This is a test of the Sam-the-Snowman email notification system.</p>'
 );
+
+-- Expected Output:
+-- +------------------------+
+-- | SEND_EMAIL             |
+-- +------------------------+
+-- | Email sent successfully|
+-- +------------------------+
+--
+-- Next Step: Check your email inbox for the test message
+-- Subject: "Sam-the-Snowman - Test Email"
+-- From: Snowflake Notifications
+-- If not received within 2 minutes, check your spam folder or verify
+-- your email domain is allow-listed in Snowflake notification settings
 
 -- Email integration complete
 

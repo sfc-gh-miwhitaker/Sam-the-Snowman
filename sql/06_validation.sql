@@ -51,12 +51,30 @@ SELECT
 FROM SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log
 ORDER BY component;
 
+-- Expected Output (if deployment succeeded):
+-- | component                                  | status | indicator |
+-- |--------------------------------------------|--------|-----------|
+-- | agent.sam_the_snowman                      | PASS   | ✓         |
+-- | database.snowflake_documentation           | PASS   | ✓         |
+-- | git_repository.sam_the_snowman_repo        | PASS   | ✓         |
+-- | integration.sfe_email_integration          | PASS   | ✓         |
+-- | integration.sfe_github_api_integration     | PASS   | ✓         |
+-- | procedure.send_email                       | PASS   | ✓         |
+-- | semantic_view.cost_analysis                | PASS   | ✓         |
+-- | semantic_view.query_performance            | PASS   | ✓         |
+-- | semantic_view.warehouse_operations         | PASS   | ✓         |
+
 -- Count summary
 SELECT 
     COUNT(*) AS total_components,
     SUM(CASE WHEN status = 'PASS' THEN 1 ELSE 0 END) AS passed,
     SUM(CASE WHEN status = 'MISSING' THEN 1 ELSE 0 END) AS failed
 FROM SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log;
+
+-- Expected Output:
+-- | total_components | passed | failed |
+-- |------------------|--------|--------|
+-- | 9                | 9      | 0      |
 
 -- Final status message
 SELECT 
@@ -66,4 +84,15 @@ SELECT
         ELSE '✗ Some components failed to deploy. Check the deployment log above for details.'
     END AS deployment_status
 FROM SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log;
+
+-- Expected Output (success):
+-- | deployment_status                                                           |
+-- |-----------------------------------------------------------------------------|
+-- | ✓ All components deployed successfully! Sam-the-Snowman is ready to use.  |
+--
+-- Next Steps:
+-- 1. Check your email for the test notification (Subject: "Sam-the-Snowman - Test Email")
+-- 2. Navigate to Snowsight: AI & ML > Agents
+-- 3. Open "Sam-the-Snowman"
+-- 4. Ask: "What were my top 10 slowest queries today?"
 
