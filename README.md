@@ -39,11 +39,10 @@ Sam is a Snowflake Intelligence agent that analyzes your actual query history to
 ### The Flow: GitHub → Snowsight Workspace → Deploy
 
 **1. Create Git Workspace** in Snowsight (Projects > Workspaces > From Git repository)
-**2. Run Configuration** open `sql/00_config.sql`, review auto-detected email, click "Run All"
+**2. Mount Git Stage** open `sql/00_config.sql`, set context (`USE ROLE ACCOUNTADMIN; USE WAREHOUSE <name>;`), click "Run All" (no edits)
 **3. Run Deployment** open `deploy_all.sql`, click "Run All"
 **4. Done!** Navigate to AI & ML > Agents in Snowsight
 
-**Smart Defaults**: Email auto-detects from your Snowflake profile. Only 2 settings to review!  
 **Custom Roles**: See [`docs/05-ROLE-BASED-ACCESS.md`](docs/05-ROLE-BASED-ACCESS.md) (Part 2) for role-based deployments.
 
 **👉 Detailed walkthrough**: See [`QUICKSTART.md`](QUICKSTART.md) for step-by-step instructions with screenshots.
@@ -77,7 +76,7 @@ Sam-the-Snowman/
 ├── QUICKSTART.md                ← Start here for deployment
 ├── deploy_all.sql               ← Single-command deployment
 ├── sql/                         ← Deployment modules (00-06)
-│   ├── 00_config.sql            ← Configure role & email (edit this!)
+│   ├── 00_config.sql            ← Mount Git repository stage (run on error, no edits)
 │   ├── 01_scaffolding.sql       ← Databases and schemas
 │   ├── 02_email_integration.sql ← Email notifications
 │   ├── 03_semantic_views.sql    ← Analytical views (⭐ best reference)
@@ -127,7 +126,7 @@ Sam-the-Snowman/
 - **Read-Only Data Access**: Agent queries ACCOUNT_USAGE views only (no write access)
 - **User Warehouse Context**: Agent uses each user's current warehouse (isolated compute)
 
-**Default Access**: Only users with SYSADMIN role (configurable in `sql/00_config.sql`)
+**Default Access**: Only users with SYSADMIN role (change `SET role_name` at top of `deploy_all.sql` if needed)
 
 ---
 

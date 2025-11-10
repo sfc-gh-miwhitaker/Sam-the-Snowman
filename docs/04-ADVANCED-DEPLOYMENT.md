@@ -26,23 +26,19 @@ Sam-the-Snowman uses a modular deployment architecture that breaks the deploymen
 - Safe to run multiple times (idempotent)
 - Recommended workflow: open `deploy_all.sql` in Snowsight (Git + Worksheets integration), update the configuration block, and run the entire script at once.
 
-### Module 00: Configuration (`sql/00_config.sql`)
+### Module 00: Stage Mount (`sql/00_config.sql`)
 
-**Purpose:** Set configuration variables and enable account-level features
+**Purpose:** Ensure the Git repository is available as a Snowflake stage
 
 **What it does:**
-- Sets `role_name` variable (default: SYSADMIN)
-- Sets `notification_recipient_email` variable
-- Enables Cortex cross-region access
-- Grants CORTEX_USER role to configured role
+- Creates (or reuses) the shared demo database and `DEPLOY` schema
+- Creates the `SFE_GITHUB_API_INTEGRATION` (idempotent)
+- Creates the Git repository stage `SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO`
+- Fetches the latest branch contents and lists available SQL modules
 
-**Key learning:** Configuration management in Snowflake scripts
+**Key learning:** How Snowsight workspaces surface Git repositories as Snowflake stages
 
-**Customize before deployment:**
-```sql
-SET role_name = 'SYSADMIN';  -- Change to your role
-SET notification_recipient_email = 'YOUR_EMAIL@DOMAIN.COM';  -- Your email
-```
+**Usage:** Run when deploy_all.sql reports the repository stage is missing (no edits required)
 
 ---
 
@@ -76,8 +72,8 @@ SET notification_recipient_email = 'YOUR_EMAIL@DOMAIN.COM';  -- Your email
 
 **What it does:**
 - Creates `SFE_EMAIL_INTEGRATION` notification integration
-- Creates `send_email` stored procedure with SQL injection protection
-- Tests the email integration
+- Creates `sfe_send_email` stored procedure with SQL injection protection
+- Auto-detects the current user's email address and tests the integration
 
 **Key learning:** Notification integrations, Python stored procedures, security patterns
 
@@ -299,7 +295,7 @@ Use modules as examples:
 
 **Symptom:** `SQL compilation error: error line N at position N unexpected 'identifier'`
 
-**Solution:** Run `00_config.sql` first to set `$role_name` and `$notification_recipient_email`
+**Solution:** Run `00_config.sql` to recreate the Git repository stage, then rerun `deploy_all.sql` (which sets `role_name`/integration variables before executing modules)
 
 ### Deployment Log Not Found
 

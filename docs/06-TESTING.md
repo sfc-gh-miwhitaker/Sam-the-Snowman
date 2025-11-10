@@ -19,7 +19,7 @@ This guide provides comprehensive testing procedures to validate your Sam-the-Sn
 
 ## Pre-Deployment Checklist
 
-Before running `deploy_all.sql` (or the individual modules in `sql/00_config.sql` through `sql/06_validation.sql`), verify all prerequisites are met:
+Before running `deploy_all.sql` (or the individual modules in `sql/01_scaffolding.sql` through `sql/06_validation.sql`), verify all prerequisites are met:
 
 ### ✓ Account Prerequisites
 
@@ -47,7 +47,7 @@ SELECT CURRENT_REGION(), CURRENT_ACCOUNT();
 
 ### ✓ Configuration Review
 
-- [ ] Updated configuration variables in `sql/00_config.sql`
+- [ ] Confirmed session variables at top of `deploy_all.sql` (role name, integration names) are correct
 - [ ] Confirmed the target warehouse exists and is accessible
 - [ ] Replaced the placeholder email address in the test call (`sql/02_email_integration.sql`)
 - [ ] Understand all objects that will be created
@@ -240,7 +240,7 @@ DESC AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
 ```sql
 USE ROLE ACCOUNTADMIN;
 
--- Confirm the configured deployment role (from sql/00_config.sql) has access
+-- Confirm the configured deployment role (from deploy_all.sql) has access
 SHOW GRANTS TO ROLE SYSADMIN;  -- replace if you customized role_name
 
 -- Check database and schema grants
@@ -503,7 +503,7 @@ Verify that only authorized roles can access the agent.
 ### Test 1: Configured Deployment Role (default SYSADMIN)
 
 ```sql
--- Activate the role defined in sql/00_config.sql (default SYSADMIN)
+-- Activate the role defined in deploy_all.sql (default SYSADMIN)
 USE ROLE SYSADMIN;
 
 -- Verify agent is visible

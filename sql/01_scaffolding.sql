@@ -24,7 +24,8 @@
  *   - Temporary deployment_log table
  * 
  * Prerequisites:
- *   - 00_config.sql must be run first to set variables
+ *   - Run 00_config.sql first to ensure the Git repository stage exists
+ *   - Execute from a session where deploy_all.sql has set session variables (role_name, git repo identifiers)
  *   - ACCOUNTADMIN role privileges
  * 
  * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)

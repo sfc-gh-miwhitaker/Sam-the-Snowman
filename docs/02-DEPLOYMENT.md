@@ -9,15 +9,15 @@ This checklist ensures all prerequisites are met before deploying the Sam-the-Sn
 
 Before running `deploy_all.sql` (or individual modules), verify these configurations:
 
-### 1. Configuration Variables (edit first section of deploy_all.sql)
+### 1. Configuration Variables (edit top of deploy_all.sql if needed)
 - [ ] Confirm `SET role_name = 'SYSADMIN';` (adjust if you use another deployment role)
-- [ ] Update `SET notification_recipient_email = 'YOUR_EMAIL_ADDRESS@EMAILDOMAIN.COM';` with a valid address
+- [ ] Update `SET git_api_integration_name` / `SET git_repo_name` only if you renamed the corresponding objects
 - [ ] Update `API_ALLOWED_PREFIXES` / `ORIGIN` in the GitHub integration section if you intend to point at a private repository
 
 **Note**: The agent uses the user's current warehouse context—no dedicated warehouse needed.
 
 ### 2. Email Configuration
-- [ ] Ensure `notification_recipient_email` points to an allow-listed address
+- [ ] Ensure your Snowflake user profile has a valid email (`SHOW USERS LIKE <username>` → `email`)
 - [ ] Confirm email domain is allow-listed in Snowflake notification settings
 - [ ] Test email delivery after deployment
 
@@ -29,9 +29,9 @@ Before running `deploy_all.sql` (or individual modules), verify these configurat
 
 ## Deployment Steps
 
-1. [ ] Review and update configuration variables (`sql/00_config.sql`)
-2. [ ] Execute `deploy_all.sql` in Snowsight (Git + Worksheets integration) as ACCOUNTADMIN
-    - Equivalent manual flow: run modules `sql/00_config.sql` → `sql/06_validation.sql`
+1. [ ] Run `sql/00_config.sql` (ACCOUNTADMIN) to mount the Git repository stage (no edits required)
+2. [ ] Execute `deploy_all.sql` in Snowsight (ACCOUNTADMIN). Customise session variables at the top if needed.
+    - Equivalent manual flow: run modules `sql/01_scaffolding.sql` → `sql/06_validation.sql`
 3. [ ] Verify test email received
 4. [ ] Test agent with sample query
 5. [ ] Review security grants align with organizational policies

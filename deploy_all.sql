@@ -31,14 +31,11 @@
  *      • Authentication: Public repository (no credentials needed)
  *      • Click: Create
  *
- *   Step 2: Run Configuration Setup (REQUIRED FIRST!)
+ *   Step 2: Mount the Git Repository Stage (REQUIRED FIRST!)
  *      • In workspace file browser, open: sql/00_config.sql
- *      • Find: SET notification_recipient_email = 'your.email@company.com';
- *      • Update with your actual email address
- *      • Set context: USE WAREHOUSE COMPUTE_WH; USE ROLE ACCOUNTADMIN;
- *      • Click "Run All" to execute sql/00_config.sql
- *      • This creates the Git Repository Stage needed by deploy_all.sql
- *      • Expected output: "Configuration and Git setup complete"
+ *      • Set context: USE ROLE ACCOUNTADMIN; USE WAREHOUSE COMPUTE_WH;
+ *      • Click "Run All" (no edits required)
+ *      • Expected output: LIST results showing sql/ modules + summary row
  *
  *   Step 3: Run This Deployment Script
  *      • In workspace file browser, open: deploy_all.sql (this file)
@@ -60,10 +57,11 @@
  *   ✓ Creates the AI agent with all tools
  *   ✓ Validates deployment success
  *
- * Technical Note:
- *   This script assumes sql/00_config.sql was ALREADY executed, which created
- *   the Git Repository Stage at @SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO.
- *   All modules are executed FROM that stage using EXECUTE IMMEDIATE FROM.
+ * Technical Notes:
+ *   • sql/00_config.sql must be executed first to create the stage at
+ *     @SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO.
+ *   • Customize the session variables below if you deploy with a role other than SYSADMIN.
+ *   • All modules are executed FROM the stage using EXECUTE IMMEDIATE FROM.
  *
  * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
  * Modified: 2025-11-10
@@ -77,6 +75,22 @@
 
 -- Ensure ACCOUNTADMIN role is active for deployment
 USE ROLE ACCOUNTADMIN;
+
+-- ============================================================================
+-- SESSION VARIABLES (Customize if your org uses a different deployment role)
+-- ============================================================================
+
+SET role_name = 'SYSADMIN';
+SET git_api_integration_name = 'SFE_GITHUB_API_INTEGRATION';
+SET git_repo_name = 'SFE_SAM_THE_SNOWMAN_REPO';
+
+-- ============================================================================
+-- ACCOUNT-LEVEL PREREQUISITES
+-- ============================================================================
+
+ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
+
+GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE IDENTIFIER($role_name);
 
 -- ============================================================================
 -- PREREQUISITE CHECK

@@ -32,7 +32,7 @@ This guide covers all aspects of role-based access control for Sam-the-Snowman:
 By default, Sam-the-Snowman uses the **SYSADMIN** role:
 
 ```sql
--- sql/00_config.sql (line 44)
+-- deploy_all.sql (top of file)
 SET role_name = 'SYSADMIN';
 ```
 
@@ -42,9 +42,10 @@ SET role_name = 'SYSADMIN';
 - No PUBLIC grants are issued (secure by default)
 
 **To deploy**:
-1. Keep default `role_name = 'SYSADMIN'` in `sql/00_config.sql`
-2. Run deployment: `@sql/00_config.sql` → `@deploy_all.sql`
-3. Grant SYSADMIN to users who need access
+1. Keep default `SET role_name = 'SYSADMIN';` at the top of `deploy_all.sql`
+2. Run `@sql/00_config.sql` (mounts the Git stage, no edits required)
+3. Run `@deploy_all.sql`
+4. Grant SYSADMIN to users who need access
 
 ### Default Privileges Granted
 
@@ -100,7 +101,7 @@ GRANT ROLE SAM_AGENT_ADMIN TO USER john_smith;
 
 #### Step 2: Update Configuration
 
-Edit `sql/00_config.sql` line 44:
+Edit the session variables at the top of `deploy_all.sql`:
 
 ```sql
 -- Change from default
@@ -118,7 +119,7 @@ USE ROLE ACCOUNTADMIN;
 USE WAREHOUSE COMPUTE_WH;
 
 -- Run configuration (uses custom role)
-@sql/00_config.sql
+@sql/00_config.sql          -- Mount Git stage (no edits)
 
 -- Run deployment (grants to custom role)
 @deploy_all.sql
@@ -257,7 +258,7 @@ GRANT ROLE SAM_AGENT_USER TO USER analyst_1;
 GRANT ROLE SAM_AGENT_USER TO USER analyst_2;
 
 -- Deploy with admin role
--- sql/00_config.sql: SET role_name = 'SAM_AGENT_ADMIN';
+-- deploy_all.sql: SET role_name = 'SAM_AGENT_ADMIN';
 ```
 
 ---
@@ -275,7 +276,7 @@ GRANT ROLE DATA_ENGINEER_ROLE TO USER data_engineer_1;
 GRANT ROLE DATA_ENGINEER_ROLE TO USER data_engineer_2;
 
 -- Deploy with data engineering role
--- sql/00_config.sql: SET role_name = 'DATA_ENGINEER_ROLE';
+-- deploy_all.sql: SET role_name = 'DATA_ENGINEER_ROLE';
 
 -- Grant read-only access to analysts
 CREATE ROLE IF NOT EXISTS ANALYST_ROLE;
@@ -309,8 +310,8 @@ CREATE ROLE IF NOT EXISTS SAM_AGENT_PROD;
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE_PROD;
 
 -- For each environment, update:
--- sql/00_config.sql line 44: SET role_name = 'SAM_AGENT_DEV' (or TEST, PROD)
--- sql/00_config.sql line 73: SET git_repo_database = 'SNOWFLAKE_EXAMPLE_DEV'
+-- deploy_all.sql (top): SET role_name = 'SAM_AGENT_DEV' (or TEST, PROD)
+-- sql/00_config.sql: Update CREATE DATABASE/CREATE SCHEMA statements to use environment-specific names
 ```
 
 **Result**: Isolated agents per environment with clear ownership and separation.
@@ -337,7 +338,7 @@ GRANT ROLE SVC_SAM_AGENT_ROLE TO USER svc_sam_agent;
 GRANT ROLE SVC_SAM_AGENT_ROLE TO ROLE ACCOUNTADMIN; -- for setup
 
 -- Deploy with service role
--- sql/00_config.sql: SET role_name = 'SVC_SAM_AGENT_ROLE';
+-- deploy_all.sql: SET role_name = 'SVC_SAM_AGENT_ROLE';
 ```
 
 **Benefits**:
@@ -377,7 +378,7 @@ GRANT ROLE SVC_SAM_AGENT_ROLE TO ROLE ACCOUNTADMIN; -- for setup
 
 3. **Update configuration**:
    ```sql
-   -- sql/00_config.sql line 44: SET role_name = 'SAM_AGENT_ADMIN';
+   -- deploy_all.sql (top): SET role_name = 'SAM_AGENT_ADMIN';
    ```
 
 4. **Verify**:

@@ -10,8 +10,8 @@
  * Description:
  *   This module sets up email delivery capabilities:
  *   - Creates SFE_EMAIL_INTEGRATION notification integration
- *   - Creates send_email stored procedure with SQL injection protection
- *   - Tests the email integration
+ *   - Creates sfe_send_email stored procedure with SQL injection protection
+ *   - Tests the email integration (auto-detects your email address)
  * 
  * OBJECTS CREATED:
  *   - SFE_EMAIL_INTEGRATION (Notification Integration)
@@ -36,10 +36,36 @@
 -- CREATE EMAIL NOTIFICATION INTEGRATION
 -- ============================================================================
 
--- Create email notification integration for agent output delivery
--- Requires ACCOUNTADMIN privileges
 USE ROLE ACCOUNTADMIN;
 
+-- Resolve effective email address using the current user's profile
+SET current_user_email = (
+    SELECT COALESCE(email, 'EMAIL_NOT_SET_IN_PROFILE')
+    FROM SNOWFLAKE.ACCOUNT_USAGE.USERS
+    WHERE name = CURRENT_USER()
+    LIMIT 1
+);
+
+SET effective_notification_email = (
+    SELECT NULLIF($current_user_email, 'EMAIL_NOT_SET_IN_PROFILE')
+);
+
+SELECT
+    CURRENT_USER() AS current_user,
+    $current_user_email AS profile_email,
+    COALESCE($effective_notification_email, 'EMAIL REQUIRED') AS email_used_for_notifications;
+
+DO $$
+BEGIN
+    IF ($effective_notification_email IS NULL) THEN
+        RETURN 'ERROR: Unable to determine notification email. Add an email address to your Snowflake user profile (ALTER USER <username> SET EMAIL = ...).';
+    END IF;
+    RETURN 'Notification emails will be sent to: ' || $effective_notification_email;
+END;
+$$;
+
+-- Create email notification integration for agent output delivery
+-- Requires ACCOUNTADMIN privileges
 CREATE OR REPLACE NOTIFICATION INTEGRATION SFE_EMAIL_INTEGRATION
     TYPE = EMAIL
     ENABLED = TRUE
@@ -110,7 +136,7 @@ UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE compone
 -- Test the email integration using configured recipient
 -- This will send a test email to verify the notification integration works
 CALL SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email(
-    $notification_recipient_email,
+    $effective_notification_email,
     'Sam-the-Snowman - Test Email',
     '<h1>Email Integration Test</h1><p>This is a test of the Sam-the-Snowman email notification system.</p>'
 );

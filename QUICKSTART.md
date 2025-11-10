@@ -54,7 +54,7 @@ You have: GitHub URL
     ↓
 Snowsight creates: Git Workspace (files appear in UI)
     ↓
-You edit: sql/00_config.sql (update email)
+You run: sql/00_config.sql (mount Git stage)
     ↓
 You run: deploy_all.sql
     ↓
@@ -101,71 +101,68 @@ Result: Working AI agent!
 - ✅ You can reuse this API integration for future projects
 - ✅ Repository files now appear in the left panel! 🎉
 
-#### 2.2: Run Configuration Setup (REQUIRED FIRST!)
+#### 2.2: Mount the Git Repository Stage (REQUIRED FIRST!)
 
-**This step creates the Git Repository Stage that deploy_all.sql needs.**
+**This step creates the Git repository stage that deploy_all.sql needs.**
 
-1. **In the workspace file browser** (left panel), navigate to: `sql/00_config.sql`
-2. **Find this line** (around line 46):
-   ```sql
-   SET notification_recipient_email = 'your.email@company.com';
-   ```
-3. **Change it** to your actual email:
-   ```sql
-   SET notification_recipient_email = 'jane.doe@mycompany.com';
-   ```
-4. **Set your context** (at the top of the SQL editor):
+1. In the workspace file browser, open `sql/00_config.sql` (no edits required)
+2. Set worksheet context:
    ```sql
    USE WAREHOUSE COMPUTE_WH;  -- or any warehouse you have
    USE ROLE ACCOUNTADMIN;
    ```
-5. **Click** → **Run All** to execute sql/00_config.sql
+3. Click **Run All** to execute the script
 
 **Expected output**:
 ```
-Configuration validation passed. Email: jane.doe@mycompany.com
-Git Repository Stage created successfully
-Configuration and Git setup complete
+Database SNOWFLAKE_EXAMPLE created successfully
+Schema SNOWFLAKE_EXAMPLE.DEPLOY created successfully
+API Integration SFE_GITHUB_API_INTEGRATION created or reused
+Git repository SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO created
+Git repository fetched successfully
 ```
 
-**What just happened?** The configuration script:
-- ✅ Validated your email address
-- ✅ Created Git API Integration
-- ✅ Created Git Repository Stage at `@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO`
-- ✅ Cloned the repository into Snowflake
+Followed by:
+- `SHOW GIT REPOSITORIES ...` confirming the repository exists
+- `LIST @SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql` showing every SQL module in the stage
+- A summary row with the stage path and next action (“Open deploy_all.sql and run all statements.”)
 
-**Note**: This is the "scaffolding" step that makes deploy_all.sql work!
+**What just happened?** The stage script:
+- ✅ Ensured the demo database and deployment schema exist
+- ✅ Created or reused the Git API integration
+- ✅ Created the Git repository stage at `@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO`
+- ✅ Fetched the latest code and verified the stage is readable from Snowsight
 
 #### 2.3: Run the Main Deployment
 
 **Now that the Git Repository Stage exists, we can deploy the agent.**
 
 1. **In the workspace file browser**, open: `deploy_all.sql`
-2. **Verify your context** is still set:
+2. **(Optional)** Adjust the session variables at the top (change `SET role_name = 'SYSADMIN';` if you use a different deployment role)
+3. **Verify your context** is still set:
    ```sql
    USE WAREHOUSE COMPUTE_WH;
    USE ROLE ACCOUNTADMIN;
    ```
-3. **Click** → **Run All** (or press Cmd/Shift+Enter)
-4. **Watch the deployment** ✨
+4. **Click** → **Run All** (or press Cmd/Shift+Enter)
+5. **Watch the deployment** ✨
 
 ---
 
 ### What Happens During Deployment?
 
-**Step 2.2** (sql/00_config.sql):
+**Stage Mount (sql/00_config.sql):**
 ```
-✓ Validates your email address was updated
+✓ Ensures SNOWFLAKE_EXAMPLE and SNOWFLAKE_EXAMPLE.DEPLOY exist
 ✓ Creates Git API Integration (SFE_GITHUB_API_INTEGRATION)
-✓ Creates databases (SNOWFLAKE_EXAMPLE)
 ✓ Creates Git Repository STAGE (@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO)
-✓ Clones the GitHub repo into the stage
-✓ Fetches latest code
+✓ Fetches the latest code into the stage
+✓ Lists available SQL modules (LIST @stage/branches/main/sql)
 
-Result: Git Repository Stage ready for deployment!
+Result: Git repository stage ready for deployment!
 ```
 
-**Step 2.3** (deploy_all.sql):
+**deploy_all.sql:**
 ```
 ✓ Verifies Git Repository Stage exists
 ✓ Module 1: Scaffolding (databases, schemas, privileges)
@@ -288,8 +285,12 @@ Are my warehouses properly sized based on queue times?
 
 ## Troubleshooting Quick Reference
 
-### "ERROR: You must update notification_recipient_email"
-**Fix**: You forgot to edit `sql/00_config.sql` - go back to Step 1
+### "ERROR: Unable to determine notification email"
+**Fix**: Your Snowflake user profile is missing an email address. Run:
+```sql
+ALTER USER <username> SET EMAIL = 'your.email@company.com';
+```
+Then rerun `sql/02_email_integration.sql`.
 
 ### "Insufficient privileges"
 **Fix**: Ensure you're using `ACCOUNTADMIN` role:
