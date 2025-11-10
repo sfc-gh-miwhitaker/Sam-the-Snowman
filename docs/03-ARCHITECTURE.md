@@ -10,13 +10,43 @@ Sam-the-Snowman deploys a single Snowflake Assistant that combines domain-specif
 
 Everything described here is provisioned by the modular deployment workflow (`deploy_all.sql`, which calls `sql/00_config.sql` through `sql/06_validation.sql`).
 
+---
+
+## Schema Organization
+
+Sam-the-Snowman uses a **functional schema architecture** that demonstrates production-grade organization:
+
+```
+SNOWFLAKE_EXAMPLE/
+├── DEPLOY/                          ← Deployment infrastructure
+│   └── SFE_SAM_THE_SNOWMAN_REPO     ← Git repository stage (schema: DEPLOY)
+│
+├── INTEGRATIONS/                    ← External system connections
+│   └── sfe_send_email()             ← Email notification procedure
+│
+└── SEMANTIC/                        ← Agent tools & analytics
+    ├── sfe_query_performance        ← Query analytics semantic view
+    ├── sfe_cost_analysis            ← Cost analytics semantic view
+    └── sfe_warehouse_operations     ← Warehouse analytics semantic view
+```
+
+**Design Principles**:
+- **Separation of Concerns**: Infrastructure, integrations, and analytics are isolated
+- **SFE_ Prefix**: All objects use `sfe_` prefix for demo safety and discoverability
+- **Scalability**: Easy to add more views, procedures, or repos to appropriate schema
+- **Access Control**: Granular permissions per schema (DevOps → DEPLOY, Analysts → SEMANTIC)
+
+This pattern is **reusable as a template** for production projects requiring clear organization.
+
+---
+
 ## Semantic Views
 
-| View | Purpose | Primary Tables |
-|------|---------|----------------|
-| `query_performance` | Analyze slow queries, errors, spilling, cache efficiency, and partition scans | `SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY`, `SNOWFLAKE.ACCOUNT_USAGE.QUERY_ATTRIBUTION_HISTORY` |
-| `cost_analysis` | Track warehouse credit consumption, cost trends, and FinOps insights | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY` |
-| `warehouse_operations` | Evaluate warehouse sizing, queue depth, concurrency, and provisioning | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY` |
+| View | Location | Purpose | Primary Tables |
+|------|----------|---------|----------------|
+| `sfe_query_performance` | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Analyze slow queries, errors, spilling, cache efficiency, partition scans | `SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY`, `QUERY_ATTRIBUTION_HISTORY` |
+| `sfe_cost_analysis` | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Track warehouse credit consumption, cost trends, FinOps insights | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY` |
+| `sfe_warehouse_operations` | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Evaluate warehouse sizing, queue depth, concurrency, provisioning | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY` |
 
 Each column comment includes synonyms (for example, "slow", "latency", "runtime") so the agent understands natural language variations. If you need additional vocabulary, edit the comments in `sql/03_semantic_views.sql` and re-run the semantic view module.
 
@@ -61,7 +91,7 @@ Show concurrency and queue depth by hour of day.
 
 ### Add Synonyms
 ```
-CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.tools.query_performance
+CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.semantic.sfe_query_performance
 ...
 FACTS (
   QUERY_HISTORY.TOTAL_ELAPSED_TIME AS TOTAL_ELAPSED_TIME
@@ -79,7 +109,7 @@ Re-run `sql/03_semantic_views.sql` (idempotent) after making changes, then rerun
 
 ## Troubleshooting
 
-- **"Semantic view not found"**: `SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.tools;` If missing, re-run `sql/03_semantic_views.sql` (and optionally `sql/05_agent.sql`).
+- **"Semantic view not found"**: `SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.semantic;` If missing, re-run `sql/03_semantic_views.sql` (and optionally `sql/05_agent.sql`).
 - **"No data returned"**: `ACCOUNT_USAGE` data can lag by 45 minutes. Verify timestamps with `SELECT MAX(START_TIME) FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY;`.
 - **"Agent answered the wrong question"**: Rephrase using domain keywords (slow, cost, queue). If issues persist, review the orchestration instructions in `sql/05_agent.sql`.
 

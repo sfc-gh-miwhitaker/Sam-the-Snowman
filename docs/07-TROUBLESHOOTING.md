@@ -247,7 +247,7 @@ SQL compilation error: Agent specification is invalid
    SHOW CORTEX SEARCH SERVICES IN DATABASE snowflake_documentation;
    
    -- Check stored procedure exists
-   SHOW PROCEDURES LIKE 'send_email' IN SCHEMA SNOWFLAKE_EXAMPLE.tools;
+   SHOW PROCEDURES LIKE 'sfe_send_email' IN SCHEMA SNOWFLAKE_EXAMPLE.integrations;
    ```
 
 2. If any dependency is missing, recreate it from the setup script
@@ -348,14 +348,14 @@ USE ROLE PUBLIC;
 3. Test semantic view directly:
    ```sql
    SELECT COUNT(*) 
-   FROM SNOWFLAKE_EXAMPLE.tools.query_performance;
+   FROM SNOWFLAKE_EXAMPLE.semantic.sfe_query_performance;
    ```
 
 4. Verify your user has access:
    ```sql
    -- Check grants
    SHOW GRANTS ON DATABASE SNOWFLAKE_EXAMPLE;
-   SHOW GRANTS ON SCHEMA SNOWFLAKE_EXAMPLE.tools;
+   SHOW GRANTS ON SCHEMA SNOWFLAKE_EXAMPLE.semantic;
    SHOW GRANTS ON DATABASE SNOWFLAKE_INTELLIGENCE;
    SHOW GRANTS ON SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
    ```
@@ -399,7 +399,7 @@ This was fixed in v2.1.1 by using `OBJECT_CONSTRUCT()` instead of static JSON.
 
 1. Test email integration directly:
    ```sql
-   CALL SNOWFLAKE_EXAMPLE.tools.send_email(
+   CALL SNOWFLAKE_EXAMPLE.integrations.sfe_send_email(
        'your.email@domain.com',
        'Test Email',
        '<h1>Test</h1><p>If you receive this, email integration works.</p>'
@@ -547,7 +547,7 @@ USE ROLE ACCOUNTADMIN;
 
 -- Grant database and schema access
 GRANT USAGE ON DATABASE SNOWFLAKE_EXAMPLE TO ROLE <target_role>;
-GRANT USAGE ON SCHEMA SNOWFLAKE_EXAMPLE.tools TO ROLE <target_role>;
+GRANT USAGE ON SCHEMA SNOWFLAKE_EXAMPLE.semantic TO ROLE <target_role>;
 GRANT USAGE ON DATABASE SNOWFLAKE_INTELLIGENCE TO ROLE <target_role>;
 GRANT USAGE ON SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS TO ROLE <target_role>;
 
@@ -630,7 +630,7 @@ LIMIT 20;
 
 ```sql
 -- Verify semantic view access
-SELECT COUNT(*) FROM SNOWFLAKE_EXAMPLE.tools.query_performance;
+SELECT COUNT(*) FROM SNOWFLAKE_EXAMPLE.semantic.sfe_query_performance;
 
 -- Verify documentation search service
 SHOW CORTEX SEARCH SERVICES IN DATABASE snowflake_documentation;

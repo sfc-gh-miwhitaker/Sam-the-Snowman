@@ -14,10 +14,10 @@
  *   Components validated:
  *   - agent.sam_the_snowman
  *   - integration.sfe_email_integration
- *   - procedure.send_email
- *   - semantic_view.cost_analysis
- *   - semantic_view.query_performance
- *   - semantic_view.warehouse_operations
+ *   - procedure.sfe_send_email
+ *   - semantic_view.sfe_cost_analysis
+ *   - semantic_view.sfe_query_performance
+ *   - semantic_view.sfe_warehouse_operations
  *   - database.snowflake_documentation
  * 
  * Prerequisites:
@@ -56,13 +56,13 @@ ORDER BY component;
 -- |--------------------------------------------|--------|-----------|
 -- | agent.sam_the_snowman                      | PASS   | ✓         |
 -- | database.snowflake_documentation           | PASS   | ✓         |
--- | git_repository.sam_the_snowman_repo        | PASS   | ✓         |
+-- | git_repository.sfe_sam_the_snowman_repo    | PASS   | ✓         |
 -- | integration.sfe_email_integration          | PASS   | ✓         |
 -- | integration.sfe_github_api_integration     | PASS   | ✓         |
--- | procedure.send_email                       | PASS   | ✓         |
--- | semantic_view.cost_analysis                | PASS   | ✓         |
--- | semantic_view.query_performance            | PASS   | ✓         |
--- | semantic_view.warehouse_operations         | PASS   | ✓         |
+-- | procedure.sfe_send_email                   | PASS   | ✓         |
+-- | semantic_view.sfe_cost_analysis            | PASS   | ✓         |
+-- | semantic_view.sfe_query_performance        | PASS   | ✓         |
+-- | semantic_view.sfe_warehouse_operations     | PASS   | ✓         |
 
 -- Count summary
 SELECT 

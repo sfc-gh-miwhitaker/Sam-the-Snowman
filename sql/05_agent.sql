@@ -120,13 +120,13 @@ FROM SPECIFICATION $$
     ],
     "tool_resources": {
         "query_performance": {
-            "semantic_view": "SNOWFLAKE_EXAMPLE.tools.query_performance"
+            "semantic_view": "SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance"
         },
         "cost_analysis": {
-            "semantic_view": "SNOWFLAKE_EXAMPLE.tools.cost_analysis"
+            "semantic_view": "SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis"
         },
         "warehouse_operations": {
-            "semantic_view": "SNOWFLAKE_EXAMPLE.tools.warehouse_operations"
+            "semantic_view": "SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations"
         },
         "snowflake_knowledge_ext_documentation": {
             "id_column": "SOURCE_URL",
@@ -135,8 +135,8 @@ FROM SPECIFICATION $$
             "name": "SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE"
         },
         "cortex_email_tool": {
-            "identifier": "SNOWFLAKE_EXAMPLE.tools.send_email",
-            "name": "SEND_EMAIL(VARCHAR, VARCHAR, VARCHAR)",
+            "identifier": "SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email",
+            "name": "SFE_SEND_EMAIL(VARCHAR, VARCHAR, VARCHAR)",
             "type": "procedure",
             "execution_environment": {
                 "type": "warehouse"

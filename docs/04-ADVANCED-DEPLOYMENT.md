@@ -51,7 +51,7 @@ SET notification_recipient_email = 'YOUR_EMAIL@DOMAIN.COM';  -- Your email
 **Purpose:** Create database and schema infrastructure
 
 **What it does:**
-- Creates `SNOWFLAKE_EXAMPLE` database and `tools` schema
+- Creates `SNOWFLAKE_EXAMPLE` database and functional schemas (`deploy`, `integrations`, `semantic`)
 - Creates `SNOWFLAKE_INTELLIGENCE` database and `AGENTS` schema
 - Transfers `SNOWFLAKE_INTELLIGENCE` ownership to configured role
 - Grants privileges to configured role
@@ -61,7 +61,9 @@ SET notification_recipient_email = 'YOUR_EMAIL@DOMAIN.COM';  -- Your email
 
 **Objects created:**
 - `SNOWFLAKE_EXAMPLE` database
-- `SNOWFLAKE_EXAMPLE.tools` schema
+- `SNOWFLAKE_EXAMPLE.deploy` schema
+- `SNOWFLAKE_EXAMPLE.integrations` schema
+- `SNOWFLAKE_EXAMPLE.semantic` schema
 - `SNOWFLAKE_INTELLIGENCE` database (or updates ownership if exists)
 - `SNOWFLAKE_INTELLIGENCE.AGENTS` schema
 - Temporary `deployment_log` table
@@ -81,7 +83,7 @@ SET notification_recipient_email = 'YOUR_EMAIL@DOMAIN.COM';  -- Your email
 
 **Objects created:**
 - `SFE_EMAIL_INTEGRATION` notification integration
-- `SNOWFLAKE_EXAMPLE.tools.send_email` procedure
+- `SNOWFLAKE_EXAMPLE.integrations.sfe_send_email` procedure
 
 **Security highlight:** The stored procedure uses `session.call()` to prevent SQL injection when calling `SYSTEM$SEND_EMAIL`.
 
@@ -92,16 +94,16 @@ SET notification_recipient_email = 'YOUR_EMAIL@DOMAIN.COM';  -- Your email
 **Purpose:** Create domain-specific semantic views for Cortex Analyst
 
 **What it does:**
-- Creates `query_performance` semantic view (query analysis)
-- Creates `cost_analysis` semantic view (cost tracking)
-- Creates `warehouse_operations` semantic view (capacity planning)
+- Creates `sfe_query_performance` semantic view (query analysis)
+- Creates `sfe_cost_analysis` semantic view (cost tracking)
+- Creates `sfe_warehouse_operations` semantic view (capacity planning)
 
 **Key learning:** ⭐ **Semantic view syntax and design patterns**
 
 **Objects created:**
-- `SNOWFLAKE_EXAMPLE.tools.query_performance`
-- `SNOWFLAKE_EXAMPLE.tools.cost_analysis`
-- `SNOWFLAKE_EXAMPLE.tools.warehouse_operations`
+- `SNOWFLAKE_EXAMPLE.semantic.sfe_query_performance`
+- `SNOWFLAKE_EXAMPLE.semantic.sfe_cost_analysis`
+- `SNOWFLAKE_EXAMPLE.semantic.sfe_warehouse_operations`
 
 **Why this module is valuable:**
 This is the **best reference** for semantic view syntax. Each view demonstrates:

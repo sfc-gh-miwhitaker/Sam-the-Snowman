@@ -9,14 +9,16 @@
  * 
  * Description:
  *   This module creates the required database and schema infrastructure:
- *   - SNOWFLAKE_EXAMPLE database and tools schema
+ *   - SNOWFLAKE_EXAMPLE database and functional schemas (DEPLOY, INTEGRATIONS, SEMANTIC)
  *   - SNOWFLAKE_INTELLIGENCE database and AGENTS schema (required by Snowflake)
  *   - Privilege grants to the configured role
  *   - Deployment logging infrastructure
  * 
  * OBJECTS CREATED:
  *   - SNOWFLAKE_EXAMPLE database
- *   - SNOWFLAKE_EXAMPLE.tools schema
+ *   - SNOWFLAKE_EXAMPLE.DEPLOY schema
+ *   - SNOWFLAKE_EXAMPLE.INTEGRATIONS schema
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC schema
  *   - SNOWFLAKE_INTELLIGENCE database (ownership transferred to configured role)
  *   - SNOWFLAKE_INTELLIGENCE.AGENTS schema
  *   - Temporary deployment_log table
@@ -45,9 +47,15 @@ USE ROLE identifier($role_name);
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
 COMMENT = 'DEMO: Demo/Example projects - NOT FOR PRODUCTION';
 
--- Create schema for tools used by agents
-CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.tools
-COMMENT = 'DEMO: Sam-the-Snowman - Schema for tools like semantic views and stored procedures used by agents.';
+-- Create functional schemas (organized by purpose)
+CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.DEPLOY
+COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure (Git repositories, automation)';
+
+CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.INTEGRATIONS
+COMMENT = 'DEMO: Sam-the-Snowman - External system integrations (email, webhooks, APIs)';
+
+CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC
+COMMENT = 'DEMO: Sam-the-Snowman - Semantic views for agent tools and analytics';
 
 -- ============================================================================
 -- CREATE/CONFIGURE SNOWFLAKE_INTELLIGENCE DATABASE
@@ -78,10 +86,12 @@ COMMENT = 'DEMO: Sam-the-Snowman - Schema for Snowflake Intelligence agents';
 -- GRANT PRIVILEGES
 -- ============================================================================
 
--- Grant the configured role access to SNOWFLAKE_EXAMPLE tools
+-- Grant the configured role access to SNOWFLAKE_EXAMPLE functional schemas
 -- These are intentionally not granted to PUBLIC - users must be granted the configured role
 GRANT USAGE ON DATABASE SNOWFLAKE_EXAMPLE TO ROLE identifier($role_name);
-GRANT USAGE ON SCHEMA SNOWFLAKE_EXAMPLE.tools TO ROLE identifier($role_name);
+GRANT USAGE ON SCHEMA SNOWFLAKE_EXAMPLE.DEPLOY TO ROLE identifier($role_name);
+GRANT USAGE ON SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS TO ROLE identifier($role_name);
+GRANT USAGE ON SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC TO ROLE identifier($role_name);
 
 -- Grant the configured role access to SNOWFLAKE_INTELLIGENCE
 -- Agent access will be controlled through role membership

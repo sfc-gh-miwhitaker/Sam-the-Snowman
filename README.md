@@ -39,11 +39,12 @@ Sam is a Snowflake Intelligence agent that analyzes your actual query history to
 ### The Flow: GitHub → Snowsight Workspace → Deploy
 
 **1. Create Git Workspace** in Snowsight (Projects > Workspaces > From Git repository)
-**2. Run Configuration** open `sql/00_config.sql`, update email, click "Run All"
+**2. Run Configuration** open `sql/00_config.sql`, review auto-detected email, click "Run All"
 **3. Run Deployment** open `deploy_all.sql`, click "Run All"
 **4. Done!** Navigate to AI & ML > Agents in Snowsight
 
-**Why 2 steps?** Step 2 creates the Git Repository Stage that Step 3 needs to execute modules FROM.
+**Smart Defaults**: Email auto-detects from your Snowflake profile. Only 2 settings to review!  
+**Custom Roles**: See [`docs/05-ROLE-BASED-ACCESS.md`](docs/05-ROLE-BASED-ACCESS.md) (Part 2) for role-based deployments.
 
 **👉 Detailed walkthrough**: See [`QUICKSTART.md`](QUICKSTART.md) for step-by-step instructions with screenshots.
 
@@ -54,9 +55,15 @@ Sam is a Snowflake Intelligence agent that analyzes your actual query history to
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | **Agent** | `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman` | AI-powered query assistant |
-| **Semantic Views** | `SNOWFLAKE_EXAMPLE.tools` | Query performance, cost, warehouse analytics |
-| **Email Integration** | `SFE_EMAIL_INTEGRATION` | Notification delivery system |
+| **Semantic Views** | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Query performance, cost, warehouse analytics |
+| **Email Integration** | `SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email()` | Notification delivery procedure |
+| **Git Repository** | `SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO` | Automated deployment from Git |
 | **Documentation** | `snowflake_documentation` | Cortex Search for best practices |
+
+**Schema Organization**:
+- `DEPLOY` → Deployment infrastructure (Git repos)
+- `INTEGRATIONS` → External systems (email, webhooks)
+- `SEMANTIC` → Agent tools and analytics
 
 **Cost**: Minimal. Agent uses your current warehouse context - you control compute costs.
 
@@ -130,7 +137,7 @@ To remove all Sam-the-Snowman components:
 
 ```sql
 USE ROLE ACCOUNTADMIN;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
 **Note**: Per demo project standards, shared databases (`SNOWFLAKE_EXAMPLE`, `SNOWFLAKE_INTELLIGENCE`) are preserved. Only Sam-the-Snowman objects are removed.

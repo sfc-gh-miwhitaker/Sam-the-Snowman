@@ -5,15 +5,19 @@
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  * 
  * Synopsis:
- *   Configuration variables and account-level prerequisites for Sam-the-Snowman.
+ *   Simplified configuration with smart defaults and auto-detection.
  * 
  * Description:
- *   This module sets up configuration variables and enables Cortex features.
- *   Customize the variables below before running the deployment.
+ *   This module configures Sam-the-Snowman with minimal user input:
+ *   1. Auto-detects your email from Snowflake user profile
+ *   2. Uses SYSADMIN role by default (customizable)
+ *   3. Applies Sam-the-Snowman standards for all other settings
  * 
- * Configuration Variables:
- *   - role_name: Role that will own and access the agent (default: SYSADMIN)
- *   - notification_recipient_email: Email address for test notifications
+ * User Configuration (2 settings only):
+ *   - role_name: Role for agent ownership (default: SYSADMIN)
+ *   - notification_recipient_email: Auto-detected from user profile
+ * 
+ * For custom role deployments, see: docs/08-CUSTOM-ROLE-DEPLOYMENT.md
  * 
  * Prerequisites:
  *   - ACCOUNTADMIN role privileges
@@ -25,50 +29,61 @@
  * License: Apache 2.0
  * 
  * Usage:
- *   This module is called by deploy_all.sql or can be run standalone.
+ *   Run this module from Snowsight (or the Snowflake Worksheet) BEFORE executing deploy_all.sql.
+ *   It provisions the shared Git repository stage used by the deployment orchestrator.
  ******************************************************************************/
 
 -- ============================================================================
--- CONFIGURATION VARIABLES (REQUIRED: Update these before deployment)
+-- USER CONFIGURATION (Only 2 settings to review!)
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
--- STEP 1: Configure Role and Email
+-- 1. ROLE CONFIGURATION
 -- ----------------------------------------------------------------------------
-
--- Role that will own and have access to the agent
--- Default: SYSADMIN (change if you want a different role)
+-- The role that will own and access the Sam-the-Snowman agent.
+--
+-- Default: SYSADMIN (recommended for most deployments)
+-- Custom: If your organization uses custom roles, change this.
+--         See docs/05-ROLE-BASED-ACCESS.md (Part 2) for detailed guidance.
+--
 SET role_name = 'SYSADMIN';
 
--- ⚠️  REQUIRED: Your email address for test notifications
--- The deployment will send a test email to confirm the integration works
--- REPLACE 'your.email@company.com' WITH YOUR ACTUAL EMAIL ADDRESS
-SET notification_recipient_email = 'your.email@company.com';
-
 -- ----------------------------------------------------------------------------
--- STEP 2: Configure Git Integration (Advanced - defaults work for most users)
+-- 2. EMAIL CONFIGURATION (Auto-Detected, Override if Needed)
 -- ----------------------------------------------------------------------------
+-- Email address for test notification during deployment.
+-- We'll try to auto-detect from your Snowflake user profile.
 
--- Git API Integration name (uses SFE_ prefix per demo project standards)
+-- Auto-detect email from current user profile
+SET notification_recipient_email = (
+    SELECT COALESCE(email, 'EMAIL_NOT_SET_IN_PROFILE') 
+    FROM SNOWFLAKE.ACCOUNT_USAGE.USERS 
+    WHERE name = CURRENT_USER() 
+    LIMIT 1
+);
+
+-- ⚠️ OVERRIDE ONLY IF NEEDED:
+-- If auto-detection fails (email not set in your user profile), uncomment and set manually:
+-- SET notification_recipient_email = 'your.email@company.com';
+
+-- ============================================================================
+-- STATIC CONFIGURATION (Do not modify - uses Sam-the-Snowman standards)
+-- ============================================================================
+
+-- Git API Integration (reusable across all GitHub projects)
 SET git_api_integration_name = 'SFE_GITHUB_API_INTEGRATION';
-
--- Allowed GitHub URL prefix (restrict after first deployment if desired)
 SET git_allowed_prefix = 'https://github.com/';
 
--- Target database and schema for Git repository and tools
+-- Database and schema structure (functional schema organization)
 SET git_repo_database = 'SNOWFLAKE_EXAMPLE';
-SET git_repo_schema = 'tools';
+SET git_repo_schema = 'DEPLOY';
 
--- Git repository name (consider adding SFE_ prefix for strict demo compliance)
-SET git_repo_name = 'SAM_THE_SNOWMAN_REPO';
-
--- Source repository URL and branch
--- Default: Official Sam-the-Snowman repository
--- Change this if you forked the repo or want to point to your own Git server
+-- Git repository configuration (official Sam-the-Snowman repo)
+SET git_repo_name = 'SFE_SAM_THE_SNOWMAN_REPO';
 SET git_repo_origin = 'https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git';
 SET git_repo_branch = 'main';
 
--- Derived variables (do not edit these)
+-- Derived variables (computed from above, do not edit)
 SET git_repo_fqn = '"' || $git_repo_database || '"."' || $git_repo_schema || '"."' || $git_repo_name || '"';
 SET git_repo_stage_prefix = '@' || $git_repo_database || '.' || $git_repo_schema || '.' || $git_repo_name || '/branches/' || $git_repo_branch;
 
@@ -76,15 +91,23 @@ SET git_repo_stage_prefix = '@' || $git_repo_database || '.' || $git_repo_schema
 -- CONFIGURATION VALIDATION
 -- ============================================================================
 
--- Validate that email address was updated (prevents common deployment mistake)
+-- Validate email configuration
 DO $$
 BEGIN
+    -- Check if email auto-detection failed
+    IF ($notification_recipient_email = 'EMAIL_NOT_SET_IN_PROFILE') THEN
+        RETURN 'WARNING: Email not found in user profile. Please set notification_recipient_email manually in sql/00_config.sql (line 62) or add email to your Snowflake user profile.';
+    END IF;
+    
+    -- Check if email still has placeholder values
     IF ($notification_recipient_email LIKE '%YOUR_EMAIL%' 
         OR $notification_recipient_email = 'your.email@company.com'
         OR $notification_recipient_email = 'YOUR_EMAIL_ADDRESS@EMAILDOMAIN.COM') THEN
-        RETURN 'ERROR: You must update notification_recipient_email in sql/00_config.sql before deploying!';
+        RETURN 'ERROR: Please update notification_recipient_email in sql/00_config.sql (line 62) with your actual email address.';
     END IF;
-    RETURN 'Configuration validation passed. Email: ' || $notification_recipient_email;
+    
+    -- Success
+    RETURN 'Configuration validated. Role: ' || $role_name || ' | Email: ' || $notification_recipient_email;
 END;
 $$;
 
@@ -92,11 +115,12 @@ $$;
 -- +--------------------------------------------------------------------------+
 -- | anonymous block                                                          |
 -- +--------------------------------------------------------------------------+
--- | Configuration validation passed. Email: jane.doe@company.com            |
+-- | Configuration validated. Role: SYSADMIN | Email: jane.doe@company.com  |
 -- +--------------------------------------------------------------------------+
 --
--- If you see "ERROR: You must update notification_recipient_email", 
--- edit the email address above and rerun this module
+-- If you see "WARNING: Email not found", either:
+-- 1. Uncomment line 62 and set your email manually, OR
+-- 2. Add email to your user profile: ALTER USER <username> SET EMAIL = 'your.email@company.com';
 
 -- ============================================================================
 -- ACCOUNT-LEVEL PREREQUISITES

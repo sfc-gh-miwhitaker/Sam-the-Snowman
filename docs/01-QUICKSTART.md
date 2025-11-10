@@ -214,7 +214,7 @@ Click **Create** in the popup. The new integration now appears in the dropdown.
 ```
 Configuration validation passed. Email: jane.doe@mycompany.com
 Database SNOWFLAKE_EXAMPLE created successfully
-Schema TOOLS created successfully
+Schema DEPLOY created successfully
 API Integration SFE_GITHUB_API_INTEGRATION created successfully
 Git Repository Stage created successfully
 Git repository fetched successfully
@@ -225,7 +225,7 @@ Configuration and Git setup complete
 - ✅ Validated your email address was updated
 - ✅ Created databases and schemas
 - ✅ Created Git API Integration
-- ✅ Created Git Repository Stage at `@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO`
+- ✅ Created Git Repository Stage at `@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO`
 - ✅ Cloned the repository into Snowflake for deployment
 
 **Important**: You're editing the file IN the workspace. This is your personal copy - it won't commit changes to GitHub (that's fine, this is config specific to your deployment).
@@ -270,7 +270,7 @@ Configuration and Git setup complete
 
 ✓ Git integration
   - SFE_GITHUB_API_INTEGRATION created (or confirmed existing)
-  - Git Repository Stage created: @SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO
+  - Git Repository Stage created: @SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO
   - Repository cloned into stage
   - Latest code fetched
 
@@ -409,18 +409,18 @@ Send me an email summary of query performance
 
 ### Semantic Views
 
-Located in `SNOWFLAKE_EXAMPLE.tools`:
+Located in `SNOWFLAKE_EXAMPLE.semantic`:
 
-- `query_performance` - Query execution metrics, errors, optimization opportunities
-- `cost_analysis` - Warehouse credit consumption and cost tracking
-- `warehouse_operations` - Warehouse utilization and capacity planning
+- `sfe_query_performance` - Query execution metrics, errors, optimization opportunities
+- `sfe_cost_analysis` - Warehouse credit consumption and cost tracking
+- `sfe_warehouse_operations` - Warehouse utilization and capacity planning
 
 ### Agent
 
 Located at `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman`:
 
 **Tools available**:
-- Cortex Analyst (query_performance, cost_analysis, warehouse_operations)
+- Cortex Analyst (sfe_query_performance, sfe_cost_analysis, sfe_warehouse_operations)
 - Cortex Search (snowflake_knowledge_ext_documentation)
 - Email delivery (cortex_email_tool)
 
@@ -494,7 +494,7 @@ To remove all Sam-the-Snowman components:
 
 ```sql
 USE ROLE ACCOUNTADMIN;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
 **Time**: < 1 minute  

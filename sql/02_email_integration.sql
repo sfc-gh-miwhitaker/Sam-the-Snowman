@@ -15,7 +15,7 @@
  * 
  * OBJECTS CREATED:
  *   - SFE_EMAIL_INTEGRATION (Notification Integration)
- *   - SNOWFLAKE_EXAMPLE.tools.send_email (Stored Procedure)
+ *   - SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email (Stored Procedure)
  * 
  * Prerequisites:
  *   - 00_config.sql and 01_scaffolding.sql must be run first
@@ -58,8 +58,8 @@ USE ROLE identifier($role_name);
 -- CREATE EMAIL STORED PROCEDURE
 -- ============================================================================
 
--- Create stored procedure to send HTML emails
-CREATE OR REPLACE PROCEDURE SNOWFLAKE_EXAMPLE.tools.send_email(
+-- Create stored procedure to send HTML emails (sfe_ prefix for demo safety)
+CREATE OR REPLACE PROCEDURE SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email(
     recipient_email VARCHAR,
     subject VARCHAR,
     body VARCHAR
@@ -109,7 +109,7 @@ UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE compone
 
 -- Test the email integration using configured recipient
 -- This will send a test email to verify the notification integration works
-CALL SNOWFLAKE_EXAMPLE.tools.send_email(
+CALL SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email(
     $notification_recipient_email,
     'Sam-the-Snowman - Test Email',
     '<h1>Email Integration Test</h1><p>This is a test of the Sam-the-Snowman email notification system.</p>'

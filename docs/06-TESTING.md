@@ -132,10 +132,10 @@ SHOW SCHEMAS IN DATABASE SNOWFLAKE_INTELLIGENCE;
 
 ```sql
 USE ROLE SYSADMIN;
-USE SCHEMA SNOWFLAKE_EXAMPLE.tools;
+USE SCHEMA SNOWFLAKE_EXAMPLE.deploy;
 
 SHOW GIT REPOSITORIES;
--- ✓ PASS: SAM_THE_SNOWMAN_REPO visible
+-- ✓ PASS: SFE_SAM_THE_SNOWMAN_REPO visible
 
 USE ROLE ACCOUNTADMIN;
 SHOW API INTEGRATIONS LIKE 'SFE_GITHUB_API_INTEGRATION';
@@ -152,29 +152,29 @@ SHOW API INTEGRATIONS LIKE 'SFE_GITHUB_API_INTEGRATION';
 USE ROLE SYSADMIN;
 
 -- Check semantic views exist
-SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.tools;
--- ✓ PASS: query_performance, cost_analysis, warehouse_operations visible
+SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.semantic;
+-- ✓ PASS: sfe_query_performance, sfe_cost_analysis, sfe_warehouse_operations visible
 
--- Test query_performance data access
+-- Test sfe_query_performance data access
 SELECT COUNT(*) as row_count
-FROM SNOWFLAKE_EXAMPLE.tools.query_performance;
+FROM SNOWFLAKE_EXAMPLE.semantic.sfe_query_performance;
 -- ✓ PASS: Query executes without error (count may vary)
 
--- Test cost_analysis data access
+-- Test sfe_cost_analysis data access
 SELECT COUNT(*) as row_count
-FROM SNOWFLAKE_EXAMPLE.tools.cost_analysis;
+FROM SNOWFLAKE_EXAMPLE.semantic.sfe_cost_analysis;
 -- ✓ PASS: Query executes without error (count may vary)
 
--- Test warehouse_operations data access
+-- Test sfe_warehouse_operations data access
 SELECT COUNT(*) as row_count
-FROM SNOWFLAKE_EXAMPLE.tools.warehouse_operations;
+FROM SNOWFLAKE_EXAMPLE.semantic.sfe_warehouse_operations;
 -- ✓ PASS: Query executes without error (count may vary)
 
 -- Verify query_performance has recent data
 SELECT 
     MAX(START_TIME) as most_recent_query,
     COUNT(*) as total_queries
-FROM SNOWFLAKE_EXAMPLE.tools.query_performance;
+FROM SNOWFLAKE_EXAMPLE.semantic.sfe_query_performance;
 -- ✓ PASS: most_recent_query shows recent timestamp
 ```
 
@@ -205,11 +205,11 @@ SHOW NOTIFICATION INTEGRATIONS LIKE 'SFE_EMAIL_INTEGRATION';
 USE ROLE SYSADMIN;
 
 -- Check send_email procedure exists
-SHOW PROCEDURES LIKE 'send_email' IN SCHEMA SNOWFLAKE_EXAMPLE.tools;
+SHOW PROCEDURES LIKE 'sfe_send_email' IN SCHEMA SNOWFLAKE_EXAMPLE.integrations;
 -- ✓ PASS: send_email(VARCHAR, VARCHAR, VARCHAR) visible
 
 -- Describe the procedure
-DESC PROCEDURE SNOWFLAKE_EXAMPLE.tools.send_email(VARCHAR, VARCHAR, VARCHAR);
+DESC PROCEDURE SNOWFLAKE_EXAMPLE.integrations.sfe_send_email(VARCHAR, VARCHAR, VARCHAR);
 -- ✓ PASS: Procedure details returned
 ```
 
@@ -245,7 +245,7 @@ SHOW GRANTS TO ROLE SYSADMIN;  -- replace if you customized role_name
 
 -- Check database and schema grants
 SHOW GRANTS ON DATABASE SNOWFLAKE_EXAMPLE;
-SHOW GRANTS ON SCHEMA SNOWFLAKE_EXAMPLE.tools;
+SHOW GRANTS ON SCHEMA SNOWFLAKE_EXAMPLE.semantic;
 SHOW GRANTS ON DATABASE SNOWFLAKE_INTELLIGENCE;
 SHOW GRANTS ON SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 SHOW GRANTS ON DATABASE snowflake_documentation;
@@ -297,7 +297,7 @@ SELECT
     QUERY_ID,
     TOTAL_ELAPSED_TIME / 1000 as seconds,
     QUERY_TEXT
-FROM SNOWFLAKE_EXAMPLE.tools.query_performance
+FROM SNOWFLAKE_EXAMPLE.semantic.sfe_query_performance
 WHERE START_TIME >= CURRENT_DATE()
 ORDER BY TOTAL_ELAPSED_TIME DESC
 LIMIT 5;
@@ -336,7 +336,7 @@ SELECT
     QUERY_ID,
     ERROR_CODE,
     ERROR_MESSAGE
-FROM SNOWFLAKE_EXAMPLE.tools.query_performance
+FROM SNOWFLAKE_EXAMPLE.semantic.sfe_query_performance
 WHERE ERROR_CODE IS NOT NULL
     AND START_TIME >= DATEADD(day, -7, CURRENT_DATE())
 LIMIT 10;
@@ -445,7 +445,7 @@ Validate email notification functionality.
 USE ROLE SYSADMIN;
 
 -- Test email procedure directly
-CALL SNOWFLAKE_EXAMPLE.tools.send_email(
+CALL SNOWFLAKE_EXAMPLE.integrations.sfe_send_email(
     'your.email@domain.com',
     'Snowflake Intelligence - Direct Test',
     '<h1>Direct Test</h1><p>This email was sent directly via stored procedure.</p><p>Timestamp: ' || CURRENT_TIMESTAMP()::VARCHAR || '</p>'
@@ -480,7 +480,7 @@ CALL SNOWFLAKE_EXAMPLE.tools.send_email(
 
 ```sql
 -- Test with invalid email format
-CALL SNOWFLAKE_EXAMPLE.tools.send_email(
+CALL SNOWFLAKE_EXAMPLE.integrations.sfe_send_email(
     'invalid-email-format',
     'Test Subject',
     '<p>Test body</p>'
@@ -539,7 +539,7 @@ CREATE ROLE IF NOT EXISTS test_agent_user;
 -- Grant required access
 GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE test_agent_user;
 GRANT USAGE ON DATABASE SNOWFLAKE_EXAMPLE TO ROLE test_agent_user;
-GRANT USAGE ON SCHEMA SNOWFLAKE_EXAMPLE.tools TO ROLE test_agent_user;
+GRANT USAGE ON SCHEMA SNOWFLAKE_EXAMPLE.semantic TO ROLE test_agent_user;
 GRANT USAGE ON DATABASE SNOWFLAKE_INTELLIGENCE TO ROLE test_agent_user;
 GRANT USAGE ON SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS TO ROLE test_agent_user;
 GRANT IMPORTED PRIVILEGES ON DATABASE snowflake_documentation TO ROLE test_agent_user;

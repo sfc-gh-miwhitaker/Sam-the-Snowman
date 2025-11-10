@@ -131,7 +131,7 @@ Configuration and Git setup complete
 **What just happened?** The configuration script:
 - ✅ Validated your email address
 - ✅ Created Git API Integration
-- ✅ Created Git Repository Stage at `@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO`
+- ✅ Created Git Repository Stage at `@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO`
 - ✅ Cloned the repository into Snowflake
 
 **Note**: This is the "scaffolding" step that makes deploy_all.sql work!
@@ -158,7 +158,7 @@ Configuration and Git setup complete
 ✓ Validates your email address was updated
 ✓ Creates Git API Integration (SFE_GITHUB_API_INTEGRATION)
 ✓ Creates databases (SNOWFLAKE_EXAMPLE)
-✓ Creates Git Repository STAGE (@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO)
+✓ Creates Git Repository STAGE (@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO)
 ✓ Clones the GitHub repo into the stage
 ✓ Fetches latest code
 
@@ -214,7 +214,7 @@ The Git Repository Stage must exist BEFORE deploy_all.sql can reference it with 
 
 3. **Git Repository Stage** (database object for automation)
    - Created by sql/00_config.sql
-   - Full clone of repo: `@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO`
+  - Full clone of repo: `@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO`
    - Used by deploy_all.sql to execute modules
 
 ---
@@ -319,7 +319,7 @@ To remove all Sam-the-Snowman components:
 ```sql
 -- Run the teardown script
 USE ROLE ACCOUNTADMIN;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
 **Time**: < 1 minute  

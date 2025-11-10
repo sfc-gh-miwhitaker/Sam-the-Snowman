@@ -62,7 +62,7 @@
  *
  * Technical Note:
  *   This script assumes sql/00_config.sql was ALREADY executed, which created
- *   the Git Repository Stage at @SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO.
+ *   the Git Repository Stage at @SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO.
  *   All modules are executed FROM that stage using EXECUTE IMMEDIATE FROM.
  *
  * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
@@ -92,8 +92,8 @@ BEGIN
         stage_exists := (
             SELECT COUNT(*) > 0 
             FROM INFORMATION_SCHEMA.STAGES 
-            WHERE STAGE_SCHEMA = 'TOOLS' 
-              AND STAGE_NAME = 'SAM_THE_SNOWMAN_REPO'
+            WHERE STAGE_SCHEMA = 'DEPLOY' 
+              AND STAGE_NAME = 'SFE_SAM_THE_SNOWMAN_REPO'
         );
         
         IF (NOT stage_exists) THEN
@@ -111,27 +111,27 @@ $$;
 
 -- Module 1: Scaffolding
 -- Creates databases, schemas, and grants necessary privileges
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/01_scaffolding.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/01_scaffolding.sql';
 
 -- Module 2: Email Integration
 -- Sets up notification integration and email delivery stored procedure
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/02_email_integration.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/02_email_integration.sql';
 
 -- Module 3: Semantic Views
 -- Deploys analytical views for query performance, cost, and warehouse operations
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
 
 -- Module 4: Marketplace Documentation
 -- Installs Snowflake Documentation for Cortex Search
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/04_marketplace.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/04_marketplace.sql';
 
 -- Module 5: Agent Creation
 -- Creates the Sam-the-Snowman AI agent with all tools configured
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/05_agent.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/05_agent.sql';
 
 -- Module 6: Validation
 -- Verifies all components deployed successfully
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
  
  
  

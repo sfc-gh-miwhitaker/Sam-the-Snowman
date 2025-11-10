@@ -16,9 +16,9 @@
  *   3. warehouse_operations - Warehouse utilization and capacity planning
  * 
  * OBJECTS CREATED:
- *   - SNOWFLAKE_EXAMPLE.tools.query_performance (Semantic View)
- *   - SNOWFLAKE_EXAMPLE.tools.cost_analysis (Semantic View)
- *   - SNOWFLAKE_EXAMPLE.tools.warehouse_operations (Semantic View)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance (Semantic View)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis (Semantic View)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations (Semantic View)
  * 
  * Prerequisites:
  *   - 00_config.sql and 01_scaffolding.sql must be run first
@@ -35,16 +35,16 @@
  ******************************************************************************/
 
 USE ROLE identifier($role_name);
-USE SNOWFLAKE_EXAMPLE.tools;
+USE SNOWFLAKE_EXAMPLE.SEMANTIC;
 
 -- ============================================================================
--- SEMANTIC VIEW: query_performance
+-- SEMANTIC VIEW: sfe_query_performance
 -- ============================================================================
 -- Purpose: Analyze query execution, identify slow queries, errors, and optimization opportunities
 -- Data Sources: QUERY_HISTORY, QUERY_ATTRIBUTION_HISTORY
 -- Key Metrics: Execution time, spilling, cache efficiency, error rates
 
-CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.tools.query_performance
+CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance
 TABLES (
     SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY,
     SNOWFLAKE.ACCOUNT_USAGE.QUERY_ATTRIBUTION_HISTORY
@@ -86,13 +86,13 @@ WITH EXTENSION (CA = '{"verified_queries":[{"name":"Slowest queries today","ques
 UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE component = 'semantic_view.query_performance';
 
 -- ============================================================================
--- SEMANTIC VIEW: cost_analysis
+-- SEMANTIC VIEW: sfe_cost_analysis
 -- ============================================================================
 -- Purpose: Track warehouse credit consumption and identify cost optimization opportunities
 -- Data Sources: WAREHOUSE_METERING_HISTORY
 -- Key Metrics: Credits used, compute costs, cloud services costs
 
-CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.tools.cost_analysis
+CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis
 TABLES (
     SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
 )
@@ -113,13 +113,13 @@ WITH EXTENSION (CA = '{"verified_queries":[{"name":"Most expensive warehouses la
 UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE component = 'semantic_view.cost_analysis';
 
 -- ============================================================================
--- SEMANTIC VIEW: warehouse_operations
+-- SEMANTIC VIEW: sfe_warehouse_operations
 -- ============================================================================
 -- Purpose: Monitor warehouse utilization, capacity, and identify sizing opportunities
 -- Data Sources: WAREHOUSE_LOAD_HISTORY
 -- Key Metrics: Concurrency, queue depth, blocked queries
 
-CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.tools.warehouse_operations
+CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations
 TABLES (
     SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY
 )
