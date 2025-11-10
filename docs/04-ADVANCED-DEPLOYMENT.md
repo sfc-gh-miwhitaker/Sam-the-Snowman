@@ -51,7 +51,6 @@ Sam-the-Snowman uses a modular deployment architecture that breaks the deploymen
 - Creates `SNOWFLAKE_INTELLIGENCE` database and `AGENTS` schema
 - Transfers `SNOWFLAKE_INTELLIGENCE` ownership to configured role
 - Grants privileges to configured role
-- Initializes deployment logging table
 
 **Key learning:** Database architecture, ownership management, privilege grants
 
@@ -62,7 +61,6 @@ Sam-the-Snowman uses a modular deployment architecture that breaks the deploymen
 - `SNOWFLAKE_EXAMPLE.semantic` schema
 - `SNOWFLAKE_INTELLIGENCE` database (or updates ownership if exists)
 - `SNOWFLAKE_INTELLIGENCE.AGENTS` schema
-- Temporary `deployment_log` table
 
 ---
 
@@ -192,12 +190,11 @@ $$;
 **Purpose:** Verify deployment success
 
 **What it does:**
-- Queries `deployment_log` table
-- Displays component status (PASS/MISSING)
-- Provides summary counts
-- Shows final deployment status
+- Issues targeted `SHOW` commands for each deployed object
+- Confirms marketplace database, schemas, agent, semantic views, Git repo, and email integration exist
+- Provides a quick health check without relying on helper tables
 
-**Key learning:** Deployment validation patterns, temp table usage
+**Key learning:** Validation via system metadata and `SHOW` statements
 
 **No objects created** - validation only
 

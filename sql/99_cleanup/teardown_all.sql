@@ -62,16 +62,9 @@ DROP NOTIFICATION INTEGRATION IF EXISTS SFE_EMAIL_INTEGRATION;
 -- REMOVE SCHEMA OBJECTS (Database-Level)
 -- ============================================================================
 
--- Remove Git repository from DEPLOY schema
-DROP GIT REPOSITORY IF EXISTS SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO;
-
--- Remove semantic views from SEMANTIC schema
-DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance;
-DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis;
-DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations;
-
--- Remove stored procedure from INTEGRATIONS schema
-DROP PROCEDURE IF EXISTS SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email(VARCHAR, VARCHAR, VARCHAR);
+-- Remove schema-level objects. Dropping the schemas with CASCADE later in the
+-- script will remove any remaining objects, so explicit per-object drops are
+-- no longer required.
 
 -- Remove the Sam-the-Snowman agent
 -- Note: Agents are schema-level objects in SNOWFLAKE_INTELLIGENCE.AGENTS
@@ -93,16 +86,7 @@ DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC CASCADE;
 -- LEGACY CLEANUP (For older deployments)
 -- ============================================================================
 
--- If upgrading from older version with 'tools' schema, clean up legacy objects
-DROP GIT REPOSITORY IF EXISTS SNOWFLAKE_EXAMPLE.tools.sam_the_snowman_repo;
-DROP GIT REPOSITORY IF EXISTS SNOWFLAKE_EXAMPLE.tools.SAM_THE_SNOWMAN_REPO;
-DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.tools.query_performance;
-DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.tools.cost_analysis;
-DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.tools.warehouse_operations;
-DROP PROCEDURE IF EXISTS SNOWFLAKE_EXAMPLE.tools.send_email(VARCHAR, VARCHAR, VARCHAR);
-
--- Only drop tools schema if it's empty (will fail gracefully if other objects exist)
-DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.tools;
+DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.tools CASCADE;
 
 -- ============================================================================
 -- PRESERVATION NOTES
@@ -246,10 +230,6 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
  *
  *************************************************************************************************************************/
 
--- Final check for any remaining objects in the schemas
--- This should return only non-Sam-the-Snowman objects if cleanup was successful
-SHOW OBJECTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
-SHOW OBJECTS IN SCHEMA SNOWFLAKE_EXAMPLE.DEPLOY;
-SHOW OBJECTS IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;
-SHOW OBJECTS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC;
+-- For additional verification, query SNOWFLAKE.INFORMATION_SCHEMA.OBJECTS or rerun
+-- deploy_all.sql to rebuild the environment as needed.
 

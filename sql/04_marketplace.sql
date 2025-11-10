@@ -48,9 +48,7 @@ CREATE OR REPLACE DATABASE snowflake_documentation
 
 -- Grant configured role access to Snowflake Documentation
 -- This restricts documentation access to only users with the configured role
-GRANT IMPORTED PRIVILEGES ON DATABASE snowflake_documentation TO ROLE identifier($role_name);
-
-UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE component = 'database.snowflake_documentation';
+GRANT IMPORTED PRIVILEGES ON DATABASE snowflake_documentation TO ROLE SYSADMIN;
 
 -- Marketplace installation complete
 

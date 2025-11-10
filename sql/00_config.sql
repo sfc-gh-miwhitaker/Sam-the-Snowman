@@ -10,7 +10,7 @@
  *
  * Usage:
  *   1. Open this file in Snowsight.
- *   2. Set worksheet context: USE ROLE ACCOUNTADMIN; USE WAREHOUSE <warehouse>;
+ *   2. Set worksheet context: USE WAREHOUSE <warehouse>;
  *   3. Run all statements (Cmd/Ctrl + Shift + Enter).
  *
  * Result:
@@ -20,15 +20,21 @@
  *   - Lists available SQL modules and prints the next action.
  ******************************************************************************/
 
--- Ensure ACCOUNTADMIN role for account-level objects
-USE ROLE ACCOUNTADMIN;
+-- Deployment role (override if your org uses a custom role)
+SET deployment_role = 'SYSADMIN';
+
+-- Operate under least-privilege deployment role by default
+USE ROLE IDENTIFIER($deployment_role);
 
 -- Ensure shared demo database and deployment schema exist (reusable across demo assets)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-    COMMENT = 'DEMO: Shared demo database';
+    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.DEPLOY
-    COMMENT = 'DEMO: Deployment staging schema';
+    COMMENT = 'DEMO: Sam-the-Snowman - Deployment staging schema';
+
+-- Elevate privilege only for account-level integration work
+USE ROLE ACCOUNTADMIN;
 
 -- Provision account-wide Git API integration (safe to rerun; reused by all demo workspaces)
 CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
@@ -36,6 +42,11 @@ CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
     ENABLED = TRUE
     API_ALLOWED_PREFIXES = ('https://github.com/')
     COMMENT = 'DEMO: GitHub integration for Snowsight workspaces';
+
+GRANT USAGE ON INTEGRATION SFE_GITHUB_API_INTEGRATION TO ROLE IDENTIFIER($deployment_role);
+
+-- Return to deployment role for all remaining objects
+USE ROLE IDENTIFIER($deployment_role);
 
 -- Create Git repository stage (central source for all deployment modules)
 CREATE OR REPLACE GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO

@@ -42,7 +42,7 @@
 -- ============================================================================
 
 -- Switch to the configured role for agent creation
-USE ROLE identifier($role_name);
+USE ROLE SYSADMIN;
 USE SNOWFLAKE_INTELLIGENCE.AGENTS;
 
 -- Create the Sam-the-Snowman agent with domain-specific semantic views
@@ -148,9 +148,7 @@ $$;
 
 -- Grant usage to the configured role only (restricts agent access to authorized users)
 -- To grant access to additional roles, run: GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman TO ROLE <role_name>;
-GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman TO ROLE identifier($role_name);
-
-UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE component = 'agent.sam_the_snowman';
+GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman TO ROLE SYSADMIN;
 
 -- Agent creation complete
 

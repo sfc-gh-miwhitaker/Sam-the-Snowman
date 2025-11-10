@@ -34,7 +34,7 @@
  *   after setting configuration variables and creating scaffolding.
  ******************************************************************************/
 
-USE ROLE identifier($role_name);
+USE ROLE SYSADMIN;
 USE SNOWFLAKE_EXAMPLE.SEMANTIC;
 
 -- ============================================================================
@@ -83,8 +83,6 @@ DIMENSIONS (
 COMMENT = 'DEMO: Sam-the-Snowman - Query performance metrics, errors, and optimization insights. Ask about slow queries, errors, and optimization opportunities. Excludes system-managed warehouses for clarity.'
 WITH EXTENSION (CA = '{"verified_queries":[{"name":"Slowest queries today","question":"What were my slowest queries today?","sql":"SELECT query_id, query_text, total_elapsed_time, warehouse_name FROM query_performance WHERE start_time >= CURRENT_DATE() ORDER BY total_elapsed_time DESC LIMIT 10"}]}');
 
-UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE component = 'semantic_view.query_performance';
-
 -- ============================================================================
 -- SEMANTIC VIEW: sfe_cost_analysis
 -- ============================================================================
@@ -109,8 +107,6 @@ DIMENSIONS (
 )
 COMMENT = 'DEMO: Sam-the-Snowman - Warehouse cost analysis and credit consumption tracking. Ask about costs, spend trends, and expensive warehouses. Excludes system-managed warehouses for clarity.'
 WITH EXTENSION (CA = '{"verified_queries":[{"name":"Most expensive warehouses last month","question":"What were my most expensive warehouses last month?","sql":"SELECT warehouse_name, SUM(credits_used) as total_credits FROM cost_analysis WHERE start_time >= DATE_TRUNC(MONTH, DATEADD(MONTH, -1, CURRENT_DATE())) AND start_time < DATE_TRUNC(MONTH, CURRENT_DATE()) GROUP BY warehouse_name ORDER BY total_credits DESC"}]}');
-
-UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE component = 'semantic_view.cost_analysis';
 
 -- ============================================================================
 -- SEMANTIC VIEW: sfe_warehouse_operations
@@ -137,8 +133,6 @@ DIMENSIONS (
 )
 COMMENT = 'DEMO: Sam-the-Snowman - Warehouse utilization and capacity planning metrics. Ask about warehouse sizing, queue times, and utilization patterns. Excludes system-managed warehouses for clarity.'
 WITH EXTENSION (CA = '{"verified_queries":[{"name":"Warehouses with high queues","question":"Which warehouses have the most queued queries?","sql":"SELECT warehouse_name, AVG(avg_queued_load) as avg_queue_depth FROM warehouse_operations WHERE start_time >= DATEADD(DAY, -7, CURRENT_TIMESTAMP()) GROUP BY warehouse_name HAVING avg_queue_depth > 0 ORDER BY avg_queue_depth DESC"}]}');
-
-UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE component = 'semantic_view.warehouse_operations';
 
 -- Semantic views complete
 

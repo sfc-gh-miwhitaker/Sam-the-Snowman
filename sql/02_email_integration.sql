@@ -55,14 +55,11 @@ SELECT
     $current_user_email AS profile_email,
     COALESCE($effective_notification_email, 'EMAIL REQUIRED') AS email_used_for_notifications;
 
-DO $$
-BEGIN
-    IF ($effective_notification_email IS NULL) THEN
-        RETURN 'ERROR: Unable to determine notification email. Add an email address to your Snowflake user profile (ALTER USER <username> SET EMAIL = ...).';
-    END IF;
-    RETURN 'Notification emails will be sent to: ' || $effective_notification_email;
-END;
-$$;
+SELECT
+    CASE
+        WHEN $effective_notification_email IS NULL THEN 'WARNING: No email configured for this user. Set one with ALTER USER ... SET EMAIL = <address>.'
+        ELSE 'Notification emails will be sent to: ' || $effective_notification_email
+    END AS notification_target;
 
 -- Create email notification integration for agent output delivery
 -- Requires ACCOUNTADMIN privileges
@@ -73,12 +70,10 @@ CREATE OR REPLACE NOTIFICATION INTEGRATION SFE_EMAIL_INTEGRATION
     COMMENT = 'DEMO: Sam-the-Snowman - Email notification integration for delivering agent output.';
 
 -- Grant usage on notification integration to the specified role
-GRANT USAGE ON INTEGRATION SFE_EMAIL_INTEGRATION TO ROLE identifier($role_name);
-
-UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE component = 'integration.sfe_email_integration';
+GRANT USAGE ON INTEGRATION SFE_EMAIL_INTEGRATION TO ROLE SYSADMIN;
 
 -- Switch back to the specified role for remaining objects
-USE ROLE identifier($role_name);
+USE ROLE SYSADMIN;
 
 -- ============================================================================
 -- CREATE EMAIL STORED PROCEDURE
@@ -126,8 +121,6 @@ def send_email(session: snowpark.Session, recipient_email: str, subject: str, bo
     except Exception as e:
         return f"Error sending email: {str(e)}"
 $$;
-
-UPDATE SNOWFLAKE_EXAMPLE.PUBLIC.deployment_log SET status = 'PASS' WHERE component = 'procedure.send_email';
 
 -- ============================================================================
 -- TEST EMAIL INTEGRATION
