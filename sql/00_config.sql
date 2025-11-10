@@ -41,51 +41,15 @@ CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
 CREATE OR REPLACE GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO
     API_INTEGRATION = SFE_GITHUB_API_INTEGRATION
     ORIGIN = 'https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git'
-    BRANCH = 'main'
     COMMENT = 'DEMO: Sam-the-Snowman - Git repository clone for modular SQL execution';
 
 -- Fetch the latest commit for the branch
 ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO FETCH;
 
--- Verification summary (displays expected assets and their status)
-WITH verification AS (
-    SELECT 'DATABASE' AS object_type,
-           'SNOWFLAKE_EXAMPLE' AS object_name,
-           CASE WHEN EXISTS (
-               SELECT 1
-               FROM SNOWFLAKE.INFORMATION_SCHEMA.DATABASES
-               WHERE DATABASE_NAME = 'SNOWFLAKE_EXAMPLE'
-           ) THEN 'VERIFIED' ELSE 'MISSING' END AS status
-    UNION ALL
-    SELECT 'SCHEMA',
-           'SNOWFLAKE_EXAMPLE.DEPLOY',
-           CASE WHEN EXISTS (
-               SELECT 1
-               FROM SNOWFLAKE.INFORMATION_SCHEMA.SCHEMATA
-               WHERE CATALOG_NAME = 'SNOWFLAKE_EXAMPLE'
-                 AND SCHEMA_NAME = 'DEPLOY'
-           ) THEN 'VERIFIED' ELSE 'MISSING' END
-    UNION ALL
-    SELECT 'API_INTEGRATION',
-           'SFE_GITHUB_API_INTEGRATION',
-           CASE WHEN EXISTS (
-               SELECT 1
-               FROM SNOWFLAKE.ACCOUNT_USAGE.API_INTEGRATIONS
-               WHERE API_INTEGRATION_NAME = 'SFE_GITHUB_API_INTEGRATION'
-                 AND DELETED IS NULL
-           ) THEN 'VERIFIED' ELSE 'MISSING' END
-    UNION ALL
-    SELECT 'GIT_REPOSITORY',
-           'SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO',
-           CASE WHEN EXISTS (
-               SELECT 1
-               FROM SNOWFLAKE.ACCOUNT_USAGE.GIT_REPOSITORIES
-               WHERE REPOSITORY_NAME = 'SFE_SAM_THE_SNOWMAN_REPO'
-                 AND REPOSITORY_DATABASE_NAME = 'SNOWFLAKE_EXAMPLE'
-                 AND REPOSITORY_SCHEMA_NAME = 'DEPLOY'
-                 AND DELETED IS NULL
-           ) THEN 'VERIFIED' ELSE 'MISSING' END
-)
-SELECT object_type, object_name, status
-FROM verification
-ORDER BY object_type;
+-- Verification: each DESC will fail if the object is missing
+DESC DATABASE SNOWFLAKE_EXAMPLE;
+DESC SCHEMA SNOWFLAKE_EXAMPLE.DEPLOY;
+DESC INTEGRATION SFE_GITHUB_API_INTEGRATION;
+DESC GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO;
+
+SELECT 'Shared objects verified. Git repository stage is ready for deploy_all.sql.' AS verification_status;
