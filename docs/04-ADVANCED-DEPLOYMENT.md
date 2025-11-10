@@ -1,381 +1,132 @@
-# Modular Deployment Architecture
+# Advanced Deployment
 
-**Status:** Active  
-**Version:** 3.1.0  
-**Author:** M. Whitaker
+**Version**: 4.0 · **Last updated**: 2025-11-10
 
----
-
-## Overview
-
-Sam-the-Snowman uses a modular deployment architecture that breaks the deployment into focused, reusable components. This approach makes it easier to:
-
-- **Find examples** - Each module focuses on a specific Snowflake feature (semantic views, agents, etc.)
-- **Troubleshoot issues** - Run individual modules to isolate problems
-- **Learn incrementally** - Study one concept at a time
-- **Reuse patterns** - Copy module patterns for your own projects
+Sam-the-Snowman ships in modular SQL files so you can deploy, troubleshoot, or iterate on individual components. This guide explains how to work with those modules beyond the single-shot `deploy_all.sql` experience.
 
 ---
 
-## Module Structure
+## 1. Module Directory
 
-### Master Deployment Script
+| Module | Purpose | Notes |
+|--------|---------|-------|
+| `sql/00_config.sql` | Mounts the Git repository stage and fetches the latest code | Run first when using modules directly |
+| `sql/01_scaffolding.sql` | Creates databases, schemas, and grants (assumes `SYSADMIN`) | Idempotent |
+| `sql/02_email_integration.sql` | Creates `SFE_EMAIL_INTEGRATION` and the Snowpark email procedure | Sends a test email |
+| `sql/03_semantic_views.sql` | Builds semantic views for performance, cost, and warehouse analytics | Re-run after editing view definitions |
+| `sql/04_marketplace.sql` | Installs the Snowflake Documentation marketplace database | Prompts for legal acceptance if needed |
+| `sql/05_agent.sql` | Creates `sam_the_snowman` and binds all tools | Re-run after changing views or instructions |
+| `sql/06_validation.sql` | Issues `SHOW` statements for every deployed object | Use after any partial redeploy |
+| `sql/99_cleanup/teardown_all.sql` | Drops demo objects while preserving shared databases | Safe to run multiple times |
 
-**`deploy_all.sql`** - Orchestrates all modules in the correct order (located in project root)
-- Executes modules sequentially using standard Snowflake SQL statements
-- Safe to run multiple times (idempotent)
-- Recommended workflow: open `deploy_all.sql` in Snowsight (Git + Worksheets integration), update the configuration block, and run the entire script at once.
-
-### Module 00: Stage Mount (`sql/00_config.sql`)
-
-**Purpose:** Ensure the Git repository is available as a Snowflake stage
-
-**What it does:**
-- Creates (or reuses) the shared demo database and `DEPLOY` schema
-- Creates the `SFE_GITHUB_API_INTEGRATION` (idempotent)
-- Creates the Git repository stage `SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO`
-- Fetches the latest branch contents and lists available SQL modules
-
-**Key learning:** How Snowsight workspaces surface Git repositories as Snowflake stages
-
-**Usage:** Run when deploy_all.sql reports the repository stage is missing (no edits required)
+All modules are idempotent. They can be executed from Snowsight, Snow SQL, or Snow CLI.
 
 ---
 
-### Module 01: Scaffolding (`sql/01_scaffolding.sql`)
+## 2. Running Modules Individually (Snowsight)
 
-**Purpose:** Create database and schema infrastructure
+When you only need to redeploy a subset of components:
 
-**What it does:**
-- Creates `SNOWFLAKE_EXAMPLE` database and functional schemas (`deploy`, `integrations`, `semantic`)
-- Creates `SNOWFLAKE_INTELLIGENCE` database and `AGENTS` schema
-- Transfers `SNOWFLAKE_INTELLIGENCE` ownership to configured role
-- Grants privileges to configured role
+1. Run `sql/00_config.sql` to make sure the Git stage is present.
+2. Execute the module you want to refresh:
+   ```sql
+   EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
+   ```
+3. Run `sql/05_agent.sql` if your changes affect the agent’s tool bindings.
+4. Finish with `sql/06_validation.sql` to confirm the object now appears in the `SHOW` output.
 
-**Key learning:** Database architecture, ownership management, privilege grants
-
-**Objects created:**
-- `SNOWFLAKE_EXAMPLE` database
-- `SNOWFLAKE_EXAMPLE.deploy` schema
-- `SNOWFLAKE_EXAMPLE.integrations` schema
-- `SNOWFLAKE_EXAMPLE.semantic` schema
-- `SNOWFLAKE_INTELLIGENCE` database (or updates ownership if exists)
-- `SNOWFLAKE_INTELLIGENCE.AGENTS` schema
+> Modules contain `USE ROLE SYSADMIN;` statements. If you need a different owner, edit those statements before running the module.
 
 ---
 
-### Module 02: Email Integration (`sql/02_email_integration.sql`)
+## 3. Using Snow CLI
 
-**Purpose:** Set up email notification capabilities
-
-**What it does:**
-- Creates `SFE_EMAIL_INTEGRATION` notification integration
-- Creates `sfe_send_email` stored procedure with SQL injection protection
-- Auto-detects the current user's email address and tests the integration
-
-**Key learning:** Notification integrations, Python stored procedures, security patterns
-
-**Objects created:**
-- `SFE_EMAIL_INTEGRATION` notification integration
-- `SNOWFLAKE_EXAMPLE.integrations.sfe_send_email` procedure
-
-**Security highlight:** The stored procedure uses `session.call()` to prevent SQL injection when calling `SYSTEM$SEND_EMAIL`.
-
----
-
-### Module 03: Semantic Views (`sql/03_semantic_views.sql`)
-
-**Purpose:** Create domain-specific semantic views for Cortex Analyst
-
-**What it does:**
-- Creates `sfe_query_performance` semantic view (query analysis)
-- Creates `sfe_cost_analysis` semantic view (cost tracking)
-- Creates `sfe_warehouse_operations` semantic view (capacity planning)
-
-**Key learning:** ⭐ **Semantic view syntax and design patterns**
-
-**Objects created:**
-- `SNOWFLAKE_EXAMPLE.semantic.sfe_query_performance`
-- `SNOWFLAKE_EXAMPLE.semantic.sfe_cost_analysis`
-- `SNOWFLAKE_EXAMPLE.semantic.sfe_warehouse_operations`
-
-**Why this module is valuable:**
-This is the **best reference** for semantic view syntax. Each view demonstrates:
-- `TABLES()` - Source table declarations
-- `FACTS()` - Numeric measures with comments and synonyms
-- `DIMENSIONS()` - Categorical attributes with comments and synonyms
-- `COMMENT` - View-level documentation
-- `WITH EXTENSION (CA = ...)` - Verified query examples
-
-**Example pattern:**
-```sql
-CREATE OR REPLACE SEMANTIC VIEW schema.view_name
-TABLES (
-    SNOWFLAKE.ACCOUNT_USAGE.SOURCE_TABLE
-)
-FACTS (
-  SOURCE_TABLE.METRIC as METRIC comment='Description. Synonyms: alt1, alt2.'
-)
-DIMENSIONS (
-  SOURCE_TABLE.COLUMN as COLUMN comment='Description.'
-)
-COMMENT = 'Purpose and usage guidance'
-WITH EXTENSION (CA = '{"verified_queries":[...]}');
-```
-
----
-
-### Module 04: Marketplace (`sql/04_marketplace.sql`)
-
-**Purpose:** Install Snowflake Documentation from Marketplace
-
-**What it does:**
-- Accepts legal terms for marketplace listing
-- Creates `snowflake_documentation` database from listing
-- Grants imported privileges to configured role
-
-**Key learning:** Marketplace listing installation, imported privileges
-
-**Objects created:**
-- `snowflake_documentation` database (marketplace listing)
-
----
-
-### Module 05: Agent (`sql/05_agent.sql`)
-
-**Purpose:** Create the Sam-the-Snowman AI agent
-
-**What it does:**
-- Creates agent in `SNOWFLAKE_INTELLIGENCE.AGENTS`
-- Configures agent profile and instructions
-- Defines five tools (3 semantic views, 1 Cortex Search, 1 procedure)
-- Grants usage to configured role
-
-**Key learning:** ⭐ **Agent configuration and tool integration**
-
-**Objects created:**
-- `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman` agent
-
-**Why this module is valuable:**
-This is the **best reference** for agent configuration. It demonstrates:
-- Agent profile with `display_name`
-- Instruction structure (response, orchestration, sample_questions)
-- Tool definitions (cortex_analyst_text_to_sql, cortex_search, generic)
-- Tool resource mappings to semantic views and procedures
-- Role-based access control
-
-**Example pattern:**
-```sql
-CREATE OR REPLACE AGENT schema.agent_name
-WITH PROFILE = '{ "display_name": "Display Name" }'
-COMMENT = 'Purpose description'
-FROM SPECIFICATION $$
-{
-    "models": { "orchestration": "auto" },
-    "instructions": {
-        "response": "Agent persona and response style",
-        "orchestration": "Tool selection logic and rules",
-        "sample_questions": [...]
-    },
-    "tools": [...],
-    "tool_resources": {...}
-}
-$$;
-```
-
----
-
-### Module 06: Validation (`sql/06_validation.sql`)
-
-**Purpose:** Verify deployment success
-
-**What it does:**
-- Issues targeted `SHOW` commands for each deployed object
-- Confirms marketplace database, schemas, agent, semantic views, Git repo, and email integration exist
-- Provides a quick health check without relying on helper tables
-
-**Key learning:** Validation via system metadata and `SHOW` statements
-
-**No objects created** - validation only
-
----
-
-## Usage Patterns
-
-### Pattern 1: Full Deployment (Recommended)
-
-Execute the combined SQL script:
-
-```sql
--- In Snowsight, open and run deploy_all.sql (from project root)
--- This runs all modules in sequence (00_config through 06_validation)
-```
-
-For command-line execution you can also use Snow CLI and source each module manually:
+The modules can be executed from your terminal with the Snow CLI (v3 or later):
 
 ```bash
+# Run deploy_all.sql
 snow sql -f deploy_all.sql
-# or run modules individually with "snow sql -f sql/00_config.sql" ...
+
+# Run an individual module
+snow sql -f sql/03_semantic_views.sql
+
+# Run validation after a partial change
+snow sql -f sql/06_validation.sql
 ```
 
-### Pattern 2: Step-by-Step Deployment
+Tips:
+- Set your profile with ACCOUNTADMIN privileges before invoking the commands.
+- When using the CLI, run `sql/00_config.sql` at the start of each session so the Git stage exists.
+- Use `--variable` or environment variables if you need to parameterise custom scripts (the shipped modules do not require parameters).
 
-Execute modules individually:
+---
 
+## 4. Partial Redeployment Recipes
+
+### Refresh Semantic Views Only
 ```sql
--- 1. Configure
-!source sql/00_config.sql
-
--- 2. Set up infrastructure
-!source sql/01_scaffolding.sql
-
--- 3. Email capabilities
-!source sql/02_email_integration.sql
-
--- 4. Semantic views
-!source sql/03_semantic_views.sql
-
--- 5. Documentation
-!source sql/04_marketplace.sql
-
--- 6. Agent
-!source sql/05_agent.sql
-
--- 7. Verify
-!source sql/06_validation.sql
+EXECUTE IMMEDIATE FROM '@.../sql/00_config.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/03_semantic_views.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/05_agent.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/06_validation.sql';
 ```
 
-### Pattern 3: Selective Re-deployment
-
-Re-run specific modules after changes:
-
+### Update Agent Instructions
 ```sql
--- Already deployed but want to update the agent?
-!source sql/00_config.sql  -- Ensure variables are set
-!source sql/05_agent.sql    -- Recreate agent only
-
--- Want to update semantic views?
-!source sql/00_config.sql        -- Ensure variables are set
-!source sql/03_semantic_views.sql -- Recreate views
-!source sql/05_agent.sql          -- Update agent to use new views
+EXECUTE IMMEDIATE FROM '@.../sql/00_config.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/05_agent.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/06_validation.sql';
 ```
 
-### Pattern 4: Learning and Reference
-
-Use modules as examples:
-
+### Re-run Email Integration Test
 ```sql
--- Want to learn semantic view syntax?
--- Read sql/03_semantic_views.sql
+EXECUTE IMMEDIATE FROM '@.../sql/00_config.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/02_email_integration.sql';
+```
 
--- Want to learn agent configuration?
--- Read sql/05_agent.sql
-
--- Want to see email notification setup?
--- Read sql/02_email_integration.sql
+### Full Teardown and Redeploy
+```sql
+EXECUTE IMMEDIATE FROM '@.../sql/99_cleanup/teardown_all.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/00_config.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/01_scaffolding.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/02_email_integration.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/03_semantic_views.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/04_marketplace.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/05_agent.sql';
+EXECUTE IMMEDIATE FROM '@.../sql/06_validation.sql';
 ```
 
 ---
 
-## Troubleshooting
+## 5. Refreshing the Git Stage
 
-### Module Fails to Execute
+If you want to pull the latest commit from GitHub after initial deployment:
 
-**Symptom:** Module shows errors when run individually
-
-**Solution:**
-1. Ensure `00_config.sql` was run first (sets variables)
-2. Check that previous modules completed successfully
-3. Verify you have the required privileges (ACCOUNTADMIN)
-
-### Variables Not Defined Error
-
-**Symptom:** `SQL compilation error: error line N at position N unexpected 'identifier'`
-
-**Solution:** Run `00_config.sql` to recreate the Git repository stage, then rerun `deploy_all.sql` (which sets `role_name`/integration variables before executing modules)
-
-### Deployment Log Not Found
-
-**Symptom:** `Object 'DEPLOYMENT_LOG' does not exist`
-
-**Solution:** Run `01_scaffolding.sql` to create the log table
-
-### Agent Creation Fails
-
-**Symptom:** Agent creation fails with privilege errors
-
-**Solution:**
-1. Ensure `01_scaffolding.sql` completed (creates schemas)
-2. Ensure `03_semantic_views.sql` completed (agent depends on views)
-3. Ensure `04_marketplace.sql` completed (agent uses documentation)
+1. Rerun `sql/00_config.sql` – it calls `ALTER GIT REPOSITORY ... FETCH;`.
+2. Execute any modules that changed in the new commit.
+3. Run `sql/06_validation.sql` to confirm the update.
 
 ---
 
-## Benefits of Modular Architecture
+## 6. Troubleshooting Tips
 
-### For Learning
-
-- **Clear examples:** Each module demonstrates one concept
-- **Incremental understanding:** Learn one piece at a time
-- **Easy experimentation:** Modify and re-run individual modules
-
-### For Development
-
-- **Faster iteration:** Only redeploy changed modules
-- **Easier debugging:** Isolate issues to specific modules
-- **Better testing:** Test individual components independently
-
-### For Production
-
-- **Selective deployment:** Skip modules you don't need
-- **Clearer audit trail:** Know exactly what each step does
-- **Easier maintenance:** Update individual components without full redeployment
+| Symptom | Resolution |
+|---------|------------|
+| Stage not found when running a module | Re-run `sql/00_config.sql` to recreate the stage |
+| Permission error in a module | Ensure the module’s `USE ROLE SYSADMIN;` matches your target role or edit the statements |
+| Agent missing after redeploy | Run `sql/05_agent.sql`, then `sql/06_validation.sql` |
+| Marketplace listing blocked | Accept the legal terms manually, then execute `sql/04_marketplace.sql` again |
+| Email not received | Confirm the user email, rerun `sql/02_email_integration.sql`, check spam filters |
 
 ---
 
-## Migration from 01_setup.sql
+## 7. Related References
 
-**Old approach (v3.0):**
-- Single monolithic `sql/01_setup.sql` script (467 lines)
-- All-or-nothing execution
-- Difficult to find specific examples
-- Hard to debug failures
+- `README.md` – deployment overview and documentation map
+- `docs/01-QUICKSTART.md` – step-by-step Snowsight walkthrough
+- `docs/05-ROLE-BASED-ACCESS.md` – customise ownership and user grants
+- `docs/06-TESTING.md` – formal test cases
+- `docs/07-TROUBLESHOOTING.md` – extended troubleshooting catalogue
 
-**New approach (v3.1):**
-- 7 focused modules in `sql/` directory (50-150 lines each)
-- Master `deploy_all.sql` orchestrator in project root
-- Granular execution control
-- Easy to find and reference patterns
-- Clear failure isolation
-
-**Backward compatibility:**
-The deprecated `sql/01_setup_DEPRECATED.sql` is preserved for reference, but all users should migrate to the modular approach.
-
----
-
-## Best Practices
-
-1. **Always run `sql/00_config.sql` first** when executing individual modules
-2. **Use `deploy_all.sql`** for full deployments (located in project root)
-3. **Read module headers** in `sql/` directory - they explain purpose, prerequisites, and objects created
-4. **Test changes** in a dev environment before modifying modules
-5. **Use as reference** - copy patterns from modules for your own projects
-
----
-
-## Related Documentation
-
-- `README.md` - Project overview and quick start
-- `help/AGENT_ARCHITECTURE.md` - Deep dive on semantic views and agent design
-- `help/TESTING.md` - Validation and testing procedures
-- `help/TROUBLESHOOTING.md` - Common issues and solutions
-
----
-
-**Next Steps:**
-
-1. Review `deploy_all.sql` (project root) to understand the orchestration
-2. Study `sql/03_semantic_views.sql` for semantic view patterns
-3. Study `sql/05_agent.sql` for agent configuration patterns
-4. Run `deploy_all.sql` to deploy the full system
+Use this guide whenever you need to rerun part of the deployment, promote changes between environments, or execute the scripts from automation tooling.
 

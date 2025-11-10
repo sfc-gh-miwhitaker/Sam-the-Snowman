@@ -1,94 +1,95 @@
 # Deployment Checklist
-**Sam-the-Snowman - Pre-Deployment Verification**
-This checklist ensures all prerequisites are met before deploying the Sam-the-Snowman.
 
-**Version**: 3.1  
-**Last Updated**: 2025-11-07
+**Version**: 4.0 · **Last updated**: 2025-11-10
 
-## Required Configuration Changes
+Use this checklist before and after running `deploy_all.sql` (or the individual modules) to ensure a clean deployment.
 
-Before running `deploy_all.sql` (or individual modules), verify these configurations:
+---
 
-### 1. Configuration Variables (edit top of deploy_all.sql if needed)
-- [ ] Confirm `SET role_name = 'SYSADMIN';` (adjust if you use another deployment role)
-- [ ] Update `SET git_api_integration_name` / `SET git_repo_name` only if you renamed the corresponding objects
-- [ ] Update `API_ALLOWED_PREFIXES` / `ORIGIN` in the GitHub integration section if you intend to point at a private repository
+## Pre-Deployment
 
-**Note**: The agent uses the user's current warehouse context—no dedicated warehouse needed.
+### Required Access
+- [ ] ACCOUNTADMIN role available to your user
+- [ ] Warehouse access confirmed (`SHOW WAREHOUSES;`)
+- [ ] Ability to accept Snowflake Marketplace legal terms
 
-### 2. Email Configuration
-- [ ] Ensure your Snowflake user profile has a valid email (`SHOW USERS LIKE <username>` → `email`)
-- [ ] Confirm email domain is allow-listed in Snowflake notification settings
-- [ ] Test email delivery after deployment
+### Configuration Review
+- [ ] SQL modules are unmodified or intentionally updated (they default to `USE ROLE SYSADMIN;`)
+- [ ] User profile email set (required for the test message)
+- [ ] Optional: edit the SQL modules if you plan to deploy with a role other than SYSADMIN
 
-### 3. Prerequisites Verification
-- [ ] ACCOUNTADMIN role access confirmed
-- [ ] Cortex features enabled in account
-- [ ] Network access for Marketplace listings enabled
-- [ ] Users have access to at least one warehouse
+### Stage Preparation
+- [ ] Snowsight Git workspace created from `https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git`
+- [ ] `sql/00_config.sql` executed successfully (Git repository stage created and fetched)
+
+---
 
 ## Deployment Steps
 
-1. [ ] Run `sql/00_config.sql` (ACCOUNTADMIN) to mount the Git repository stage (no edits required)
-2. [ ] Execute `deploy_all.sql` in Snowsight (ACCOUNTADMIN). Customise session variables at the top if needed.
-    - Equivalent manual flow: run modules `sql/01_scaffolding.sql` → `sql/06_validation.sql`
-3. [ ] Verify test email received
-4. [ ] Test agent with sample query
-5. [ ] Review security grants align with organizational policies
+1. [ ] Run `sql/00_config.sql` (ACCOUNTADMIN) to mount the Git repository stage.
+2. [ ] Execute `deploy_all.sql` (ACCOUNTADMIN). The script runs modules 01–06 from the stage.
+3. [ ] Watch the results – the final section runs `sql/06_validation.sql` and prints `SHOW` outputs for every object.
+4. [ ] Confirm the test email arrives.
+5. [ ] Open Snowsight → **AI & ML → Agents** and confirm `Sam-the-Snowman` appears.
 
-## Post-Deployment Validation
-
-Run these commands to verify successful deployment:
-
+Need to re-run a single component? Execute the corresponding module directly:
 ```sql
--- Verify database and schemas exist
-SHOW DATABASES LIKE 'SNOWFLAKE_EXAMPLE';
-SHOW SCHEMAS IN DATABASE SNOWFLAKE_EXAMPLE;
-
--- Verify semantic views
-SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.semantic;
-
--- Verify agent (Snowflake requires SNOWFLAKE_INTELLIGENCE.AGENTS)
-SHOW SCHEMAS IN DATABASE SNOWFLAKE_INTELLIGENCE;
-SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
-DESC AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
-
--- Verify documentation database import
-SHOW DATABASES LIKE 'snowflake_documentation';
-
--- Quick smoke test
--- Navigate to AI & ML > Agents in Snowsight
--- Select sam_the_snowman
--- Ask: "What were my top 5 slowest queries today?"
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/<module>.sql';
 ```
 
-## Security Review Checklist
+---
 
-- [x] Uses SYSADMIN role (or configured role) for object creation; ACCOUNTADMIN used only when required
-- [x] Access scoped to configured role (no PUBLIC grants)
-- [x] SQL injection protection in Python procedure
-- [x] All user inputs properly escaped
-- [x] ACCOUNTADMIN used only where required:
-  - Account-level settings (CORTEX_ENABLED_CROSS_REGION)
-  - Database role grants (SNOWFLAKE.CORTEX_USER)
-  - Marketplace operations (legal terms, database import)
-- [x] Agent uses user's warehouse context (no dedicated warehouse = simpler permissions)
-- [x] All sensitive values documented as configuration variables
+## Post-Deployment Verification
 
-## Code Quality Standards Met
+Run these commands (or consult the output from `sql/06_validation.sql`) to confirm each asset:
 
-- [x] Apache 2.0 LICENSE file created
-- [x] Comprehensive file header with author, version, usage
-- [x] All SQL keywords UPPERCASE
-- [x] All identifiers lowercase_snake_case
-- [x] Clear inline comments throughout
-- [x] Security considerations documented in README
-- [x] Idempotent script (safe to re-run)
-- [x] All placeholders clearly marked and documented
+```sql
+-- Integration & email procedure
+SHOW NOTIFICATION INTEGRATIONS LIKE 'SFE_EMAIL_INTEGRATION';
+SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;
 
-## Additional Resources
+-- Semantic views
+SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC;
 
-- [TESTING.md](TESTING.md) - Comprehensive testing procedures
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues and solutions
-- [AGENT_ARCHITECTURE.md](AGENT_ARCHITECTURE.md) - Semantic views, tool configuration, and examples
-- [ROLE_BASED_ACCESS.md](ROLE_BASED_ACCESS.md) - Restrict access to specific teams
+-- Agent & schemas
+SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
+SHOW SCHEMAS IN DATABASE SNOWFLAKE_EXAMPLE;
+SHOW DATABASES LIKE 'SNOWFLAKE_DOCUMENTATION';
+```
+
+### Functional Smoke Test
+1. Ask the agent: “What were my top 5 slowest queries today?”
+2. Ask: “Which warehouses consumed the most credits last week?”
+3. Call the email tool: “Send me an email summary of query performance.”
+
+---
+
+## Security Review
+
+- Ownership defaults to `SYSADMIN`. If you need a different owner, edit the SQL modules before deployment.
+- No PUBLIC grants are created; grant access to additional roles explicitly.
+- `SNOWFLAKE.CORTEX_USER` database role is granted to the owning role during deployment.
+- The Snowpark procedure uses parameter binding and only calls `SYSTEM$SEND_EMAIL`.
+- Semantic views read from `SNOWFLAKE.ACCOUNT_USAGE` (read-only data).
+
+---
+
+## Cleanup
+
+To remove the demo artifacts while preserving shared databases:
+
+```sql
+USE ROLE ACCOUNTADMIN;
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+```
+
+---
+
+## Related Guides
+
+- `docs/01-QUICKSTART.md` – detailed walkthrough with checkpoints
+- `docs/03-ARCHITECTURE.md` – semantic view and agent design
+- `docs/04-ADVANCED-DEPLOYMENT.md` – partial redeployments, Snow CLI usage
+- `docs/05-ROLE-BASED-ACCESS.md` – how to grant or restrict agent access
+- `docs/06-TESTING.md` – regression and smoke tests
+- `docs/07-TROUBLESHOOTING.md` – quick fixes for common issues

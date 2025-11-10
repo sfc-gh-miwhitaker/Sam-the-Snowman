@@ -38,6 +38,8 @@ SNOWFLAKE_EXAMPLE/
 
 This pattern is **reusable as a template** for production projects requiring clear organization.
 
+> **Role ownership**: The shipping SQL modules issue `USE ROLE SYSADMIN;` and grant privileges to SYSADMIN. If you adopt a different owning role, edit those statements in the modules before redeploying.
+
 ---
 
 ## Semantic Views
@@ -117,12 +119,13 @@ Re-run `sql/03_semantic_views.sql` (idempotent) after making changes, then rerun
 
 | File | Description |
 |------|-------------|
-| `deploy_all.sql` | Orchestrates full deployment (runs modules 00-06) |
-| `sql/03_semantic_views.sql` | Creates the domain-specific semantic views |
-| `sql/05_agent.sql` | Creates the Sam-the-Snowman agent and tool bindings |
-| `sql/99_cleanup/teardown_all.sql` | Removes all project artifacts |
-| `help/TESTING.md` | End-to-end validation procedures |
-| `help/ROLE_BASED_ACCESS.md` | Restrict agent usage to specific roles |
+| `deploy_all.sql` | Runs modules 01–06 from the Git stage |
+| `sql/03_semantic_views.sql` | Defines the semantic views and column synonyms |
+| `sql/05_agent.sql` | Builds the agent specification and tool bindings |
+| `sql/06_validation.sql` | Issues `SHOW` statements for deployed assets |
+| `sql/99_cleanup/teardown_all.sql` | Drops the demo objects while preserving shared databases |
+| `docs/05-ROLE-BASED-ACCESS.md` | Grant or restrict access to the agent |
+| `docs/06-TESTING.md` | Functional and regression tests |
 
 Use this reference when you need to extend the agent or explain its architecture to stakeholders.
 

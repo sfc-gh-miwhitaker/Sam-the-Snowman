@@ -1,169 +1,112 @@
 # Sam-the-Snowman
 
-⚠️ **DEMO PROJECT - NOT FOR PRODUCTION USE**
+⚠️ **DEMO PROJECT – NOT FOR PRODUCTION USE**
 
-An AI-powered assistant for Snowflake optimization and performance analysis. Deploy in 5 minutes, start optimizing immediately.
+Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usage data and returns actionable guidance on query performance, cost control, and warehouse operations. Deploy the agent in a few minutes, ask natural-language questions, and receive answers backed by live telemetry from your environment.
 
-**Version**: 3.2 | **License**: Apache 2.0 | **Status**: Community Ready
-
----
-
-## What is Sam-the-Snowman?
-
-Sam is a Snowflake Intelligence agent that analyzes your actual query history to provide personalized, actionable recommendations. Ask questions in natural language, get data-driven insights backed by your real metrics.
-
-**Examples:**
-- "What were my top 10 slowest queries today?"
-- "Which warehouses are costing me the most money?"
-- "Show me queries with errors and how to fix them"
-- "Are my warehouses properly sized based on queue times?"
+**Version**: 4.0 · **License**: Apache 2.0
 
 ---
 
-## Key Features
+## What You Deploy
 
-- ✅ **Query Performance Analysis**: Identifies slow queries and optimization opportunities
-- ✅ **Cost Tracking**: Analyzes warehouse spend and credit consumption
-- ✅ **Warehouse Optimization**: Recommends sizing based on utilization and queues
-- ✅ **Error Resolution**: Helps troubleshoot query failures
-- ✅ **Documentation Search**: Integrated Snowflake best practices lookup
-- ✅ **Email Reports**: Sends analysis summaries to stakeholders
-- ✅ **Role-Based Access**: Restricts access to authorized teams only
+- **Performance diagnostics** – spotlight slow or error-prone queries and suggest fixes.
+- **Cost insight** – track warehouse credit consumption and identify expensive workloads.
+- **Warehouse sizing** – highlight queues, concurrency, and right-sizing opportunities.
+- **Documentation lookup** – search official Snowflake guidance with Cortex Search.
+- **Email delivery** – send HTML summaries to stakeholders directly from Snowflake.
 
 ---
 
-## Quick Start
+## Quick Start (Summary)
 
-**Prerequisites**: ACCOUNTADMIN role, active warehouse, 5 minutes
+1. **Create a Snowsight Git Workspace** pointing at `https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git`.
+2. **Run `sql/00_config.sql`** (ACCOUNTADMIN + warehouse) to mount the Git repository stage.
+3. **Run `deploy_all.sql`** (same worksheet) to execute modules 01–06 from the stage.
+4. **Review `deploy_all.sql` results** – the final section runs `sql/06_validation.sql`, which lists every deployed object.
+5. **Open Snowsight → AI & ML → Agents** and start chatting with `Sam-the-Snowman`.
 
-### The Flow: GitHub → Snowsight Workspace → Deploy
-
-**1. Create Git Workspace** in Snowsight (Projects > Workspaces > From Git repository)
-**2. Mount Git Stage** open `sql/00_config.sql`, set context (`USE ROLE ACCOUNTADMIN; USE WAREHOUSE <name>;`), click "Run All" (no edits)
-**3. Run Deployment** open `deploy_all.sql`, click "Run All"
-**4. Done!** Navigate to AI & ML > Agents in Snowsight
-
-**Custom Roles**: See [`docs/05-ROLE-BASED-ACCESS.md`](docs/05-ROLE-BASED-ACCESS.md) (Part 2) for role-based deployments.
-
-**👉 Detailed walkthrough**: See [`QUICKSTART.md`](QUICKSTART.md) for step-by-step instructions with screenshots.
+Need screenshots or deeper context? See `QUICKSTART.md` for the full walkthrough.
 
 ---
 
-## What Gets Deployed
+## Components Created
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| **Agent** | `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman` | AI-powered query assistant |
-| **Semantic Views** | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Query performance, cost, warehouse analytics |
-| **Email Integration** | `SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email()` | Notification delivery procedure |
-| **Git Repository** | `SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO` | Automated deployment from Git |
-| **Documentation** | `snowflake_documentation` | Cortex Search for best practices |
+| Agent | `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman` | Orchestrates tools and answers questions |
+| Semantic views | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Domain datasets for performance, cost, and warehouse analytics |
+| Email procedure | `SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email()` | Sends HTML mail via `SYSTEM$SEND_EMAIL` |
+| Git repository stage | `SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO` | Stores the Git clone used by `deploy_all.sql` |
+| Documentation database | `snowflake_documentation` | Supplies Cortex Search with official Snowflake guidance |
 
-**Schema Organization**:
-- `DEPLOY` → Deployment infrastructure (Git repos)
-- `INTEGRATIONS` → External systems (email, webhooks)
-- `SEMANTIC` → Agent tools and analytics
-
-**Cost**: Minimal. Agent uses your current warehouse context - you control compute costs.
+Schemas follow the demo pattern: `DEPLOY` (infrastructure), `INTEGRATIONS` (external systems), and `SEMANTIC` (analytics). All account-level objects use the `SFE_` prefix for easy discovery and cleanup.
 
 ---
 
-## Project Structure
+## Repository Layout
 
 ```
 Sam-the-Snowman/
-├── README.md                    ← You are here
-├── QUICKSTART.md                ← Start here for deployment
-├── deploy_all.sql               ← Single-command deployment
-├── sql/                         ← Deployment modules (00-06)
-│   ├── 00_config.sql            ← Mount Git repository stage (run on error, no edits)
-│   ├── 01_scaffolding.sql       ← Databases and schemas
-│   ├── 02_email_integration.sql ← Email notifications
-│   ├── 03_semantic_views.sql    ← Analytical views (⭐ best reference)
-│   ├── 04_marketplace.sql       ← Documentation installation
-│   ├── 05_agent.sql             ← Agent creation (⭐ best reference)
-│   ├── 06_validation.sql        ← Deployment verification
-│   └── 99_cleanup/
-│       └── teardown_all.sql     ← Complete cleanup
-├── docs/                        ← Detailed guides
-│   ├── 01-QUICKSTART.md         ← Detailed deployment walkthrough
-│   ├── 02-DEPLOYMENT.md         ← Deployment checklist
-│   ├── 03-ARCHITECTURE.md       ← How semantic views work
-│   ├── 04-ADVANCED-DEPLOYMENT.md ← Modular deployment patterns
-│   ├── 05-ROLE-BASED-ACCESS.md  ← Access control configuration
-│   ├── 06-TESTING.md            ← Validation procedures
-│   └── 07-TROUBLESHOOTING.md    ← Common issues & solutions
-└── .cursornotes/                ← Internal development docs (not for deployment)
+├── README.md              ← Project overview
+├── QUICKSTART.md          ← 5‑minute deployment recipe
+├── deploy_all.sql         ← Runs modules 01–06 from the Git stage
+├── sql/
+│   ├── 00_config.sql      ← Mount Git repository stage
+│   ├── 01_scaffolding.sql ← Databases, schemas, grants (uses SYSADMIN)
+│   ├── 02_email_integration.sql
+│   ├── 03_semantic_views.sql
+│   ├── 04_marketplace.sql
+│   ├── 05_agent.sql
+│   ├── 06_validation.sql  ← `SHOW` checks for every component
+│   └── 99_cleanup/teardown_all.sql
+└── docs/                  ← Detailed guides (01‑07)
 ```
 
 ---
 
-## Documentation
+## Documentation Map
 
-### 🚀 Getting Started
-- [`QUICKSTART.md`](QUICKSTART.md) - 5-minute deployment guide
-- [`docs/01-QUICKSTART.md`](docs/01-QUICKSTART.md) - Detailed walkthrough with validation
-- [`docs/02-DEPLOYMENT.md`](docs/02-DEPLOYMENT.md) - Deployment checklist
-
-### 🏗️ Architecture & Customization
-- [`docs/03-ARCHITECTURE.md`](docs/03-ARCHITECTURE.md) - Semantic views and agent design
-- [`sql/03_semantic_views.sql`](sql/03_semantic_views.sql) - Semantic view examples (best reference)
-- [`sql/05_agent.sql`](sql/05_agent.sql) - Agent configuration (best reference)
-
-### 🔧 Advanced Topics
-- [`docs/04-ADVANCED-DEPLOYMENT.md`](docs/04-ADVANCED-DEPLOYMENT.md) - Modular deployment
-- [`docs/05-ROLE-BASED-ACCESS.md`](docs/05-ROLE-BASED-ACCESS.md) - Access control
-- [`docs/06-TESTING.md`](docs/06-TESTING.md) - Testing & validation
-- [`docs/07-TROUBLESHOOTING.md`](docs/07-TROUBLESHOOTING.md) - Problem solving
+| Guide | When to use |
+|-------|-------------|
+| `QUICKSTART.md` | Minimal steps for deployment in Snowsight |
+| `docs/01-QUICKSTART.md` | Expanded walkthrough with validation checkpoints |
+| `docs/02-DEPLOYMENT.md` | Pre-flight checklist and post-deploy verification |
+| `docs/03-ARCHITECTURE.md` | How semantic views, tools, and the agent fit together |
+| `docs/04-ADVANCED-DEPLOYMENT.md` | Running individual modules or scripts from Snow CLI |
+| `docs/05-ROLE-BASED-ACCESS.md` | Granting or restricting access to the agent |
+| `docs/06-TESTING.md` | Smoke tests and regression checks |
+| `docs/07-TROUBLESHOOTING.md` | Common issues and quick resolutions |
 
 ---
 
-## Security & Access Control
+## Security & Access
 
-- **Principle of Least Privilege**: Uses SYSADMIN (configurable) for most operations
-- **Role-Based Access**: Agent restricted to configured role only (no PUBLIC grants)
-- **SQL Injection Protection**: All stored procedures use parameterized queries
-- **Read-Only Data Access**: Agent queries ACCOUNT_USAGE views only (no write access)
-- **User Warehouse Context**: Agent uses each user's current warehouse (isolated compute)
-
-**Default Access**: Only users with SYSADMIN role (change `SET role_name` at top of `deploy_all.sql` if needed)
+- Deployment scripts assume the **SYSADMIN** role for object ownership. If you require a different owner, edit the `USE ROLE SYSADMIN;` statements inside the SQL modules before deploying.
+- No PUBLIC grants are created. Grant the owning role (default SYSADMIN) or additional roles as needed after deployment.
+- The Snowpark email procedure uses parameter binding to prevent SQL injection.
+- Semantic views read from `SNOWFLAKE.ACCOUNT_USAGE`; no write access is granted.
+- Users run the agent with whichever warehouse they activate in their session – cost remains under your control.
 
 ---
 
 ## Cleanup
 
-To remove all Sam-the-Snowman components:
+Run the teardown script to remove demo objects while leaving shared databases in place:
 
 ```sql
 USE ROLE ACCOUNTADMIN;
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
-**Note**: Per demo project standards, shared databases (`SNOWFLAKE_EXAMPLE`, `SNOWFLAKE_INTELLIGENCE`) are preserved. Only Sam-the-Snowman objects are removed.
-
----
-
-## Use as a Template
-
-This project demonstrates best practices for Snowflake Intelligence agents:
-- ✅ Semantic view design patterns
-- ✅ Modular deployment structure
-- ✅ Configuration management
-- ✅ Git integration workflow
-- ✅ Role-based access control
-
-**Copy this** for your own agent projects! See [`docs/03-ARCHITECTURE.md`](docs/03-ARCHITECTURE.md) for customization guidance.
+The script drops the agent, semantic views, email procedure, and Git stage, but preserves `SNOWFLAKE_EXAMPLE` and `SNOWFLAKE_INTELLIGENCE` databases per demo standards.
 
 ---
 
 ## Support & Contributing
 
-- **Issues**: Submit via [GitHub Issues](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/issues)
-- **Contributions**: Follow existing code style, test thoroughly, update docs
-- **Questions**: Snowflake Community forums
+- Report issues on GitHub: <https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/issues>
+- Follow the existing coding style, run the test plan in `docs/06-TESTING.md`, and update documentation with your changes before opening a PR.
+- Questions? The Snowflake Community forums are a great place to ask.
 
-**Maintained by**: M. Whitaker | **Inspired by**: Kaitlyn Wells (@snowflake)
-
----
-
-**Ready to deploy?** → [`QUICKSTART.md`](QUICKSTART.md) 🚀
+Maintained by M. Whitaker · Inspired by work from Kaitlyn Wells (@snowflake)
