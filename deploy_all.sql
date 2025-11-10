@@ -98,17 +98,7 @@ GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE IDENTIFIER($role_name);
 -- Verify that the Git Repository Stage exists (created by sql/00_config.sql)
 -- If this fails, you need to run sql/00_config.sql first!
 
-CALL SYSTEM$ASSERT_TRUE(
-    EXISTS (
-        SELECT 1
-        FROM INFORMATION_SCHEMA.STAGES 
-        WHERE STAGE_SCHEMA = 'DEPLOY' 
-          AND STAGE_NAME = 'SFE_SAM_THE_SNOWMAN_REPO'
-    ),
-    'ERROR: Git Repository Stage not found! You must run sql/00_config.sql FIRST to create the stage.'
-);
-
-SELECT 'Git Repository Stage verified. Proceeding with deployment...' AS prerequisite_status;
+DESC STAGE SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO;
 
 -- ============================================================================
 -- MODULE EXECUTION FROM GIT REPOSITORY STAGE
