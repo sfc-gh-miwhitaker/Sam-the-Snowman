@@ -115,6 +115,7 @@ fix_*.sql
 # Internal Project Documentation
 # =============================================================================
 # Internal notes and development tracking (per project rules)
+.cursor/docs/
 .cursornotes/
 .internal/
 notes.txt
@@ -158,5 +159,7 @@ _build/
 site/
 
 
-# Cursor directory (generated locally, not committed)
+.cursor/
+
+# Cursor editor artifacts (local only)
 .cursor/
