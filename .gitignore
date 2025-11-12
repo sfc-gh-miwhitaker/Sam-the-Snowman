@@ -13,6 +13,7 @@ secrets.yaml
 credentials.json
 snowflake_credentials.txt
 connection_config.ini
+config/.env
 
 # =============================================================================
 # Snowflake-Specific Files
@@ -36,6 +37,7 @@ venv/
 env/
 ENV/
 .venv/
+*.venv/
 virtualenv/
 
 # Distribution / packaging
@@ -155,9 +157,6 @@ _build/
 .doctrees/
 site/
 
-
-# Cursor directory (generated locally, not committed)
-.cursor/
 
 # Cursor directory (generated locally, not committed)
 .cursor/

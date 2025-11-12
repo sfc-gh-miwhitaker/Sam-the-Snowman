@@ -4,6 +4,14 @@
 
 Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usage data and returns actionable guidance on query performance, cost control, and warehouse operations. Deploy the agent in a few minutes, ask natural-language questions, and receive answers backed by live telemetry from your environment.
 
+👋 **First time here? Follow these files in order:**
+1. `docs/01-QUICKSTART.md` - Prepare Snowsight workspace and prerequisites (5 min)
+2. `sql/00_config.sql` - Mount the Git repository stage (2 min)
+3. `deploy_all.sql` - Execute modules 01–06 from the stage (3 min)
+4. `docs/07-TROUBLESHOOTING.md` - Run targeted fixes if a step fails (optional)
+
+**Total setup time: ~10 minutes**
+
 **Version**: 4.0 · **License**: Apache 2.0
 
 ---
