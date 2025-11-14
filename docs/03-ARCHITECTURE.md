@@ -63,10 +63,10 @@ Sam-the-Snowman's semantic views demonstrate **production-grade patterns** that 
   - Example: `EXECUTION_STATUS` comment includes "(SUCCESS, FAIL, INCIDENT)"
   - Helps Cortex Analyst understand data patterns and generate better queries
 
-**✓ Custom Instructions**: Each view includes domain-specific business rules and interpretation guidance
+**✓ Rich Contextual Descriptions**: Each fact and dimension comment explains implications and provides guidance
   - Encodes expert knowledge about what metrics mean and when values indicate problems
-  - Example: "BYTES_SPILLED_TO_REMOTE_STORAGE is the most critical performance red flag"
-  - Guides the agent to prioritize findings and provide actionable recommendations
+  - Example: "Memory spillage to remote storage indicating severe memory pressure and performance degradation"
+  - Helps both humans and AI understand when action is needed
 
 **✓ Verified Queries**: 3-5 curated examples per view demonstrating common use cases
   - Shows users what questions they can ask
@@ -155,10 +155,6 @@ To verify the enhanced semantic views implement all best practices, run these qu
 SELECT GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance');
 -- Look for: "(e.g., ...)" patterns in dimension comments showing example values
 
--- Verify custom instructions exist
-SELECT GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis');
--- Look for: "instructions": "..." in WITH EXTENSION block
-
 -- Count verified queries per view
 SELECT 
   'sfe_query_performance' as view_name,
@@ -181,7 +177,7 @@ SELECT
 
 **Expected Results**:
 - ✅ Each view has dimension comments with example values (e.g., patterns)
-- ✅ Each view has custom "instructions" in CA extension
+- ✅ Each view has rich contextual descriptions explaining implications
 - ✅ Each view has 3+ verified queries
 - ✅ Synonyms allow natural language variation
 

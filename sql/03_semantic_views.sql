@@ -47,8 +47,8 @@ USE SNOWFLAKE_EXAMPLE.SEMANTIC;
 -- Best Practices Implemented:
 -- ✓ Sample values in comments (e.g., patterns) to improve AI accuracy
 -- ✓ Expanded synonyms covering natural language variations
--- ✓ Custom instructions for Cortex Analyst business rules
--- ✓ Verified queries demonstrating common use cases
+-- ✓ Rich contextual descriptions explaining metric implications
+-- ✓ Multiple verified queries demonstrating common use cases
 -- ✓ Strategic filtering (excludes system-managed warehouses)
 
 CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance
@@ -132,8 +132,7 @@ WITH EXTENSION (CA = '{
       "question": "What are the most common query errors?",
       "sql": "SELECT error_code, error_message, COUNT(*) as failure_count FROM query_performance WHERE execution_status = ''FAIL'' AND start_time >= DATEADD(day, -7, CURRENT_TIMESTAMP()) GROUP BY error_code, error_message ORDER BY failure_count DESC LIMIT 10"
     }
-  ],
-  "instructions": "This view analyzes query execution performance and helps identify optimization opportunities. Key principles: (1) BYTES_SPILLED_TO_REMOTE_STORAGE is the most critical performance red flag indicating warehouse undersizing; (2) Low PERCENTAGE_SCANNED_FROM_CACHE suggests repeated queries that could benefit from result caching or warehouse suspension settings; (3) High ratio of PARTITIONS_SCANNED to PARTITIONS_TOTAL indicates poor clustering or missing WHERE clause filters; (4) System-managed warehouses are intentionally excluded to focus on user-controlled compute resources. When analyzing slow queries, always check spilling metrics first, then cache efficiency, then partition pruning effectiveness."
+  ]
 }');
 
 -- ============================================================================
@@ -145,8 +144,8 @@ WITH EXTENSION (CA = '{
 --
 -- Best Practices Implemented:
 -- ✓ Comprehensive synonyms for financial terminology
--- ✓ Custom instructions for cost interpretation and optimization
--- ✓ Verified queries for common FinOps scenarios
+-- ✓ Rich contextual descriptions for cost interpretation
+-- ✓ Multiple verified queries for common FinOps scenarios
 -- ✓ Sample values in comments showing typical warehouse names
 -- ✓ Clear distinction between compute and cloud services costs
 
@@ -190,8 +189,7 @@ WITH EXTENSION (CA = '{
       "question": "Which warehouses have high cloud services costs?",
       "sql": "SELECT warehouse_name, SUM(credits_used_compute) as compute_credits, SUM(credits_used_cloud_services) as services_credits, (services_credits / NULLIF(compute_credits, 0) * 100) as services_percentage FROM cost_analysis WHERE start_time >= DATEADD(''day'', -7, CURRENT_TIMESTAMP()) GROUP BY warehouse_name HAVING services_percentage > 10 ORDER BY services_percentage DESC"
     }
-  ],
-  "instructions": "This view tracks warehouse credit consumption for financial governance and cost optimization. Key principles: (1) CREDITS_USED is the definitive cost metric combining compute and cloud services; (2) Cloud services credits typically should not exceed 10% of compute credits - higher ratios indicate inefficient query patterns or excessive metadata operations; (3) Sudden spikes in credit usage warrant investigation for runaway queries or configuration changes; (4) Cost analysis is most effective when combined with query performance data to identify expensive but inefficient workloads. When analyzing costs, always aggregate by warehouse and time period to identify trends and outliers."
+  ]
 }');
 
 -- ============================================================================
@@ -204,8 +202,8 @@ WITH EXTENSION (CA = '{
 -- Best Practices Implemented:
 -- ✓ Sample values in comments for typical warehouse names
 -- ✓ Expanded synonyms for operations terminology
--- ✓ Custom instructions for capacity planning and right-sizing
--- ✓ Verified queries for common operational scenarios
+-- ✓ Rich contextual descriptions for capacity planning
+-- ✓ Multiple verified queries for common operational scenarios
 -- ✓ Clear explanation of queue types and their implications
 
 CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations
@@ -250,8 +248,7 @@ WITH EXTENSION (CA = '{
       "question": "Which warehouses have lock contention issues?",
       "sql": "SELECT warehouse_name, AVG(avg_blocked) as avg_blocked_queries FROM warehouse_operations WHERE start_time >= DATEADD(''day'', -7, CURRENT_TIMESTAMP()) GROUP BY warehouse_name HAVING avg_blocked_queries > 0 ORDER BY avg_blocked_queries DESC"
     }
-  ],
-  "instructions": "This view analyzes warehouse operational metrics for capacity planning and right-sizing decisions. Key principles: (1) AVG_QUEUED_LOAD > 0 consistently indicates warehouse undersizing or need for multi-cluster scaling; (2) AVG_QUEUED_PROVISIONING spikes occur during cold starts and can be reduced by adjusting auto-suspend settings; (3) AVG_BLOCKED indicates lock contention from concurrent DML operations, not warehouse size issues; (4) Low AVG_RUNNING values relative to warehouse size suggest oversizing and waste. When analyzing warehouse operations, distinguish between capacity issues (queued load), configuration issues (provisioning delays), and concurrency issues (blocked queries). Right-sizing should balance utilization (minimize idle time) against performance (minimize queuing)."
+  ]
 }');
 
 -- Semantic views complete

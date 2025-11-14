@@ -83,11 +83,11 @@ Edit the generated SQL to match Sam-the-Snowman standards:
    COMMENT = 'DEMO: Sam-the-Snowman - Snowpipe ingestion monitoring and reliability analysis.'
    ```
 
-3. **Enhance custom instructions**:
+3. **Enhance column comments with contextual information**:
    ```sql
-   WITH EXTENSION (CA = '{
-     "instructions": "This view monitors Snowpipe file ingestion... <add domain expertise>"
-   }')
+   -- In FACTS and DIMENSIONS, add rich descriptions
+   PIPE_USAGE_HISTORY.CREDITS_USED as CREDITS_USED 
+     comment='Snowpipe credits consumed. High values relative to BYTES_INSERTED suggest inefficient file sizing. Synonyms: ingestion cost, pipe cost.',
    ```
 
 4. **Add best-practice header**:
@@ -222,10 +222,10 @@ The generator produces:
 -- Key Metrics: File processing rates, errors, latency, credit consumption
 --
 -- Best Practices Implemented:
--- ✓ Sample values for pipe names
+-- ✓ Sample values in comments for pipe names
 -- ✓ Expanded synonyms for ingestion terminology
--- ✓ Custom instructions for interpreting ingestion metrics
--- ✓ Verified queries for common Snowpipe scenarios
+-- ✓ Rich contextual descriptions for interpreting ingestion metrics
+-- ✓ Multiple verified queries for common Snowpipe scenarios
 -- ✓ Relationship between usage and error tracking
 
 CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_pipe_monitoring
@@ -270,8 +270,7 @@ WITH EXTENSION (CA = '{
       "question": "Show me pipes with load failures",
       "sql": "SELECT pipe_name, error_message, COUNT(*) as failure_count FROM sfe_pipe_monitoring WHERE status = ''LOAD_FAILED'' AND start_time >= DATEADD(''day'', -7, CURRENT_TIMESTAMP()) GROUP BY pipe_name, error_message ORDER BY failure_count DESC"
     }
-  ],
-  "instructions": "This view monitors Snowpipe continuous ingestion pipelines. Key principles: (1) ERROR_COUNT > 0 indicates file format issues or schema mismatches requiring investigation; (2) Declining FILES_INSERTED trends may indicate upstream source issues; (3) High CREDITS_USED relative to BYTES_INSERTED suggests inefficient file sizing (prefer larger files); (4) STATUS=PARTIALLY_LOADED indicates recoverable errors where some rows succeeded. When analyzing ingestion issues, always check error patterns first, then file sizing efficiency, then cost trends."
+  ]
 }');
 ```
 
@@ -312,7 +311,7 @@ $$;
 - **Refine with domain expertise** - enhance AI output with business context
 - **Add comprehensive synonyms** - cover natural language variations
 - **Include sample values** - improve Cortex Analyst accuracy
-- **Write custom instructions** - encode business rules and interpretation guidance
+- **Write rich contextual descriptions** - explain what metrics mean and when values indicate problems in comments
 - **Test verified queries** - ensure they work and demonstrate value
 
 ### ❌ DON'T
