@@ -28,8 +28,8 @@
  *   - Snowflake Documentation must be installed
  * 
  * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
- * Modified: 2025-11-07
- * Version: 3.1
+ * Modified: 2025-11-14
+ * Version: 4.0
  * License: Apache 2.0
  * 
  * Usage:

@@ -1,23 +1,40 @@
 /*******************************************************************************
  * DEMO PROJECT: Sam-the-Snowman
  * Module: 00_config.sql
- *
+ * 
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
- *
- * Purpose:
- *   Mount the Sam-the-Snowman Git repository as a Snowflake stage.
- *   Run this script when deploy_all.sql reports that the repository stage is missing.
- *
+ * 
+ * Synopsis:
+ *   Mounts the Sam-the-Snowman Git repository as a Snowflake stage.
+ * 
+ * Description:
+ *   This module establishes the Git repository infrastructure required for
+ *   deployment. It creates the shared demo database, the DEPLOY schema, the
+ *   GitHub API integration, and fetches the Git repository stage. Run this
+ *   script first, before deploy_all.sql, or when the repository stage is missing.
+ * 
+ * OBJECTS CREATED:
+ *   - SNOWFLAKE_EXAMPLE (Database - shared across demo projects)
+ *   - SNOWFLAKE_EXAMPLE.DEPLOY (Schema - deployment infrastructure)
+ *   - SFE_GITHUB_API_INTEGRATION (API Integration - GitHub access)
+ *   - SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO (Git Repository)
+ * 
+ * Prerequisites:
+ *   - ACCOUNTADMIN role privileges (for API integration creation)
+ *   - Active warehouse for repository fetch operations
+ *   - Network access to GitHub
+ * 
+ * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
+ * Modified: 2025-11-14
+ * Version: 4.0
+ * License: Apache 2.0
+ * 
  * Usage:
- *   1. Open this file in Snowsight.
+ *   Run standalone in Snowsight:
+ *   1. Open this file in Snowsight
  *   2. Set worksheet context: USE WAREHOUSE <warehouse>;
- *   3. Run all statements (Cmd/Ctrl + Shift + Enter).
- *
- * Result:
- *   - Ensures the shared demo database and DEPLOY schema exist.
- *   - Creates the SFE_GITHUB_API_INTEGRATION (idempotent).
- *   - Creates/fetches the Git repository stage at SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO.
- *   - Lists available SQL modules and prints the next action.
+ *   3. Run all statements (Cmd/Ctrl + Shift + Enter)
+ *   4. Proceed to deploy_all.sql after successful completion
  ******************************************************************************/
 
 -- Deployment role (override if your org uses a custom role)

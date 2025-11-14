@@ -32,16 +32,14 @@
  * Prerequisites:
  *   - ACCOUNTADMIN role privileges
  *   - Sam-the-Snowman previously deployed via `deploy_all.sql`
- *
+ * 
+ * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
+ * Modified: 2025-11-14
+ * Version: 4.0
+ * License: Apache 2.0
+ * 
  * Usage:
  *   Execute this entire script as ACCOUNTADMIN. Safe to run multiple times.
- *
-* Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
-* Modified: 2025-11-07
-* Version: 3.1
- * License: Apache 2.0
- *
- * Idempotency:
  *   This script is idempotent and can be run multiple times without errors.
  *
  ******************************************************************************/
