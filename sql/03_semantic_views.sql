@@ -45,7 +45,7 @@ USE SNOWFLAKE_EXAMPLE.SEMANTIC;
 -- Key Metrics: Execution time, spilling, cache efficiency, error rates
 --
 -- Best Practices Implemented:
--- ✓ Sample values for key dimensions to improve AI accuracy
+-- ✓ Sample values in comments (e.g., patterns) to improve AI accuracy
 -- ✓ Expanded synonyms covering natural language variations
 -- ✓ Custom instructions for Cortex Analyst business rules
 -- ✓ Verified queries demonstrating common use cases
@@ -90,11 +90,9 @@ DIMENSIONS (
   QUERY_HISTORY.QUERY_TEXT as QUERY_TEXT 
     comment='Complete SQL statement text as executed. Synonyms: SQL, query statement, SQL text, query string.',
   QUERY_HISTORY.QUERY_TYPE as QUERY_TYPE 
-    comment='Query classification. Synonyms: query category, statement type, operation type.'
-    sample_values=['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP', 'MERGE', 'COPY', 'CREATE_TABLE_AS_SELECT'],
+    comment='Query classification (e.g., SELECT, INSERT, UPDATE, DELETE, CREATE, MERGE). Synonyms: query category, statement type, operation type.',
   QUERY_HISTORY.EXECUTION_STATUS as EXECUTION_STATUS 
-    comment='Final query status. SUCCESS indicates completion, FAILED indicates errors. Synonyms: query status, execution result, completion status.'
-    sample_values=['SUCCESS', 'FAIL', 'INCIDENT'],
+    comment='Final query status (SUCCESS, FAIL, INCIDENT). SUCCESS indicates completion, FAILED indicates errors. Synonyms: query status, execution result, completion status.',
   QUERY_HISTORY.ERROR_CODE as ERROR_CODE 
     comment='Numeric error code for failed queries. NULL for successful queries. Synonyms: failure code, error number.',
   QUERY_HISTORY.ERROR_MESSAGE as ERROR_MESSAGE 
@@ -108,11 +106,9 @@ DIMENSIONS (
   QUERY_HISTORY.ROLE_NAME as ROLE_NAME 
     comment='Role context during query execution. Synonyms: query role, execution role, role used.',
   QUERY_HISTORY.WAREHOUSE_NAME as WAREHOUSE_NAME 
-    comment='Virtual warehouse that executed the query. System-managed warehouses excluded. Synonyms: compute cluster, virtual warehouse, warehouse, cluster name.'
-    sample_values=['COMPUTE_WH', 'ANALYTICS_WH', 'ETL_WH', 'BI_WH', 'DATA_SCIENCE_WH'],
+    comment='Virtual warehouse that executed the query (e.g., COMPUTE_WH, ANALYTICS_WH, ETL_WH). System-managed warehouses excluded. Synonyms: compute cluster, virtual warehouse, warehouse, cluster name.',
   QUERY_HISTORY.WAREHOUSE_SIZE as WAREHOUSE_SIZE 
-    comment='Warehouse size tier at execution time. Larger sizes provide more compute power. Synonyms: warehouse tier, compute size, cluster size.'
-    sample_values=['X-Small', 'Small', 'Medium', 'Large', 'X-Large', '2X-Large', '3X-Large', '4X-Large', '5X-Large', '6X-Large'],
+    comment='Warehouse size tier at execution time (X-Small, Small, Medium, Large, X-Large, 2X-Large, etc.). Larger sizes provide more compute power. Synonyms: warehouse tier, compute size, cluster size.',
   QUERY_HISTORY.DATABASE_NAME as DATABASE_NAME 
     comment='Primary database accessed by the query. Synonyms: database, db, schema database.',
   QUERY_HISTORY.SCHEMA_NAME as SCHEMA_NAME 
@@ -151,7 +147,7 @@ WITH EXTENSION (CA = '{
 -- ✓ Comprehensive synonyms for financial terminology
 -- ✓ Custom instructions for cost interpretation and optimization
 -- ✓ Verified queries for common FinOps scenarios
--- ✓ Sample values showing typical warehouse names
+-- ✓ Sample values in comments showing typical warehouse names
 -- ✓ Clear distinction between compute and cloud services costs
 
 CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis
@@ -168,8 +164,7 @@ FACTS (
 )
 DIMENSIONS (
   WAREHOUSE_METERING_HISTORY.WAREHOUSE_NAME as WAREHOUSE_NAME 
-    comment='Virtual warehouse name. System-managed warehouses excluded for clarity. Synonyms: compute cluster, warehouse, cluster name, virtual warehouse.'
-    sample_values=['COMPUTE_WH', 'ANALYTICS_WH', 'ETL_WH', 'BI_WH', 'DATA_SCIENCE_WH', 'DEV_WH', 'PROD_WH'],
+    comment='Virtual warehouse name (e.g., COMPUTE_WH, ANALYTICS_WH, ETL_WH). System-managed warehouses excluded for clarity. Synonyms: compute cluster, warehouse, cluster name, virtual warehouse.',
   WAREHOUSE_METERING_HISTORY.WAREHOUSE_ID as WAREHOUSE_ID 
     comment='Unique warehouse identifier. Use for tracking across renames. Synonyms: warehouse UUID, warehouse identifier.',
   WAREHOUSE_METERING_HISTORY.START_TIME as START_TIME 
@@ -207,7 +202,7 @@ WITH EXTENSION (CA = '{
 -- Key Metrics: Concurrency, queue depth, blocked queries
 --
 -- Best Practices Implemented:
--- ✓ Sample values for typical warehouse names
+-- ✓ Sample values in comments for typical warehouse names
 -- ✓ Expanded synonyms for operations terminology
 -- ✓ Custom instructions for capacity planning and right-sizing
 -- ✓ Verified queries for common operational scenarios
@@ -229,8 +224,7 @@ FACTS (
 )
 DIMENSIONS (
   WAREHOUSE_LOAD_HISTORY.WAREHOUSE_NAME as WAREHOUSE_NAME 
-    comment='Virtual warehouse name. System-managed warehouses excluded for operational clarity. Synonyms: compute cluster, warehouse, cluster name, virtual warehouse.'
-    sample_values=['COMPUTE_WH', 'ANALYTICS_WH', 'ETL_WH', 'BI_WH', 'DATA_SCIENCE_WH', 'DEV_WH', 'PROD_WH'],
+    comment='Virtual warehouse name (e.g., COMPUTE_WH, ANALYTICS_WH, ETL_WH). System-managed warehouses excluded for operational clarity. Synonyms: compute cluster, warehouse, cluster name, virtual warehouse.',
   WAREHOUSE_LOAD_HISTORY.WAREHOUSE_ID as WAREHOUSE_ID 
     comment='Unique warehouse identifier. Persists across warehouse renames. Synonyms: warehouse UUID, warehouse identifier.',
   WAREHOUSE_LOAD_HISTORY.START_TIME as START_TIME 

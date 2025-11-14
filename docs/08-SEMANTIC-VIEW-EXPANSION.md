@@ -109,7 +109,8 @@ Based on Sam-the-Snowman's best practices:
 - **Expand synonyms**: Add natural language variations users might ask
 - **Add context to comments**: Explain when values indicate problems
 - **Strategic filtering**: Exclude irrelevant data (e.g., system objects)
-- **Sample values**: Include representative examples for key dimensions
+- **Sample values in comments**: Include representative examples within comment text (e.g., "Warehouse size (X-Small, Small, Medium, Large)")
+  - **Note**: SQL DDL does not support `sample_values=[]` syntax; embed examples in comment strings
 - **Multiple verified queries**: Show common use cases (3-5 queries)
 
 ### Step 5: Integrate into Deployment
@@ -246,15 +247,13 @@ FACTS (
 )
 DIMENSIONS (
   PIPE_USAGE_HISTORY.PIPE_NAME as PIPE_NAME 
-    comment='Snowpipe object name. Synonyms: pipe, ingestion pipe.'
-    sample_values=['MY_S3_PIPE', 'EVENT_STREAM_PIPE', 'CDC_PIPE'],
+    comment='Snowpipe object name (e.g., MY_S3_PIPE, EVENT_STREAM_PIPE, CDC_PIPE). Synonyms: pipe, ingestion pipe.',
   PIPE_USAGE_HISTORY.START_TIME as START_TIME 
     comment='Measurement period start. Synonyms: period start, ingestion start.',
   COPY_HISTORY.FILE_NAME as FILE_NAME 
     comment='Staged file path loaded by pipe. Synonyms: source file, staged file.',
   COPY_HISTORY.STATUS as STATUS 
-    comment='Load status for each file. Synonyms: load status, ingestion status.'
-    sample_values=['LOADED', 'LOAD_FAILED', 'PARTIALLY_LOADED'],
+    comment='Load status for each file (LOADED, LOAD_FAILED, PARTIALLY_LOADED). Synonyms: load status, ingestion status.',
   COPY_HISTORY.ERROR_MESSAGE as ERROR_MESSAGE 
     comment='Detailed error description for failed loads. Synonyms: failure reason, error details.'
 )

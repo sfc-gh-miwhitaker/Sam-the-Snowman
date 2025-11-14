@@ -58,9 +58,9 @@ Sam-the-Snowman's semantic views demonstrate **production-grade patterns** that 
   - Example: `TOTAL_ELAPSED_TIME` includes "duration, total time, wall time, elapsed time, latency, response time"
   - Enables the agent to understand different phrasings of the same concept
 
-**✓ Sample Values**: Key dimensions include representative examples to improve AI accuracy
-  - Example: `WAREHOUSE_SIZE` samples: `['X-Small', 'Small', 'Medium', 'Large', ...]`
-  - Example: `EXECUTION_STATUS` samples: `['SUCCESS', 'FAIL', 'INCIDENT']`
+**✓ Sample Values in Comments**: Key dimensions include representative examples within comments to improve AI accuracy
+  - Example: `WAREHOUSE_SIZE` comment includes "(X-Small, Small, Medium, Large, X-Large, 2X-Large, etc.)"
+  - Example: `EXECUTION_STATUS` comment includes "(SUCCESS, FAIL, INCIDENT)"
   - Helps Cortex Analyst understand data patterns and generate better queries
 
 **✓ Custom Instructions**: Each view includes domain-specific business rules and interpretation guidance
@@ -151,9 +151,9 @@ Re-run `sql/03_semantic_views.sql` (idempotent) after making changes, then rerun
 To verify the enhanced semantic views implement all best practices, run these queries:
 
 ```sql
--- Check for sample values
+-- Check for sample values in comments
 SELECT GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance');
--- Look for: sample_values=[...] in dimension definitions
+-- Look for: "(e.g., ...)" patterns in dimension comments showing example values
 
 -- Verify custom instructions exist
 SELECT GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis');
@@ -180,7 +180,7 @@ SELECT
 ```
 
 **Expected Results**:
-- ✅ Each view has 2-3 dimensions with sample_values
+- ✅ Each view has dimension comments with example values (e.g., patterns)
 - ✅ Each view has custom "instructions" in CA extension
 - ✅ Each view has 3+ verified queries
 - ✅ Synonyms allow natural language variation
