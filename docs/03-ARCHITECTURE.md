@@ -50,7 +50,38 @@ This pattern is **reusable as a template** for production projects requiring cle
 | `sfe_cost_analysis` | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Track warehouse credit consumption, cost trends, FinOps insights | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY` |
 | `sfe_warehouse_operations` | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Evaluate warehouse sizing, queue depth, concurrency, provisioning | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY` |
 
-Each column comment includes synonyms (for example, "slow", "latency", "runtime") so the agent understands natural language variations. If you need additional vocabulary, edit the comments in `sql/03_semantic_views.sql` and re-run the semantic view module.
+### Best Practice Implementation
+
+Sam-the-Snowman's semantic views demonstrate **production-grade patterns** that serve as a template for your own projects:
+
+**✓ Expanded Synonyms**: Each fact and dimension includes comprehensive natural language variations
+  - Example: `TOTAL_ELAPSED_TIME` includes "duration, total time, wall time, elapsed time, latency, response time"
+  - Enables the agent to understand different phrasings of the same concept
+
+**✓ Sample Values**: Key dimensions include representative examples to improve AI accuracy
+  - Example: `WAREHOUSE_SIZE` samples: `['X-Small', 'Small', 'Medium', 'Large', ...]`
+  - Example: `EXECUTION_STATUS` samples: `['SUCCESS', 'FAIL', 'INCIDENT']`
+  - Helps Cortex Analyst understand data patterns and generate better queries
+
+**✓ Custom Instructions**: Each view includes domain-specific business rules and interpretation guidance
+  - Encodes expert knowledge about what metrics mean and when values indicate problems
+  - Example: "BYTES_SPILLED_TO_REMOTE_STORAGE is the most critical performance red flag"
+  - Guides the agent to prioritize findings and provide actionable recommendations
+
+**✓ Verified Queries**: 3-5 curated examples per view demonstrating common use cases
+  - Shows users what questions they can ask
+  - Provides templates the agent can adapt for similar queries
+  - Validates that the view structure supports real analytical workflows
+
+**✓ Strategic Filtering**: Views intentionally exclude irrelevant data
+  - System-managed warehouses removed to focus on user-controlled resources
+  - Improves query performance and result clarity
+
+**✓ Rich Context in Comments**: Descriptions explain what values mean and their implications
+  - Not just "Queue wait time" but "Queue wait time due to warehouse load. Indicates insufficient concurrency."
+  - Helps both humans and AI understand when action is needed
+
+If you need additional vocabulary or want to expand to new domains, see `docs/08-SEMANTIC-VIEW-EXPANSION.md` for guidance on using Snowflake's AI-assisted generator.
 
 ## Tool Orchestration
 
@@ -115,6 +146,47 @@ Re-run `sql/03_semantic_views.sql` (idempotent) after making changes, then rerun
 - **"No data returned"**: `ACCOUNT_USAGE` data can lag by 45 minutes. Verify timestamps with `SELECT MAX(START_TIME) FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY;`.
 - **"Agent answered the wrong question"**: Rephrase using domain keywords (slow, cost, queue). If issues persist, review the orchestration instructions in `sql/05_agent.sql`.
 
+## Validating Best Practices
+
+To verify the enhanced semantic views implement all best practices, run these queries:
+
+```sql
+-- Check for sample values
+SELECT GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance');
+-- Look for: sample_values=[...] in dimension definitions
+
+-- Verify custom instructions exist
+SELECT GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis');
+-- Look for: "instructions": "..." in WITH EXTENSION block
+
+-- Count verified queries per view
+SELECT 
+  'sfe_query_performance' as view_name,
+  REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance'), '"name":') as verified_query_count
+UNION ALL
+SELECT 
+  'sfe_cost_analysis',
+  REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis'), '"name":')
+UNION ALL
+SELECT 
+  'sfe_warehouse_operations',
+  REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations'), '"name":');
+
+-- Test synonym coverage by asking varied questions
+-- These should all route to query_performance:
+-- "Show me slow queries today"
+-- "What queries had high latency?"
+-- "Which queries took the longest to run?"
+```
+
+**Expected Results**:
+- ✅ Each view has 2-3 dimensions with sample_values
+- ✅ Each view has custom "instructions" in CA extension
+- ✅ Each view has 3+ verified queries
+- ✅ Synonyms allow natural language variation
+
+---
+
 ## Related Files
 
 | File | Description |
@@ -126,6 +198,7 @@ Re-run `sql/03_semantic_views.sql` (idempotent) after making changes, then rerun
 | `sql/99_cleanup/teardown_all.sql` | Drops the demo objects while preserving shared databases |
 | `docs/05-ROLE-BASED-ACCESS.md` | Grant or restrict access to the agent |
 | `docs/06-TESTING.md` | Functional and regression tests |
+| `docs/08-SEMANTIC-VIEW-EXPANSION.md` | Guide for adding new semantic views using AI assistance |
 
 Use this reference when you need to extend the agent or explain its architecture to stakeholders.
 

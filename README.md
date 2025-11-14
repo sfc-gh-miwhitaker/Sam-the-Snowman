@@ -85,6 +85,7 @@ Sam-the-Snowman/
 | `docs/05-ROLE-BASED-ACCESS.md` | Granting or restricting access to the agent |
 | `docs/06-TESTING.md` | Smoke tests and regression checks |
 | `docs/07-TROUBLESHOOTING.md` | Common issues and quick resolutions |
+| `docs/08-SEMANTIC-VIEW-EXPANSION.md` | Adding new analytical domains using AI-assisted generation |
 
 ---
 
