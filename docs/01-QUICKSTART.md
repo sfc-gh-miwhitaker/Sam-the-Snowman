@@ -12,14 +12,13 @@ This guide expands the main quickstart with additional checkpoints, validation q
    ```sql
    SHOW GRANTS TO USER CURRENT_USER();
    ```
-2. **Pick a warehouse** – any size works (`SHOW WAREHOUSES;`).
-3. **Verify your user email** – required for the test message (`SHOW USERS LIKE CURRENT_USER();`).
-4. **Marketplace access** – you must be allowed to accept Marketplace terms.
+2. **Verify your user email** – required for the test message (`SHOW USERS LIKE CURRENT_USER();`).
+3. **Marketplace access** – you must be allowed to accept Marketplace terms.
+4. **No manual warehouse selection required** – the script creates and resumes `SFE_SAM_SNOWMAN_WH`.
 
 Set worksheet context before proceeding:
 ```sql
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE <your_warehouse>;
 ```
 
 ---
@@ -96,7 +95,7 @@ Need to redeploy a component without running the full orchestrator? Execute modu
 ```sql
 -- Example: rerun semantic views
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE <your_warehouse>;
+USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
 ```
 

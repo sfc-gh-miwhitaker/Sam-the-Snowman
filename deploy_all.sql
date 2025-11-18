@@ -12,10 +12,9 @@
  *   1. Copy this ENTIRE script (Cmd/Ctrl+A, Cmd/Ctrl+C)
  *   2. Open Snowsight → New Worksheet
  *   3. Paste the script (Cmd/Ctrl+V)
- *   4. Set warehouse context: USE WAREHOUSE <your_warehouse>;
- *   5. Click "Run All" (▶▶) or press Cmd/Ctrl+Shift+Enter
- *   6. Wait ~3-5 minutes for complete deployment
- *   7. Navigate to AI & ML > Agents > Sam-the-Snowman to start using
+ *   4. Click "Run All" (▶▶) or press Cmd/Ctrl+Shift+Enter
+ *   5. Wait ~3-5 minutes for complete deployment
+ *   6. Navigate to AI & ML > Agents > Sam-the-Snowman to start using
  * 
  * GITHUB REPOSITORY:
  *   https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git
@@ -23,6 +22,7 @@
  * WHAT GETS CREATED:
  *   Account-Level Objects (requires ACCOUNTADMIN):
  *   - SFE_GITHUB_API_INTEGRATION (API Integration for GitHub access)
+ *   - SFE_SAM_SNOWMAN_WH (Dedicated demo warehouse, X-Small, auto-suspend 60s)
  *   
  *   Database Objects:
  *   - SNOWFLAKE_EXAMPLE database (shared demo database)
@@ -44,7 +44,6 @@
  * 
  * PREREQUISITES:
  *   - ACCOUNTADMIN role access
- *   - Active warehouse (any size, XSMALL sufficient)
  *   - Network access to GitHub
  *   - Email integration configured (optional, for notifications)
  * 
@@ -54,7 +53,7 @@
  * 
  * TROUBLESHOOTING:
  *   Error: "Warehouse must be specified"
- *   → Add before script: USE WAREHOUSE COMPUTE_WH; (or your warehouse name)
+ *   → The script creates `SFE_SAM_SNOWMAN_WH`. Resume it (`ALTER WAREHOUSE SFE_SAM_SNOWMAN_WH RESUME;`) and rerun this script.
  *   
  *   Error: "Insufficient privileges to operate on database SNOWFLAKE_EXAMPLE"
  *   → Ensure you're using: USE ROLE ACCOUNTADMIN;
@@ -104,8 +103,22 @@ CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.DEPLOY
     COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure schema';
 
--- Elevate privilege for account-level API integration work
+-- Elevate privilege for account-level objects (warehouse, integrations)
 USE ROLE ACCOUNTADMIN;
+
+-- Create dedicated demo warehouse (idempotent)
+CREATE OR REPLACE WAREHOUSE SFE_SAM_SNOWMAN_WH
+    WAREHOUSE_SIZE = 'XSMALL'
+    MIN_CLUSTER_COUNT = 1
+    MAX_CLUSTER_COUNT = 1
+    AUTO_SUSPEND = 60
+    AUTO_RESUME = TRUE
+    INITIALLY_SUSPENDED = TRUE
+    SCALING_POLICY = 'ECONOMY'
+    COMMENT = 'DEMO: Sam-the-Snowman - Dedicated warehouse for deployment and runtime';
+
+GRANT USAGE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE IDENTIFIER($deployment_role);
+GRANT OPERATE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE IDENTIFIER($deployment_role);
 
 -- Create account-wide Git API integration (safe to rerun; reused by all demo projects)
 CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
@@ -124,6 +137,7 @@ GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE IDENTIFIER($deployment_role);
 
 -- Return to deployment role for Git repository creation
 USE ROLE IDENTIFIER($deployment_role);
+USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Create Git repository stage (central source for all deployment modules)
 CREATE OR REPLACE GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO
@@ -144,6 +158,7 @@ SELECT 'Phase 1 Complete: Infrastructure setup successful. Git repository stage 
 -- Ensure ACCOUNTADMIN role is active for all module deployments
 -- (Some modules require elevated privileges for integrations and marketplace)
 USE ROLE ACCOUNTADMIN;
+USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Module 1: Scaffolding
 -- Creates SNOWFLAKE_INTELLIGENCE database, schemas, and grants privileges

@@ -37,6 +37,7 @@
 
 -- Switch to ACCOUNTADMIN for marketplace operations
 USE ROLE ACCOUNTADMIN;
+USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Accept legal terms for Snowflake Documentation marketplace listing
 CALL SYSTEM$ACCEPT_LEGAL_TERMS('DATA_EXCHANGE_LISTING', 'GZSTZ67BY9OQ4');

@@ -4,6 +4,8 @@
 
 Sam-the-Snowman ships in modular SQL files so you can deploy, troubleshoot, or iterate on individual components. This guide explains how to work with those modules beyond the single-shot `deploy_all.sql` experience.
 
+> All modules assume the dedicated demo warehouse `SFE_SAM_SNOWMAN_WH`, which `deploy_all.sql` creates/resumes automatically.
+
 ---
 
 ## 1. Module Directory

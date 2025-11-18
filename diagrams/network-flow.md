@@ -18,7 +18,7 @@ graph TB
 
     subgraph "Snowflake Cloud"
         Gateway[Snowflake Cloud Services\nHTTPS :443]
-        Warehouse[Virtual Warehouse\n(e.g., COMPUTE_WH)]
+        Warehouse[Demo Warehouse\nSFE_SAM_SNOWMAN_WH]
         Db[SNOWFLAKE_EXAMPLE Database]
         Agents[SNOWFLAKE_INTELLIGENCE.AGENTS]
         EmailProc[sfe_send_email() Procedure]
@@ -54,11 +54,11 @@ graph TB
   - Technology: Snowflake control plane in the customer's region.
   - Location: Snowflake-managed infrastructure.
   - Deps: Initiates outbound HTTPS requests to GitHub and Marketplace endpoints.
-- **Virtual Warehouse**
+- **Demo Warehouse (SFE_SAM_SNOWMAN_WH)**
   - Purpose: Provides compute for semantic queries, agent execution, and the email procedure.
-  - Technology: Snowflake virtual warehouse (e.g., COMPUTE_WH or a dedicated demo warehouse).
+  - Technology: Snowflake X-Small warehouse created and managed by `deploy_all.sql`.
   - Location: Customer Snowflake account.
-  - Deps: Must be resumed prior to running `deploy_all.sql` or agent sessions.
+  - Deps: Script auto-creates/resumes it; you can resize or grant additional roles as needed.
 - **SNOWFLAKE_EXAMPLE Database**
   - Purpose: Stores deployment (`DEPLOY`), integration, and semantic schemas used by the agent.
   - Technology: Snowflake database created by `sql/01_scaffolding.sql`.

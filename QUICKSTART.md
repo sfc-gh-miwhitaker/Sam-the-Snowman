@@ -29,11 +29,9 @@ Select all content (Cmd/Ctrl+A) and copy (Cmd/Ctrl+C).
 
 1. Open Snowsight and create a new SQL worksheet
 2. Paste the entire deployment script (Cmd/Ctrl+V)
-3. Set your warehouse context at the top of the worksheet:
+3. Deploy with the default demo warehouse (auto-created by the script).
 
-```sql
-USE WAREHOUSE <your_warehouse_name>;
-```
+> `deploy_all.sql` provisions and resumes `SFE_SAM_SNOWMAN_WH`, so you don’t have to set `USE WAREHOUSE` manually.
 
 ### Step 3: Run the Deployment
 
@@ -94,7 +92,7 @@ The agent will use semantic views and Snowflake documentation to analyze your ac
 ## Troubleshooting
 
 **Error: "Warehouse must be specified"**  
-→ Add `USE WAREHOUSE <your_warehouse>;` at the top of the worksheet
+→ Resume the dedicated warehouse: `ALTER WAREHOUSE SFE_SAM_SNOWMAN_WH RESUME;` and rerun the script.
 
 **Error: "Insufficient privileges"**  
 → Ensure you're using `USE ROLE ACCOUNTADMIN;`

@@ -70,6 +70,11 @@ graph TB
   - Technology: Marketplace share `SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE`.
   - Location: Installed via `sql/04_marketplace.sql`.
   - Deps: Requires Marketplace subscription and imported privileges.
+- **Demo Warehouse (SFE_SAM_SNOWMAN_WH)**
+  - Purpose: Provide consistent compute for ingestion, semantic view creation, and agent workloads.
+  - Technology: Snowflake X-Small warehouse created by `deploy_all.sql` (auto-suspend 60s).
+  - Location: Customer Snowflake account.
+  - Deps: Script resumes it on demand; you can resize/grant other roles as needed.
 - **Sam-the-Snowman Agent**
   - Purpose: Orchestrate semantic analytics, documentation lookup, and email delivery.
   - Technology: Snowflake Intelligence Agent.

@@ -15,6 +15,7 @@
  * 
  * OBJECTS REMOVED:
  *   - SFE_EMAIL_INTEGRATION (Notification Integration)
+ *   - SFE_SAM_SNOWMAN_WH (Dedicated demo warehouse)
  *   - SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman (Agent)
  *   - SNOWFLAKE_EXAMPLE.SEMANTIC semantic views (sfe_query_performance, sfe_cost_analysis, sfe_warehouse_operations)
  *   - SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email procedure
@@ -53,6 +54,9 @@ USE ROLE accountadmin;
 
 -- Drop notification integration
 DROP NOTIFICATION INTEGRATION IF EXISTS SFE_EMAIL_INTEGRATION;
+
+-- Drop dedicated demo warehouse
+DROP WAREHOUSE IF EXISTS SFE_SAM_SNOWMAN_WH;
 
 -- Note: SFE_GITHUB_API_INTEGRATION is preserved (reusable across projects)
 

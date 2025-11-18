@@ -41,6 +41,7 @@
 -- ============================================================================
 
 USE ROLE SYSADMIN;
+USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Create the demo database (mandatory for all demo projects)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE

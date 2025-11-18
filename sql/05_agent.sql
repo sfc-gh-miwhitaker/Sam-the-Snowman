@@ -43,6 +43,7 @@
 
 -- Switch to the configured role for agent creation
 USE ROLE SYSADMIN;
+USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 USE SNOWFLAKE_INTELLIGENCE.AGENTS;
 
 -- Create the Sam-the-Snowman agent with domain-specific semantic views

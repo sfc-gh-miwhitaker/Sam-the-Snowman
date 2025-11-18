@@ -7,6 +7,9 @@ Sam-the-Snowman deploys a single Snowflake Assistant that combines domain-specif
 - **semantic views**: Focused datasets for performance, cost, and warehouse operations
 - **tool orchestration**: Deterministic routing that maps user intent to the right view
 - **supporting tools**: Snowflake documentation search and email delivery
+- **demo warehouse**: Dedicated compute (`SFE_SAM_SNOWMAN_WH`) for every module and interactive workload
+
+`deploy_all.sql` creates/resumes `SFE_SAM_SNOWMAN_WH` (X-Small, auto-suspend 60s) and each SQL module begins with `USE WAREHOUSE SFE_SAM_SNOWMAN_WH;`, ensuring consistent compute whether you run the orchestrator or a standalone module.
 
 Everything described here is provisioned by the modular deployment workflow (`deploy_all.sql`, which calls `sql/01_scaffolding.sql` through `sql/06_validation.sql`).
 
@@ -187,7 +190,7 @@ SELECT
 
 | File | Description |
 |------|-------------|
-| `deploy_all.sql` | Runs modules 01–06 from the Git stage |
+| `deploy_all.sql` | Creates `SFE_SAM_SNOWMAN_WH` and runs modules 01–06 from the Git stage |
 | `sql/03_semantic_views.sql` | Defines the semantic views and column synonyms |
 | `sql/05_agent.sql` | Builds the agent specification and tool bindings |
 | `sql/06_validation.sql` | Issues `SHOW` statements for deployed assets |

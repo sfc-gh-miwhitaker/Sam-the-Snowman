@@ -7,7 +7,7 @@ Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usa
 👋 **First time here? Follow these steps:**
 1. `QUICKSTART.md` - Copy/paste deployment guide (< 5 min)
 2. Open [`deploy_all.sql`](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/blob/main/deploy_all.sql) on GitHub
-3. Copy entire script → Paste into Snowsight worksheet → Set warehouse → Click "Run All"
+3. Copy entire script → Paste into Snowsight worksheet → Click "Run All"
 4. Navigate to **AI & ML → Agents** → Select **Sam-the-Snowman**
 
 **Total setup time: ~5 minutes**
@@ -25,6 +25,7 @@ Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usa
 - **Warehouse sizing** – highlight queues, concurrency, and right-sizing opportunities.
 - **Documentation lookup** – search official Snowflake guidance with Cortex Search.
 - **Email delivery** – send HTML summaries to stakeholders directly from Snowflake.
+- **Dedicated compute** – auto-created X-Small warehouse (`SFE_SAM_SNOWMAN_WH`) for every workload.
 
 ---
 
@@ -35,15 +36,15 @@ Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usa
 1. **Copy** the [`deploy_all.sql`](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/blob/main/deploy_all.sql) script from GitHub
 2. **Open Snowsight** → Create new SQL worksheet
 3. **Paste** the entire script
-4. **Set context**: `USE WAREHOUSE <your_warehouse>;`
-5. **Click "Run All"** (▶▶) or press Cmd/Ctrl+Shift+Enter
-6. **Wait ~3-5 minutes** for automated deployment
-7. **Navigate to AI & ML → Agents** → Select `Sam-the-Snowman`
+4. **Click "Run All"** (▶▶) or press Cmd/Ctrl+Shift+Enter
+5. **Wait ~3-5 minutes** for automated deployment
+6. **Navigate to AI & ML → Agents** → Select `Sam-the-Snowman`
 
 The script automatically:
 - ✓ Creates infrastructure (database, schema, API integration, Git repo stage)
 - ✓ Deploys all modules from the Git repository
 - ✓ Validates the deployment
+- ✓ Creates/resumes the dedicated demo warehouse `SFE_SAM_SNOWMAN_WH`
 
 See `QUICKSTART.md` for detailed instructions and troubleshooting.
 
@@ -63,6 +64,7 @@ See `QUICKSTART.md` for detailed instructions and troubleshooting.
 | Semantic views | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Domain datasets for performance, cost, and warehouse analytics |
 | Email procedure | `SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email()` | Sends HTML mail via `SYSTEM$SEND_EMAIL` |
 | Git repository stage | `SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO` | Stores the Git clone used by `deploy_all.sql` |
+| Demo warehouse | `SFE_SAM_SNOWMAN_WH` | X-Small warehouse auto-created/resumed for all demo workloads |
 | Documentation database | `snowflake_documentation` | Supplies Cortex Search with official Snowflake guidance |
 
 Schemas follow the demo pattern: `DEPLOY` (infrastructure), `INTEGRATIONS` (external systems), and `SEMANTIC` (analytics). All account-level objects use the `SFE_` prefix for easy discovery and cleanup.
@@ -113,7 +115,7 @@ Sam-the-Snowman/
 - No PUBLIC grants are created. Grant the owning role (default SYSADMIN) or additional roles as needed after deployment.
 - The Snowpark email procedure uses parameter binding to prevent SQL injection.
 - Semantic views read from `SNOWFLAKE.ACCOUNT_USAGE`; no write access is granted.
-- Users run the agent with whichever warehouse they activate in their session – cost remains under your control.
+- The deployment auto-creates and uses `SFE_SAM_SNOWMAN_WH`; you can grant additional roles access or resize it as needed.
 
 ---
 

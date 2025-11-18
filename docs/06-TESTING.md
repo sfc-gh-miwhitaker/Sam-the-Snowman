@@ -11,7 +11,7 @@ Run these commands before executing `deploy_all.sql`.
 ```sql
 -- Ensure you have the right context
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE <your_warehouse>;
+USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Confirm Cortex support
 SHOW DATABASE ROLES IN DATABASE SNOWFLAKE LIKE 'CORTEX_USER';
@@ -30,7 +30,7 @@ If any check fails, resolve it before continuing (for example, add an email with
 
 ```sql
 USE ROLE ACCOUNTADMIN;
-USE WAREHOUSE <your_warehouse>;
+USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
 ```
 
@@ -41,6 +41,7 @@ Expected highlights:
 | Notification integration | `SHOW NOTIFICATION INTEGRATIONS LIKE 'SFE_EMAIL_INTEGRATION';` | One row, `ENABLED = TRUE` |
 | Git repository stage | `SHOW GIT REPOSITORIES IN SCHEMA SNOWFLAKE_EXAMPLE.DEPLOY;` | `SFE_SAM_THE_SNOWMAN_REPO` listed |
 | Email procedure | `SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;` | `SFE_SEND_EMAIL` present |
+| Demo warehouse | `SHOW WAREHOUSES LIKE 'SFE_SAM_SNOWMAN_WH';` | One row, state = SUSPENDED or RESUMED |
 | Semantic views | `SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC;` | All three `sfe_` views listed |
 | Agent | `SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;` | `SAM_THE_SNOWMAN` listed |
 | Documentation | `SHOW DATABASES LIKE 'SNOWFLAKE_DOCUMENTATION';` | One row |

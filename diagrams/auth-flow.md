@@ -28,17 +28,17 @@ sequenceDiagram
 
     Analyst->>Snowsight: Authenticate via SSO (SYSADMIN or delegated role)
     Snowsight->>Agent: Invoke Sam-the-Snowman conversation
-    Agent->>Snowflake: Query semantic views using active warehouse
+    Agent->>Snowflake: Query semantic views using SFE_SAM_SNOWMAN_WH
     Agent->>Email: Call sfe_send_email() (optional report delivery)
     Email-->>Analyst: Deliver HTML email via SYSTEM$SEND_EMAIL
 ```
 
 ## Component Descriptions
 - **Deployment Admin (ACCOUNTADMIN)**
-  - Purpose: Provision integrations, databases, and agent resources.
+  - Purpose: Provision integrations, databases, warehouse, and agent resources.
   - Technology: Snowsight worksheet running `deploy_all.sql`.
   - Location: Customer identity provider federated with Snowflake SSO.
-  - Deps: Requires MFA, ACCOUNTADMIN role, and an active warehouse.
+  - Deps: Requires MFA and ACCOUNTADMIN role; the script auto-creates `SFE_SAM_SNOWMAN_WH`.
 - **SYSADMIN Role**
   - Purpose: Owns demo schemas, semantic views, and the agent during steady state.
   - Technology: Snowflake RBAC role targeted inside each module.
@@ -48,7 +48,7 @@ sequenceDiagram
   - Purpose: Orchestrate semantic analytics, documentation lookup, and email delivery.
   - Technology: Snowflake Intelligence Agent stored in `SNOWFLAKE_INTELLIGENCE.AGENTS`.
   - Location: Snowflake account.
-  - Deps: Requires active warehouse from caller and permissions on semantic views/procedure.
+  - Deps: Uses the dedicated warehouse `SFE_SAM_SNOWMAN_WH` plus permissions on semantic views/procedure.
 - **SFE_EMAIL_INTEGRATION**
   - Purpose: Send optional emails without exposing SMTP credentials.
   - Technology: Snowflake notification integration invoked via `SYSTEM$SEND_EMAIL`.
@@ -58,7 +58,7 @@ sequenceDiagram
   - Purpose: Day-to-day users who ask questions and receive recommendations.
   - Technology: Snowsight agent interface.
   - Location: Customer workforce authenticated through SSO.
-  - Deps: Must activate a warehouse and assume a role with agent `USAGE`.
+  - Deps: Must assume a role with agent `USAGE`; the script ensures `SFE_SAM_SNOWMAN_WH` is available.
 
 ## Change History
 See `.cursor/docs/DIAGRAM_CHANGELOG.md` for vhistory.

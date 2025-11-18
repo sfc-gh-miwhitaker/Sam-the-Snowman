@@ -37,6 +37,7 @@
 -- ============================================================================
 
 USE ROLE ACCOUNTADMIN;
+USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Resolve effective email address using the current user's profile
 SET current_user_email = (

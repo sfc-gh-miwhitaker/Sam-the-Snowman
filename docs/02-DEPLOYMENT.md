@@ -10,7 +10,7 @@ Use this checklist before and after running `deploy_all.sql` (or the individual 
 
 ### Required Access
 - [ ] ACCOUNTADMIN role available to your user
-- [ ] Warehouse access confirmed (`SHOW WAREHOUSES;`)
+- [ ] Permission to create/manage warehouses (script provisions `SFE_SAM_SNOWMAN_WH`)
 - [ ] Ability to accept Snowflake Marketplace legal terms
 
 ### Configuration Review
@@ -27,8 +27,8 @@ Use this checklist before and after running `deploy_all.sql` (or the individual 
 
 1. [ ] Execute `deploy_all.sql` (ACCOUNTADMIN). The script runs modules 01–06 from the stage.
 2. [ ] Watch the results – the final section runs `sql/06_validation.sql` and prints `SHOW` outputs for every object.
-4. [ ] Confirm the test email arrives.
-5. [ ] Open Snowsight → **AI & ML → Agents** and confirm `Sam-the-Snowman` appears.
+3. [ ] Confirm the test email arrives.
+4. [ ] Open Snowsight → **AI & ML → Agents** and confirm `Sam-the-Snowman` appears.
 
 Need to re-run a single component? Execute the corresponding module directly:
 ```sql
@@ -45,6 +45,9 @@ Run these commands (or consult the output from `sql/06_validation.sql`) to confi
 -- Integration & email procedure
 SHOW NOTIFICATION INTEGRATIONS LIKE 'SFE_EMAIL_INTEGRATION';
 SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;
+
+-- Dedicated warehouse
+SHOW WAREHOUSES LIKE 'SFE_SAM_SNOWMAN_WH';
 
 -- Semantic views
 SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC;
