@@ -1,71 +1,82 @@
 /*******************************************************************************
  * DEMO PROJECT: Sam-the-Snowman
- * File: deploy_all.sql
- *
+ * Script: deploy_all.sql - Complete Deployment Script
+ * 
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
- *
- * Synopsis:
- *   Deployment orchestrator for Sam-the-Snowman.
- *   Executes modules 01-06 FROM the Git Repository Stage.
- *
- * Prerequisites:
- *   1. ACCOUNTADMIN role access
- *   2. Active warehouse context (e.g., USE WAREHOUSE COMPUTE_WH;)
- *   3. Git Workspace created in Snowsight
- *   4. sql/00_config.sql ALREADY EXECUTED (creates the Git Repository Stage)
- *
- * How to Deploy:
+ * 
+ * PURPOSE:
+ *   Single-script deployment of Sam-the-Snowman Cortex AI Agent.
+ *   Leverages Snowflake native Git integration for automated deployment.
+ * 
+ * USAGE IN SNOWSIGHT:
+ *   1. Copy this ENTIRE script (Cmd/Ctrl+A, Cmd/Ctrl+C)
+ *   2. Open Snowsight → New Worksheet
+ *   3. Paste the script (Cmd/Ctrl+V)
+ *   4. Set warehouse context: USE WAREHOUSE <your_warehouse>;
+ *   5. Click "Run All" (▶▶) or press Cmd/Ctrl+Shift+Enter
+ *   6. Wait ~3-5 minutes for complete deployment
+ *   7. Navigate to AI & ML > Agents > Sam-the-Snowman to start using
+ * 
+ * GITHUB REPOSITORY:
+ *   https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git
+ * 
+ * WHAT GETS CREATED:
+ *   Account-Level Objects (requires ACCOUNTADMIN):
+ *   - SFE_GITHUB_API_INTEGRATION (API Integration for GitHub access)
  *   
- *   Step 1: Create a Git Workspace in Snowsight
- *      • Navigate to: Projects > Workspaces
- *      • Click: "From Git repository"
- *      • Repository URL: https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git
- *      • API Integration: 
- *        - If first time: Create new with these values:
- *          Name: GITHUB_API_INTEGRATION
- *          API Provider: git_https_api
- *          Allowed Prefixes: https://github.com/ (ALL repos, not just this one!)
- *          Allowed authentication secrets: All
- *          Enabled: ✓
- *        - If exists: Select from dropdown
- *      • Authentication: Public repository (no credentials needed)
- *      • Click: Create
- *
- *   Step 2: Mount the Git Repository Stage (REQUIRED FIRST!)
- *      • In workspace file browser, open: sql/00_config.sql
- *      • Set context: USE ROLE ACCOUNTADMIN; USE WAREHOUSE COMPUTE_WH;
- *      • Click "Run All" (no edits required)
- *      • Expected output: LIST results showing sql/ modules + summary row
- *
- *   Step 3: Run This Deployment Script
- *      • In workspace file browser, open: deploy_all.sql (this file)
- *      • Verify context: USE WAREHOUSE COMPUTE_WH; USE ROLE ACCOUNTADMIN;
- *      • Click "Run All" or press Cmd/Shift+Enter
- *      • Wait ~2 minutes for completion
- *
- *   Step 4: Access Your Agent
- *      • Navigate to: AI & ML > Agents
- *      • Select: Sam-the-Snowman
- *      • Ask: "What were my top 10 slowest queries today?"
- *
- * What This Script Does:
- *   ✓ Executes modules 01-06 FROM the Git Repository Stage
- *   ✓ Creates databases: SNOWFLAKE_EXAMPLE, SNOWFLAKE_INTELLIGENCE
- *   ✓ Configures email notifications (sends test email)
- *   ✓ Deploys semantic views for query analysis
- *   ✓ Installs Snowflake Documentation (Marketplace)
- *   ✓ Creates the AI agent with all tools
- *   ✓ Validates deployment success
- *
- * Technical Notes:
- *   • sql/00_config.sql must be executed first to create the stage at
- *     @SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO.
- *   • Customize the session variables below if you deploy with a role other than SYSADMIN.
- *   • All modules are executed FROM the stage using EXECUTE IMMEDIATE FROM.
- *
+ *   Database Objects:
+ *   - SNOWFLAKE_EXAMPLE database (shared demo database)
+ *   - SNOWFLAKE_EXAMPLE.DEPLOY schema (deployment infrastructure)
+ *   - SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO (Git repository stage)
+ *   - SNOWFLAKE_INTELLIGENCE database (agent data layer)
+ *   - SNOWFLAKE_INTELLIGENCE.QUERY_INTELLIGENCE schema (semantic views)
+ *   - Email notification integration (if email configured)
+ *   - Snowflake Documentation (from Marketplace)
+ *   - Sam-the-Snowman Cortex AI Agent with tools:
+ *     • Query performance analysis
+ *     • Cost tracking and optimization
+ *     • Warehouse utilization monitoring
+ *     • Email notifications
+ *     • Snowflake documentation search
+ * 
+ * DEPLOYMENT TIME:
+ *   ~3-5 minutes depending on account region and Marketplace installation
+ * 
+ * PREREQUISITES:
+ *   - ACCOUNTADMIN role access
+ *   - Active warehouse (any size, XSMALL sufficient)
+ *   - Network access to GitHub
+ *   - Email integration configured (optional, for notifications)
+ * 
+ * SAFE TO RE-RUN:
+ *   Yes. All statements use OR REPLACE or IF NOT EXISTS patterns.
+ *   Re-running updates the agent and semantic views to latest version.
+ * 
+ * TROUBLESHOOTING:
+ *   Error: "Warehouse must be specified"
+ *   → Add before script: USE WAREHOUSE COMPUTE_WH; (or your warehouse name)
+ *   
+ *   Error: "Insufficient privileges to operate on database SNOWFLAKE_EXAMPLE"
+ *   → Ensure you're using: USE ROLE ACCOUNTADMIN;
+ *   
+ *   Error: "Failed to connect to GitHub"
+ *   → Check network policies allow https://github.com/
+ *   → Verify API integration: SHOW INTEGRATIONS LIKE 'SFE_GITHUB_API_INTEGRATION';
+ *   
+ *   Error: "Object does not exist, or operation cannot be performed"
+ *   → Repository fetch failed. Check: SHOW GIT REPOSITORIES IN DATABASE SNOWFLAKE_EXAMPLE;
+ *   → Re-run fetch: ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO FETCH;
+ *   
+ *   Agent not visible after deployment:
+ *   → Run validation: EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
+ *   → Check: SHOW CORTEX AGENTS IN DATABASE SNOWFLAKE_INTELLIGENCE;
+ * 
+ * CLEANUP:
+ *   To remove all objects: See sql/99_cleanup/teardown_all.sql
+ * 
  * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
- * Modified: 2025-11-10
- * Version: 3.2
+ * Modified: 2025-11-18
+ * Version: 4.0
  * License: Apache 2.0
  ******************************************************************************/
 
@@ -73,60 +84,98 @@
 -- DEPLOYMENT ORCHESTRATION
 -- ============================================================================
 
--- Ensure ACCOUNTADMIN role is active for deployment
-USE ROLE ACCOUNTADMIN;
-
 -- ============================================================================
 -- SESSION VARIABLES (Customize if your org uses a different deployment role)
 -- ============================================================================
 
-SET role_name = 'SYSADMIN';
-SET git_api_integration_name = 'SFE_GITHUB_API_INTEGRATION';
-SET git_repo_name = 'SFE_SAM_THE_SNOWMAN_REPO';
+SET deployment_role = 'SYSADMIN';
 
 -- ============================================================================
--- ACCOUNT-LEVEL PREREQUISITES
+-- PHASE 1: INFRASTRUCTURE SETUP (Database, Schema, API Integration, Git Repo)
 -- ============================================================================
 
+-- Start with deployment role for database and schema creation
+USE ROLE IDENTIFIER($deployment_role);
+
+-- Create shared demo database and deployment schema (reusable across demo assets)
+CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
+    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database';
+
+CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.DEPLOY
+    COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure schema';
+
+-- Elevate privilege for account-level API integration work
+USE ROLE ACCOUNTADMIN;
+
+-- Create account-wide Git API integration (safe to rerun; reused by all demo projects)
+CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
+    API_PROVIDER = git_https_api
+    ENABLED = TRUE
+    API_ALLOWED_PREFIXES = ('https://github.com/')
+    COMMENT = 'DEMO: GitHub integration for Git-based deployments';
+
+-- Grant usage to deployment role
+GRANT USAGE ON INTEGRATION SFE_GITHUB_API_INTEGRATION TO ROLE IDENTIFIER($deployment_role);
+
+-- Enable Cortex AI features (required for agent creation)
 ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 
-GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE IDENTIFIER($role_name);
+GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE IDENTIFIER($deployment_role);
+
+-- Return to deployment role for Git repository creation
+USE ROLE IDENTIFIER($deployment_role);
+
+-- Create Git repository stage (central source for all deployment modules)
+CREATE OR REPLACE GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO
+    API_INTEGRATION = SFE_GITHUB_API_INTEGRATION
+    ORIGIN = 'https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git'
+    COMMENT = 'DEMO: Sam-the-Snowman - Git repository for modular SQL execution';
+
+-- Fetch the latest commit from the main branch
+ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO FETCH;
+
+-- Verification checkpoint: Confirm infrastructure is ready
+SELECT 'Phase 1 Complete: Infrastructure setup successful. Git repository stage is ready.' AS status;
 
 -- ============================================================================
--- PREREQUISITE CHECK
+-- PHASE 2: MODULE EXECUTION FROM GIT REPOSITORY STAGE
 -- ============================================================================
--- Verify that the Git Repository Stage exists (created by sql/00_config.sql)
--- If this fails, you need to run sql/00_config.sql first!
 
-DESC GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO;
-
--- ============================================================================
--- MODULE EXECUTION FROM GIT REPOSITORY STAGE
--- ============================================================================
+-- Ensure ACCOUNTADMIN role is active for all module deployments
+-- (Some modules require elevated privileges for integrations and marketplace)
+USE ROLE ACCOUNTADMIN;
 
 -- Module 1: Scaffolding
--- Creates databases, schemas, and grants necessary privileges
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/01_scaffolding.sql';
+-- Creates SNOWFLAKE_INTELLIGENCE database, schemas, and grants privileges
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/01_scaffolding.sql';
 
 -- Module 2: Email Integration
 -- Sets up notification integration and email delivery stored procedure
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/02_email_integration.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/02_email_integration.sql';
 
 -- Module 3: Semantic Views
 -- Deploys analytical views for query performance, cost, and warehouse operations
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
 
 -- Module 4: Marketplace Documentation
--- Installs Snowflake Documentation for Cortex Search
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/04_marketplace.sql';
+-- Installs Snowflake Documentation database for Cortex Search integration
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/04_marketplace.sql';
 
 -- Module 5: Agent Creation
--- Creates the Sam-the-Snowman AI agent with all tools configured
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/05_agent.sql';
+-- Creates the Sam-the-Snowman Cortex AI agent with all tools configured
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/05_agent.sql';
 
 -- Module 6: Validation
--- Verifies all components deployed successfully
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
+-- Verifies all components deployed successfully and agent is operational
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
+
+-- ============================================================================
+-- DEPLOYMENT COMPLETE
+-- ============================================================================
+
+SELECT '🎉 Deployment Complete! Sam-the-Snowman is ready.' AS status,
+       'Navigate to: AI & ML > Agents > Sam-the-Snowman to start using your agent.' AS next_steps,
+       'Example question: "What were my top 10 slowest queries today?"' AS example_query;
  
  
  
