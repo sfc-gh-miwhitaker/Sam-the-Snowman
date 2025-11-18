@@ -1,25 +1,14 @@
 # Auth Flow - Sam-the-Snowman
-
-**Author:** Michael Whitaker  
-**Last Updated:** 2025-11-12  
-**Status:** ⚠️ **DEMO/NON-PRODUCTION**
-
----
-
-![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
-
-⚠️ **WARNING: This is a demonstration project. NOT FOR PRODUCTION USE.**
-
----
+Author: Michael Whitaker  
+Last Updated: 2025-11-18  
+Status: Reference Impl  
+![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)  
+Reference Impl: This code demonstrates prod-grade architectural patterns and best practice. review and customize security, networking, logic for your organization's specific requirements before deployment.
 
 ## Overview
-
-This sequence outlines how administrators deploy Sam-the-Snowman and how analysts authenticate to use the agent. Roles are limited to ACCOUNTADMIN for provisioning and SYSADMIN (or a delegated role) for daily operations. Email integration leverages Snowflake-managed credentials; no secrets are stored in code.
-
----
+This sequence diagram shows how ACCOUNTADMIN provisions the demo, how SYSADMIN owns runtime assets, and how analysts authenticate to use the agent. RBAC gates every stage, no secrets are stored in code, and email delivery relies on Snowflake-managed credentials.
 
 ## Diagram
-
 ```mermaid
 sequenceDiagram
     actor Admin as Deployment Admin (ACCOUNTADMIN)
@@ -31,56 +20,45 @@ sequenceDiagram
     actor Analyst as Analyst (SYSADMIN)
 
     Admin->>Snowsight: Authenticate via SSO + MFA
-    Snowsight->>Snowflake: Execute sql/00_config.sql (ACCOUNTADMIN)
-    Snowflake->>Snowflake: Create SFE_GITHUB_API_INTEGRATION (if needed)
+    Snowsight->>Snowflake: Open deploy_all.sql (ACCOUNTADMIN)
+    Snowflake->>Snowflake: Create SFE_GITHUB_API_INTEGRATION + stage (Phase 1)
     Snowsight->>Snowflake: Run deploy_all.sql (ACCOUNTADMIN)
     Snowflake->>SYSADMIN: Grant ownership/usage on schemas and agent
-    Admin->>Snowsight: Switch session to SYSADMIN for verification
+    Admin->>Snowsight: Switch session to SYSADMIN for validation
 
-    Analyst->>Snowsight: Authenticate via SSO (SYSADMIN)
+    Analyst->>Snowsight: Authenticate via SSO (SYSADMIN or delegated role)
     Snowsight->>Agent: Invoke Sam-the-Snowman conversation
     Agent->>Snowflake: Query semantic views using active warehouse
     Agent->>Email: Call sfe_send_email() (optional report delivery)
     Email-->>Analyst: Deliver HTML email via SYSTEM$SEND_EMAIL
 ```
 
----
-
 ## Component Descriptions
-
-### Deployment Admin (ACCOUNTADMIN)
-- **Purpose:** Provision integrations, databases, and agent artifacts.
-- **Technology:** Snowsight worksheet with ACCOUNTADMIN role.
-- **Location:** Customer identity provider integrated with Snowflake SSO.
-- **Dependencies:** Must have MFA enabled and access to a compute warehouse.
-
-### SYSADMIN Role
-- **Purpose:** Owns demo schemas and executes agent conversations after deployment.
-- **Technology:** Snowflake RBAC role granted by deployment scripts.
-- **Location:** Snowflake account.
-- **Dependencies:** Receives `USAGE` on the agent and databases; inherits `SNOWFLAKE.CORTEX_USER` database role.
-
-### Sam-the-Snowman Agent
-- **Purpose:** Respond to analyst questions by orchestrating semantic views, documentation search, and email delivery.
-- **Technology:** Snowflake Intelligence Agent stored in `SNOWFLAKE_INTELLIGENCE.AGENTS`.
-- **Location:** Snowflake account.
-- **Dependencies:** Requires analysts to activate a warehouse before querying.
-
-### SFE_EMAIL_INTEGRATION
-- **Purpose:** Send optional recap emails without exposing credentials.
-- **Technology:** Snowflake notification integration created with ACCOUNTADMIN.
-- **Location:** Snowflake control plane.
-- **Dependencies:** Called via `SYSTEM$SEND_EMAIL`; usage granted to SYSADMIN.
-
-### Analysts (SYSADMIN)
-- **Purpose:** Day-to-day users who ask questions and receive guidance.
-- **Technology:** Snowsight agent interface.
-- **Location:** Customer workforce authenticated via SSO.
-- **Dependencies:** Must activate a warehouse and remain within granted RBAC scope.
-
----
+- **Deployment Admin (ACCOUNTADMIN)**
+  - Purpose: Provision integrations, databases, and agent resources.
+  - Technology: Snowsight worksheet running `deploy_all.sql`.
+  - Location: Customer identity provider federated with Snowflake SSO.
+  - Deps: Requires MFA, ACCOUNTADMIN role, and an active warehouse.
+- **SYSADMIN Role**
+  - Purpose: Owns demo schemas, semantic views, and the agent during steady state.
+  - Technology: Snowflake RBAC role targeted inside each module.
+  - Location: Snowflake account.
+  - Deps: Receives `SNOWFLAKE.CORTEX_USER` database role plus `USAGE` on agent and schemas.
+- **Sam-the-Snowman Agent**
+  - Purpose: Orchestrate semantic analytics, documentation lookup, and email delivery.
+  - Technology: Snowflake Intelligence Agent stored in `SNOWFLAKE_INTELLIGENCE.AGENTS`.
+  - Location: Snowflake account.
+  - Deps: Requires active warehouse from caller and permissions on semantic views/procedure.
+- **SFE_EMAIL_INTEGRATION**
+  - Purpose: Send optional emails without exposing SMTP credentials.
+  - Technology: Snowflake notification integration invoked via `SYSTEM$SEND_EMAIL`.
+  - Location: Snowflake control plane; usage granted to SYSADMIN.
+  - Deps: Created with ACCOUNTADMIN privileges in `sql/02_email_integration.sql`.
+- **Analysts (SYSADMIN or Delegated Role)**
+  - Purpose: Day-to-day users who ask questions and receive recommendations.
+  - Technology: Snowsight agent interface.
+  - Location: Customer workforce authenticated through SSO.
+  - Deps: Must activate a warehouse and assume a role with agent `USAGE`.
 
 ## Change History
-
-See `.cursor/docs/DIAGRAM_CHANGELOG.md` for version history.
-
+See `.cursor/docs/DIAGRAM_CHANGELOG.md` for vhistory.

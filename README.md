@@ -4,13 +4,15 @@
 
 Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usage data and returns actionable guidance on query performance, cost control, and warehouse operations. Deploy the agent in a few minutes, ask natural-language questions, and receive answers backed by live telemetry from your environment.
 
-👋 **First time here? Follow these files in order:**
-1. `docs/01-QUICKSTART.md` - Prepare Snowsight workspace and prerequisites (5 min)
-2. `sql/00_config.sql` - Mount the Git repository stage (2 min)
-3. `deploy_all.sql` - Execute modules 01–06 from the stage (3 min)
-4. `docs/07-TROUBLESHOOTING.md` - Run targeted fixes if a step fails (optional)
+👋 **First time here? Follow these steps:**
+1. `QUICKSTART.md` - Copy/paste deployment guide (< 5 min)
+2. Open [`deploy_all.sql`](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/blob/main/deploy_all.sql) on GitHub
+3. Copy entire script → Paste into Snowsight worksheet → Set warehouse → Click "Run All"
+4. Navigate to **AI & ML → Agents** → Select **Sam-the-Snowman**
 
-**Total setup time: ~10 minutes**
+**Total setup time: ~5 minutes**
+
+**Expected cost to deploy:** ~0.10 credits of X-Small warehouse time (≈$0.20 on Snowflake Standard) plus <1 GB storage (<$0.05/mo).
 
 **Version**: 4.0 · **License**: Apache 2.0
 
@@ -28,13 +30,28 @@ Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usa
 
 ## Quick Start (Summary)
 
-1. **Create a Snowsight Git Workspace** pointing at `https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git`.
-2. **Run `sql/00_config.sql`** (ACCOUNTADMIN + warehouse) to mount the Git repository stage.
-3. **Run `deploy_all.sql`** (same worksheet) to execute modules 01–06 from the stage.
-4. **Review `deploy_all.sql` results** – the final section runs `sql/06_validation.sql`, which lists every deployed object.
-5. **Open Snowsight → AI & ML → Agents** and start chatting with `Sam-the-Snowman`.
+**Single-script deployment** – No Git workspace or file system navigation required:
 
-Need screenshots or deeper context? See `QUICKSTART.md` for the full walkthrough.
+1. **Copy** the [`deploy_all.sql`](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/blob/main/deploy_all.sql) script from GitHub
+2. **Open Snowsight** → Create new SQL worksheet
+3. **Paste** the entire script
+4. **Set context**: `USE WAREHOUSE <your_warehouse>;`
+5. **Click "Run All"** (▶▶) or press Cmd/Ctrl+Shift+Enter
+6. **Wait ~3-5 minutes** for automated deployment
+7. **Navigate to AI & ML → Agents** → Select `Sam-the-Snowman`
+
+The script automatically:
+- ✓ Creates infrastructure (database, schema, API integration, Git repo stage)
+- ✓ Deploys all modules from the Git repository
+- ✓ Validates the deployment
+
+See `QUICKSTART.md` for detailed instructions and troubleshooting.
+
+### Deployment Standard
+
+- `deploy_all.sql` (repo root) is the canonical deployment artifact for all environments.
+- Recommended flow: Copy/paste into Snowsight. CLI alternative: `snow sql -f deploy_all.sql` or `snowsql -f deploy_all.sql`.
+- No wrapper scripts are required; keeping the solution all-SQL preserves portability and clarity.
 
 ---
 
@@ -57,19 +74,20 @@ Schemas follow the demo pattern: `DEPLOY` (infrastructure), `INTEGRATIONS` (exte
 ```
 Sam-the-Snowman/
 ├── README.md              ← Project overview
-├── QUICKSTART.md          ← 5‑minute deployment recipe
-├── deploy_all.sql         ← Runs modules 01–06 from the Git stage
+├── QUICKSTART.md          ← 5-minute deployment guide
+├── deploy_all.sql         ← Complete deployment script (copy/paste into Snowsight)
 ├── sql/
-│   ├── 00_config.sql      ← Mount Git repository stage
-│   ├── 01_scaffolding.sql ← Databases, schemas, grants (uses SYSADMIN)
+│   ├── 01_scaffolding.sql ← Databases, schemas, grants
 │   ├── 02_email_integration.sql
 │   ├── 03_semantic_views.sql
 │   ├── 04_marketplace.sql
 │   ├── 05_agent.sql
-│   ├── 06_validation.sql  ← `SHOW` checks for every component
+│   ├── 06_validation.sql  ← Deployment verification
 │   └── 99_cleanup/teardown_all.sql
-└── docs/                  ← Detailed guides (01‑07)
+└── docs/                  ← Detailed guides (01-08)
 ```
+
+**Key file**: `deploy_all.sql` contains complete deployment logic including infrastructure setup plus execution of modules 01-06 from the Git repository stage.
 
 ---
 

@@ -8,7 +8,7 @@ Sam-the-Snowman deploys a single Snowflake Assistant that combines domain-specif
 - **tool orchestration**: Deterministic routing that maps user intent to the right view
 - **supporting tools**: Snowflake documentation search and email delivery
 
-Everything described here is provisioned by the modular deployment workflow (`deploy_all.sql`, which calls `sql/00_config.sql` through `sql/06_validation.sql`).
+Everything described here is provisioned by the modular deployment workflow (`deploy_all.sql`, which calls `sql/01_scaffolding.sql` through `sql/06_validation.sql`).
 
 ---
 

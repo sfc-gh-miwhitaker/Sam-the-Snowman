@@ -1,25 +1,14 @@
 # Data Flow - Sam-the-Snowman
-
-**Author:** Michael Whitaker  
-**Last Updated:** 2025-11-12  
-**Status:** ⚠️ **DEMO/NON-PRODUCTION**
-
----
-
-![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
-
-⚠️ **WARNING: This is a demonstration project. NOT FOR PRODUCTION USE.**
-
----
+Author: Michael Whitaker  
+Last Updated: 2025-11-18  
+Status: Reference Impl  
+![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)  
+Reference Impl: This code demonstrates prod-grade architectural patterns and best practice. review and customize security, networking, logic for your organization's specific requirements before deployment.
 
 ## Overview
-
-This diagram shows how Sam-the-Snowman reads Snowflake telemetry, enriches it with semantic views, and routes insights through the AI agent and optional email delivery. All data remains inside Snowflake; only email notifications leave the platform.
-
----
+This diagram traces telemetry from `SNOWFLAKE.ACCOUNT_USAGE`, through curated semantic views, into the Snowflake Intelligence agent and optional email delivery. All processing occurs inside Snowflake; only HTML notifications exit the platform via the managed email service.
 
 ## Diagram
-
 ```mermaid
 graph TB
     subgraph "Source Systems"
@@ -65,49 +54,37 @@ graph TB
     Agent --> EmailProc --> Notify --> Inbox
 ```
 
----
-
 ## Component Descriptions
-
-### ACCOUNT_USAGE Sources
-- **Purpose:** Provide authoritative telemetry about query execution, warehouse costs, and workload concurrency.
-- **Technology:** Snowflake ACCOUNT_USAGE shared views.
-- **Location:** Managed by Snowflake, queried via `SNOWFLAKE.ACCOUNT_USAGE`.
-- **Dependencies:** Requires ACCOUNTADMIN-granted access to shared views.
-
-### Semantic Views
-- **Purpose:** Curate domain-specific datasets for the agent (performance, cost, warehouse operations) with business-friendly metadata.
-- **Technology:** Snowflake Semantic Views created in `sql/03_semantic_views.sql`.
-- **Location:** `SNOWFLAKE_EXAMPLE.SEMANTIC`.
-- **Dependencies:** Reads ACCOUNT_USAGE tables; referenced by Cortex Analyst tools.
-
-### Snowflake Documentation Service
-- **Purpose:** Supplies best-practice context through Cortex Search.
-- **Technology:** Snowflake Marketplace dataset `CKE_SNOWFLAKE_DOCS_SERVICE`.
-- **Location:** `SNOWFLAKE_DOCUMENTATION.SHARED`.
-- **Dependencies:** Installed via `sql/04_marketplace.sql`; exposed to the agent as a Cortex Search tool.
-
-### Sam-the-Snowman Agent
-- **Purpose:** Orchestrate semantic views, documentation lookup, and email delivery in response to natural-language questions.
-- **Technology:** Snowflake Intelligence Agent defined in `sql/05_agent.sql`.
-- **Location:** `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman`.
-- **Dependencies:** Requires semantic views, documentation service, and email procedure.
-
-### Email Delivery Path
-- **Purpose:** Send optional HTML summaries to stakeholders.
-- **Technology:** Python stored procedure `sfe_send_email` calling `SYSTEM$SEND_EMAIL`.
-- **Location:** `SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email`.
-- **Dependencies:** Uses notification integration `SFE_EMAIL_INTEGRATION`; invoked by agent's `cortex_email_tool`.
-
-### Snowsight Users
-- **Purpose:** Analysts and operators who deploy and interact with the agent.
-- **Technology:** Snowsight UI and SQL worksheets.
-- **Location:** Snowflake web interface.
-- **Dependencies:** Must assume a warehouse-capable role (default `SYSADMIN`) to query semantic views through the agent.
-
----
+- **ACCOUNT_USAGE Sources**
+  - Purpose: Provide authoritative telemetry for queries, spend, and warehouse load.
+  - Technology: Snowflake system views within `SNOWFLAKE.ACCOUNT_USAGE`.
+  - Location: Snowflake-managed shared database.
+  - Deps: Requires ACCOUNTADMIN access plus an active warehouse.
+- **Semantic Views**
+  - Purpose: Present curated, LLM-friendly datasets for the agent tools.
+  - Technology: Semantic Views defined in `sql/03_semantic_views.sql`.
+  - Location: `SNOWFLAKE_EXAMPLE.SEMANTIC`.
+  - Deps: Reads ACCOUNT_USAGE views; referenced by Cortex Analyst tools in `sql/05_agent.sql`.
+- **Snowflake Documentation Service**
+  - Purpose: Supply Cortex Search with authoritative best practices.
+  - Technology: Marketplace share `SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE`.
+  - Location: Installed via `sql/04_marketplace.sql`.
+  - Deps: Requires Marketplace subscription and imported privileges.
+- **Sam-the-Snowman Agent**
+  - Purpose: Orchestrate semantic analytics, documentation lookup, and email delivery.
+  - Technology: Snowflake Intelligence Agent.
+  - Location: `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman`.
+  - Deps: Needs semantic views, Cortex Search dataset, and email procedure to exist.
+- **Email Delivery Path**
+  - Purpose: Send optional HTML recaps to stakeholders.
+  - Technology: Python procedure `sfe_send_email` calling `SYSTEM$SEND_EMAIL`.
+  - Location: `SNOWFLAKE_EXAMPLE.INTEGRATIONS`.
+  - Deps: Uses `SFE_EMAIL_INTEGRATION` and the agent `cortex_email_tool`.
+- **Snowsight Consumers**
+  - Purpose: Provide conversational and worksheet access for admins/analysts.
+  - Technology: Snowsight UI.
+  - Location: Snowflake web interface.
+  - Deps: Users must activate a warehouse and hold SYSADMIN (or delegated) role.
 
 ## Change History
-
-See `.cursor/docs/DIAGRAM_CHANGELOG.md` for version history.
-
+See `.cursor/docs/DIAGRAM_CHANGELOG.md` for vhistory.

@@ -18,7 +18,7 @@
  *   - SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email (Stored Procedure)
  * 
  * Prerequisites:
- *   - 00_config.sql and 01_scaffolding.sql must be run first
+ *   - deploy_all.sql handles infrastructure automatically; if running manually ensure 01_scaffolding.sql succeeded
  *   - Email domain allow-listed for notification integrations
  *   - ACCOUNTADMIN role privileges
  * 

@@ -44,7 +44,7 @@ To use a custom role (for example `SAM_AGENT_ADMIN`) you must edit the SQL modul
    - `sql/03_semantic_views.sql`
    - `sql/04_marketplace.sql`
    - `sql/05_agent.sql`
-3. **Deploy** using the standard workflow (`sql/00_config.sql` → `deploy_all.sql`).
+3. **Deploy** using the standard workflow (`deploy_all.sql` orchestrator).
 
 The custom role receives ownership of all objects, and cleanup continues to work as long as the role names remain consistent.
 

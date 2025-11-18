@@ -21,7 +21,7 @@ Deploy the Sam-the-Snowman Cortex AI Agent with a single copy/paste operation in
 
 Open the deployment script on GitHub:
 
-**→ [deploy_all.sql](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/blob/main/deploy_all.sql)**
+**→ [`deploy_all.sql`](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/blob/main/deploy_all.sql)**
 
 Select all content (Cmd/Ctrl+A) and copy (Cmd/Ctrl+C).
 

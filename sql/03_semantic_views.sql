@@ -21,7 +21,7 @@
  *   - SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations (Semantic View)
  * 
  * Prerequisites:
- *   - 00_config.sql and 01_scaffolding.sql must be run first
+ *   - 01_scaffolding.sql must be run first (deploy_all.sql handles this automatically)
  *   - Configured role must have access to SNOWFLAKE.ACCOUNT_USAGE views
  * 
  * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)

@@ -20,15 +20,13 @@ Use this checklist before and after running `deploy_all.sql` (or the individual 
 
 ### Stage Preparation
 - [ ] Snowsight Git workspace created from `https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git`
-- [ ] `sql/00_config.sql` executed successfully (Git repository stage created and fetched)
 
 ---
 
 ## Deployment Steps
 
-1. [ ] Run `sql/00_config.sql` (ACCOUNTADMIN) to mount the Git repository stage.
-2. [ ] Execute `deploy_all.sql` (ACCOUNTADMIN). The script runs modules 01–06 from the stage.
-3. [ ] Watch the results – the final section runs `sql/06_validation.sql` and prints `SHOW` outputs for every object.
+1. [ ] Execute `deploy_all.sql` (ACCOUNTADMIN). The script runs modules 01–06 from the stage.
+2. [ ] Watch the results – the final section runs `sql/06_validation.sql` and prints `SHOW` outputs for every object.
 4. [ ] Confirm the test email arrives.
 5. [ ] Open Snowsight → **AI & ML → Agents** and confirm `Sam-the-Snowman` appears.
 

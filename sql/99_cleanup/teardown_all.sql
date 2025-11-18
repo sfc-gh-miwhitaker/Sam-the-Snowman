@@ -8,7 +8,7 @@
  *   Complete teardown script for removing all Sam-the-Snowman components.
  * 
  * Description:
- *   This script removes all resources created by `deploy_all.sql` (and the modules in `sql/00_config.sql` … `sql/06_validation.sql`) following
+ *   This script removes all resources created by `deploy_all.sql` (modules `sql/01_scaffolding.sql` … `sql/06_validation.sql`) following
  *   demo project standards. The SNOWFLAKE_EXAMPLE database is preserved per
  *   demo standards (shared across demos for audit/reuse). Only schema-level
  *   objects specific to Sam-the-Snowman are removed.

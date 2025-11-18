@@ -23,7 +23,7 @@
  *   - SNOWFLAKE_INTELLIGENCE.AGENTS schema
  * 
  * Prerequisites:
- *   - Run 00_config.sql first to ensure the Git repository stage exists
+ *   - Run deploy_all.sql (preferred) or ensure the Git repository stage already exists
  *   - ACCOUNTADMIN role privileges
  * 
  * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)

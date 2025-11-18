@@ -38,31 +38,16 @@ USE WAREHOUSE <your_warehouse>;
 
 ---
 
-## 2. Mount the Git Repository Stage (`sql/00_config.sql`)
+## 2. Run the Deployment Orchestrator (`deploy_all.sql`)
 
-1. Open `sql/00_config.sql`.
-2. Confirm the worksheet still uses `ACCOUNTADMIN` and your warehouse.
-3. Click **Run All**.
-
-Key outcomes:
-- `SNOWFLAKE_EXAMPLE` and `SNOWFLAKE_EXAMPLE.DEPLOY` are created or confirmed.
-- `SFE_GITHUB_API_INTEGRATION` is created or reused (idempotent).
-- Git repository stage `SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO` is created and fetched.
-- A `LIST @stage/branches/main/sql` output enumerates the deployment modules.
-
-If any step fails, fix the issue and rerun the script—it is safe to repeat.
-
----
-
-## 3. Run the Deployment Orchestrator (`deploy_all.sql`)
-
-1. Open `deploy_all.sql` from the workspace.
+1. Open `deploy_all.sql` from the workspace (or copy it directly from GitHub).
 2. The script assumes the SQL modules use `SYSADMIN` (the shipping default). If you edited the modules to use a different role, adjust them before continuing.
 3. Ensure your worksheet context still has `ACCOUNTADMIN` + warehouse.
 4. Click **Run All**.
 
 What happens behind the scenes:
 - Account prerequisites are set (Cortex cross-region toggle, CORTEX_USER grant).
+- The Git repository stage is created/fetched automatically.
 - Modules 01–06 execute FROM the Git stage in order.
 - Module 06 (`sql/06_validation.sql`) emits `SHOW` statements so you can confirm each asset.
 
@@ -70,7 +55,7 @@ Total runtime is typically two to three minutes.
 
 ---
 
-## 4. Validate the Deployment
+## 3. Validate the Deployment
 
 Work through the result sets returned by module 06:
 
@@ -93,7 +78,7 @@ If a section shows “No data”, rerun the related module (see Section 6) and i
 
 ---
 
-## 5. Functional Checks
+## 4. Functional Checks
 
 1. **Email test** – after `sql/02_email_integration.sql` runs, check your inbox for *“Sam-the-Snowman - Test Email”*. If missing, confirm your profile email and rerun module 02.
 2. **Agent visibility** – in Snowsight open **AI & ML → Agents** and ensure `Sam-the-Snowman` appears. Switch to the owning role (`USE ROLE SYSADMIN;`) if needed.
@@ -104,7 +89,7 @@ If a section shows “No data”, rerun the related module (see Section 6) and i
 
 ---
 
-## 6. Rerunning Specific Modules
+## 5. Rerunning Specific Modules
 
 Need to redeploy a component without running the full orchestrator? Execute modules directly from the Git stage:
 
@@ -119,7 +104,7 @@ Modules are idempotent—rerunning them is safe. After rerunning a module, execu
 
 ---
 
-## 7. Cleanup (Optional)
+## 6. Cleanup (Optional)
 
 Remove all demo objects while preserving shared databases:
 
@@ -132,7 +117,7 @@ This drops the agent, semantic views, email procedure, and Git stage. `SNOWFLAKE
 
 ---
 
-## 8. Next Steps
+## 7. Next Steps
 
 - **Deployment checklist** – `docs/02-DEPLOYMENT.md`
 - **Architecture deep dive** – `docs/03-ARCHITECTURE.md`

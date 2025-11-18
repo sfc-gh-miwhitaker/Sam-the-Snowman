@@ -16,7 +16,7 @@
  *   - snowflake_documentation (Database - Marketplace listing)
  * 
  * Prerequisites:
- *   - 00_config.sql and 01_scaffolding.sql must be run first
+ *   - 01_scaffolding.sql must be run first (deploy_all.sql handles this automatically)
  *   - ACCOUNTADMIN role privileges
  *   - Network access to Snowflake Marketplace
  *   - Ability to accept legal terms for marketplace listings
