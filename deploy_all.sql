@@ -84,8 +84,11 @@
 -- ============================================================================
 
 -- ============================================================================
--- SESSION VARIABLES (Customize if your org uses a different deployment role)
+-- SESSION VARIABLES
 -- ============================================================================
+-- Change 'SYSADMIN' below to your custom role if you want a different owner.
+-- This role will own all schemas, views, and the agent. Users must be granted
+-- this role to access Sam-the-Snowman after deployment.
 
 SET deployment_role = 'SYSADMIN';
 
