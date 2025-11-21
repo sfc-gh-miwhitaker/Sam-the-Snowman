@@ -1,6 +1,6 @@
 # Sam-the-Snowman Quickstart
 
-**Time**: ~5 minutes · **Role required**: ACCOUNTADMIN · **Warehouse**: any size
+**Time**: ~5 minutes · **Role required**: ACCOUNTADMIN · **Warehouse**: Auto-provisioned
 
 Deploy the Sam-the-Snowman Cortex AI Agent with a single copy/paste operation in Snowsight.
 
@@ -9,13 +9,14 @@ Deploy the Sam-the-Snowman Cortex AI Agent with a single copy/paste operation in
 ## Prerequisites
 
 - ACCOUNTADMIN role granted to your user
-- At least one active warehouse (any size, XSMALL sufficient)
 - Your Snowflake user profile has an email address configured (for notifications)
 - Network access to GitHub and Snowflake Marketplace
 
+> No warehouse setup required—`deploy_all.sql` provisions `SFE_SAM_SNOWMAN_WH` automatically.
+
 ---
 
-## Deployment (3 Steps)
+## Deployment (2 Steps)
 
 ### Step 1: Copy the Deployment Script
 
@@ -25,28 +26,24 @@ Open the deployment script on GitHub:
 
 Select all content (Cmd/Ctrl+A) and copy (Cmd/Ctrl+C).
 
-### Step 2: Create New Worksheet in Snowsight
+### Step 2: Run in Snowsight
 
 1. Open Snowsight and create a new SQL worksheet
 2. Paste the entire deployment script (Cmd/Ctrl+V)
-3. Deploy with the default demo warehouse (auto-created by the script).
-
-> `deploy_all.sql` provisions and resumes `SFE_SAM_SNOWMAN_WH`, so you don’t have to set `USE WAREHOUSE` manually.
-
-### Step 3: Run the Deployment
-
-Click **"Run All"** (▶▶) or press **Cmd/Ctrl+Shift+Enter**
+3. Click **"Run All"** (▶▶) or press **Cmd/Ctrl+Shift+Enter**
 
 **Expected runtime**: 3-5 minutes
 
 The script will automatically:
-- ✓ Create infrastructure (database, schemas, API integration)
-- ✓ Mount the Git repository as a Snowflake stage
-- ✓ Deploy all modules from the Git stage
+- ✓ Create dedicated demo warehouse (`SFE_SAM_SNOWMAN_WH`, X-Small, auto-suspend 60s)
+- ✓ Create infrastructure (databases, schemas, API integration, Git repo stage)
+- ✓ Deploy all modules from the Git repository stage
 - ✓ Create semantic views for query analysis
 - ✓ Install Snowflake Documentation (Marketplace)
 - ✓ Create the Sam-the-Snowman AI agent
 - ✓ Validate the deployment
+
+> No manual warehouse setup required—the script handles compute provisioning.
 
 ---
 
@@ -119,14 +116,18 @@ USE ROLE ACCOUNTADMIN;
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
-This drops:
-- SNOWFLAKE_INTELLIGENCE database
+**What gets removed:**
 - Sam-the-Snowman agent
-- Email integration
+- Semantic views (sfe_query_performance, sfe_cost_analysis, sfe_warehouse_operations)
+- Email integration (SFE_EMAIL_INTEGRATION)
+- Dedicated demo warehouse (SFE_SAM_SNOWMAN_WH)
+- Schemas: SNOWFLAKE_EXAMPLE.DEPLOY, SNOWFLAKE_EXAMPLE.INTEGRATIONS, SNOWFLAKE_EXAMPLE.SEMANTIC
 
-This preserves:
+**What gets preserved:**
 - SNOWFLAKE_EXAMPLE database (shared across demos)
+- SNOWFLAKE_INTELLIGENCE database (required by Snowflake, may contain other agents)
 - SFE_GITHUB_API_INTEGRATION (reusable for other demos)
+- snowflake_documentation database (shared marketplace resource)
 
 ---
 
