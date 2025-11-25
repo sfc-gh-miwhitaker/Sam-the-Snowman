@@ -4,6 +4,10 @@
  * 
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  * 
+ * EXPIRATION: 2025-12-25
+ * This demo expires 30 days after creation. Deployment will be blocked after
+ * the expiration date. Fork and customize for production use.
+ * 
  * PURPOSE:
  *   Single-script deployment of Sam-the-Snowman Cortex AI Agent.
  *   Leverages Snowflake native Git integration for automated deployment.
@@ -73,11 +77,39 @@
  * CLEANUP:
  *   To remove all objects: See sql/99_cleanup/teardown_all.sql
  * 
- * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
- * Modified: 2025-11-18
+ * Author: SE Community (inspired by Kaitlyn Wells @snowflake)
+ * Created: 2025-11-25
+ * Expires: 2025-12-25
  * Version: 4.0
  * License: Apache 2.0
  ******************************************************************************/
+
+-- ============================================================================
+-- EXPIRATION CHECK (MANDATORY)
+-- ============================================================================
+-- This demo expires 30 days after creation. Deployment is blocked after expiration.
+-- To continue using this demo after expiration, fork the repository and update the date.
+
+DECLARE
+    expiration_date DATE := '2025-12-25';
+    current_date DATE := CURRENT_DATE();
+BEGIN
+    IF (current_date > expiration_date) THEN
+        RAISE EXCEPTION(
+            '🚫 DEMO EXPIRED: This demo expired on ' || expiration_date || '. ' ||
+            'Current date: ' || current_date || '. ' ||
+            'This demonstration uses Snowflake features current as of November 2025. ' ||
+            'To use this code after expiration: ' ||
+            '1. Fork the repository ' ||
+            '2. Update the expiration_date variable in deploy_all.sql ' ||
+            '3. Review and update for latest Snowflake syntax/features ' ||
+            'Repository: https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman'
+        );
+    ELSE
+        -- Show days remaining
+        RETURN 'Demo is valid. Expires in ' || (expiration_date - current_date) || ' days (' || expiration_date || ')';
+    END IF;
+END;
 
 -- ============================================================================
 -- DEPLOYMENT ORCHESTRATION
@@ -101,10 +133,10 @@ USE ROLE IDENTIFIER($deployment_role);
 
 -- Create shared demo database and deployment schema (reusable across demo assets)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database';
+    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database (Expires: 2025-12-25)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.DEPLOY
-    COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure schema';
+    COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure schema (Expires: 2025-12-25)';
 
 -- Elevate privilege for account-level objects (warehouse, integrations)
 USE ROLE ACCOUNTADMIN;
@@ -118,7 +150,7 @@ CREATE OR REPLACE WAREHOUSE SFE_SAM_SNOWMAN_WH
     AUTO_RESUME = TRUE
     INITIALLY_SUSPENDED = TRUE
     SCALING_POLICY = 'ECONOMY'
-    COMMENT = 'DEMO: Sam-the-Snowman - Dedicated warehouse for deployment and runtime';
+    COMMENT = 'DEMO: Sam-the-Snowman - Dedicated warehouse for deployment and runtime (Expires: 2025-12-25)';
 
 GRANT USAGE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE IDENTIFIER($deployment_role);
 GRANT OPERATE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE IDENTIFIER($deployment_role);
@@ -128,7 +160,7 @@ CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
     API_PROVIDER = git_https_api
     ENABLED = TRUE
     API_ALLOWED_PREFIXES = ('https://github.com/')
-    COMMENT = 'DEMO: GitHub integration for Git-based deployments';
+    COMMENT = 'DEMO: GitHub integration for Git-based deployments (Expires: 2025-12-25)';
 
 -- Grant usage to deployment role
 GRANT USAGE ON INTEGRATION SFE_GITHUB_API_INTEGRATION TO ROLE IDENTIFIER($deployment_role);
@@ -146,7 +178,7 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 CREATE OR REPLACE GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO
     API_INTEGRATION = SFE_GITHUB_API_INTEGRATION
     ORIGIN = 'https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git'
-    COMMENT = 'DEMO: Sam-the-Snowman - Git repository for modular SQL execution';
+    COMMENT = 'DEMO: Sam-the-Snowman - Git repository for modular SQL execution (Expires: 2025-12-25)';
 
 -- Fetch the latest commit from the main branch
 ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO FETCH;

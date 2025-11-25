@@ -26,8 +26,9 @@
  *   - Run deploy_all.sql (preferred) or ensure the Git repository stage already exists
  *   - ACCOUNTADMIN role privileges
  * 
- * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
- * Modified: 2025-11-14
+ * Author: SE Community (inspired by Kaitlyn Wells @snowflake)
+ * Created: 2025-11-25
+ * Expires: 2025-12-25
  * Version: 4.0
  * License: Apache 2.0
  * 
@@ -45,17 +46,17 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Create the demo database (mandatory for all demo projects)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-COMMENT = 'DEMO: Demo/Example projects - NOT FOR PRODUCTION';
+COMMENT = 'DEMO: Demo/Example projects - NOT FOR PRODUCTION (Expires: 2025-12-25)';
 
 -- Create functional schemas (organized by purpose)
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.DEPLOY
-COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure (Git repositories, automation)';
+COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure (Git repositories, automation) (Expires: 2025-12-25)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.INTEGRATIONS
-COMMENT = 'DEMO: Sam-the-Snowman - External system integrations (email, webhooks, APIs)';
+COMMENT = 'DEMO: Sam-the-Snowman - External system integrations (email, webhooks, APIs) (Expires: 2025-12-25)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC
-COMMENT = 'DEMO: Sam-the-Snowman - Semantic views for agent tools and analytics';
+COMMENT = 'DEMO: Sam-the-Snowman - Semantic views for agent tools and analytics (Expires: 2025-12-25)';
 
 -- ============================================================================
 -- CREATE/CONFIGURE SNOWFLAKE_INTELLIGENCE DATABASE
@@ -80,7 +81,7 @@ USE ROLE SYSADMIN;
 
 -- Create AGENTS schema within SNOWFLAKE_INTELLIGENCE
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS
-COMMENT = 'DEMO: Sam-the-Snowman - Schema for Snowflake Intelligence agents';
+COMMENT = 'DEMO: Sam-the-Snowman - Schema for Snowflake Intelligence agents (Expires: 2025-12-25)';
 
 -- ============================================================================
 -- GRANT PRIVILEGES

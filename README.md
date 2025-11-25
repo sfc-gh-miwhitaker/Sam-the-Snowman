@@ -1,6 +1,20 @@
+![Reference Implementation](https://img.shields.io/badge/Reference-Implementation-blue)
+![Ready to Run](https://img.shields.io/badge/Ready%20to%20Run-Yes-green)
+![Expires](https://img.shields.io/badge/Expires-2025--12--25-orange)
+
 # Sam-the-Snowman
 
-⚠️ **DEMO PROJECT – NOT FOR PRODUCTION USE**
+> **DEMONSTRATION PROJECT - EXPIRES: 2025-12-25**  
+> This demo uses Snowflake features current as of November 2025.  
+> After expiration, this repository will be archived and made private.
+
+**Author:** SE Community  
+**Purpose:** Reference implementation for Snowflake Intelligence agent with query performance analysis  
+**Created:** 2025-11-25 | **Expires:** 2025-12-25 (30 days) | **Status:** ACTIVE
+
+---
+
+⚠️ **NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY**
 
 Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usage data and returns actionable guidance on query performance, cost control, and warehouse operations. Deploy the agent in a few minutes, ask natural-language questions, and receive answers backed by live telemetry from your environment.
 
@@ -132,10 +146,24 @@ The script drops the agent, semantic views, email procedure, and Git stage, but 
 
 ---
 
+## Expiration & Archival
+
+**This demo automatically expires on 2025-12-25.**
+
+After expiration:
+- GitHub Actions will automatically archive this repository
+- The repository will be made private
+- No further updates will be accepted
+
+To extend this demo or create a production version, fork the repository before the expiration date.
+
+---
+
 ## Support & Contributing
 
 - Report issues on GitHub: <https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/issues>
 - Follow the existing coding style, run the test plan in `docs/06-TESTING.md`, and update documentation with your changes before opening a PR.
 - Questions? The Snowflake Community forums are a great place to ask.
 
-Maintained by M. Whitaker · Inspired by work from Kaitlyn Wells (@snowflake)
+**Author:** SE Community  
+Inspired by work from Kaitlyn Wells (@snowflake)

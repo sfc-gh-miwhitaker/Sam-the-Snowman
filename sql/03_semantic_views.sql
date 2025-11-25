@@ -24,8 +24,9 @@
  *   - 01_scaffolding.sql must be run first (deploy_all.sql handles this automatically)
  *   - Configured role must have access to SNOWFLAKE.ACCOUNT_USAGE views
  * 
- * Author: M. Whitaker (inspired by Kaitlyn Wells @snowflake)
- * Modified: 2025-11-14
+ * Author: SE Community (inspired by Kaitlyn Wells @snowflake)
+ * Created: 2025-11-25
+ * Expires: 2025-12-25
  * Version: 4.0
  * License: Apache 2.0
  * 
