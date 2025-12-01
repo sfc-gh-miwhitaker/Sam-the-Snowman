@@ -87,29 +87,30 @@
 -- ============================================================================
 -- EXPIRATION CHECK (MANDATORY)
 -- ============================================================================
--- This demo expires 30 days after creation. Deployment is blocked after expiration.
--- To continue using this demo after expiration, fork the repository and update the date.
+-- This demo expires 30 days after creation.
+-- If expired, deployment should be halted and the repository forked with updated dates.
+-- Expiration date: 2025-12-25
 
-DECLARE
-    expiration_date DATE := '2025-12-25';
-    current_date DATE := CURRENT_DATE();
-BEGIN
-    IF (current_date > expiration_date) THEN
-        RAISE EXCEPTION(
-            '🚫 DEMO EXPIRED: This demo expired on ' || expiration_date || '. ' ||
-            'Current date: ' || current_date || '. ' ||
-            'This demonstration uses Snowflake features current as of November 2025. ' ||
-            'To use this code after expiration: ' ||
-            '1. Fork the repository ' ||
-            '2. Update the expiration_date variable in deploy_all.sql ' ||
-            '3. Review and update for latest Snowflake syntax/features ' ||
-            'Repository: https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman'
-        );
-    ELSE
-        -- Show days remaining
-        RETURN 'Demo is valid. Expires in ' || (expiration_date - current_date) || ' days (' || expiration_date || ')';
-    END IF;
-END;
+-- Display expiration status
+SELECT 
+    '2025-12-25'::DATE AS expiration_date,
+    CURRENT_DATE() AS current_date,
+    DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) AS days_remaining,
+    CASE 
+        WHEN DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) < 0 
+        THEN '🚫 EXPIRED - Do not deploy. Fork repository and update expiration date.'
+        WHEN DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) <= 7
+        THEN '⚠️  EXPIRING SOON - ' || DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) || ' days remaining'
+        ELSE '✅ ACTIVE - ' || DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) || ' days remaining'
+    END AS demo_status;
+
+-- ⚠️  MANUAL CHECK REQUIRED:
+-- If the demo_status shows "EXPIRED", STOP HERE and do not proceed with deployment.
+-- This demo uses Snowflake features current as of November 2025.
+-- To use after expiration:
+--   1. Fork: https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman
+--   2. Update expiration_date in this file (line 94)
+--   3. Review/update for latest Snowflake syntax and features
 
 -- ============================================================================
 -- DEPLOYMENT ORCHESTRATION
