@@ -50,10 +50,27 @@
 USE ROLE accountadmin;
 
 -- ============================================================================
+-- ⚠️  PROTECTED OBJECTS - NEVER DROP THESE
+-- ============================================================================
+-- The following account-level objects are SHARED across all demo projects
+-- and must NEVER be dropped by any individual teardown script:
+--
+--   ❌ DO NOT DROP: SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT
+--      (Account-level agent visibility control - used by ALL agents)
+--
+--   ❌ DO NOT DROP: SFE_GITHUB_API_INTEGRATION  
+--      (Reusable GitHub integration - used by multiple repos)
+--
+--   ❌ DO NOT DROP: SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS schema
+--      (Shared semantic views schema - only drop individual SV_* views)
+--
+-- ============================================================================
+
+-- ============================================================================
 -- REMOVE AGENT FROM SNOWFLAKE INTELLIGENCE OBJECT
 -- ============================================================================
--- First, remove the agent from the Snowflake Intelligence object
--- This must be done before dropping the agent itself
+-- Remove the agent from the Snowflake Intelligence object (but keep the object!)
+-- This makes the agent invisible in the UI while preserving the object for other agents
 
 ALTER SNOWFLAKE INTELLIGENCE IF EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT 
     REMOVE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
@@ -62,14 +79,11 @@ ALTER SNOWFLAKE INTELLIGENCE IF EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT
 -- REMOVE INTEGRATION OBJECTS (Account-Level)
 -- ============================================================================
 
--- Drop notification integration
+-- Drop notification integration (project-specific)
 DROP NOTIFICATION INTEGRATION IF EXISTS SFE_EMAIL_INTEGRATION;
 
--- Drop dedicated demo warehouse
+-- Drop dedicated demo warehouse (project-specific)
 DROP WAREHOUSE IF EXISTS SFE_SAM_SNOWMAN_WH;
-
--- Note: SFE_GITHUB_API_INTEGRATION is preserved (reusable across projects)
--- Note: SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT is preserved (account-level, shared)
 
 -- ============================================================================
 -- REMOVE SCHEMA OBJECTS (Database-Level)
