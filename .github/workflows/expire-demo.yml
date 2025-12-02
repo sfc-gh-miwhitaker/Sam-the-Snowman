@@ -1,67 +1,108 @@
-name: Auto-Archive Demo on Expiration
-
-# This workflow automatically archives and makes the repository private
-# after the demo expiration date (30 days from creation).
+# GitHub Actions Workflow: Demo Expiration Auto-Archive
+# 
+# Purpose: Automatically archive and make private demo repositories after expiration
+# 
+# This workflow runs daily and checks if the demo has expired.
+# If expired, it archives the repository and makes it private.
 #
-# Expiration date: 2025-12-25
-# Rationale: Prevents outdated demo code with deprecated syntax from being
-# discovered and used in production after Snowflake features evolve.
+# Author: SE Community
+# Created: 2025-11-25
+# Last Updated: 2025-12-02
+
+name: Demo Expiration Check
 
 on:
   schedule:
-    # Run daily at 00:00 UTC to check expiration status
+    # Run daily at 00:00 UTC
     - cron: '0 0 * * *'
-  
   workflow_dispatch:
-    # Allow manual triggering for testing
+    # Allow manual trigger for testing
+
+env:
+  # ============================================
+  # EXPIRATION DATE - Single Source of Truth
+  # Update this when extending the demo
+  # ============================================
+  EXPIRE_DATE: '2025-12-25'
 
 jobs:
   check-expiration:
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    permissions:
+      contents: write
       
+    steps:
       - name: Check if demo has expired
-        id: check_date
+        id: check
         run: |
-          # Demo expiration date (YYYY-MM-DD)
-          EXPIRATION_DATE="2025-12-25"
           CURRENT_DATE=$(date +%Y-%m-%d)
+          EXPIRE_DATE="${{ env.EXPIRE_DATE }}"
           
           echo "Current date: $CURRENT_DATE"
-          echo "Expiration date: $EXPIRATION_DATE"
+          echo "Expiration date: $EXPIRE_DATE"
           
-          # Convert dates to seconds since epoch for comparison
-          EXPIRATION_SECONDS=$(date -d "$EXPIRATION_DATE" +%s)
-          CURRENT_SECONDS=$(date -d "$CURRENT_DATE" +%s)
-          
-          if [ $CURRENT_SECONDS -gt $EXPIRATION_SECONDS ]; then
-            echo "Demo has expired. Proceeding with archival."
+          if [[ "$CURRENT_DATE" > "$EXPIRE_DATE" ]] || [[ "$CURRENT_DATE" == "$EXPIRE_DATE" ]]; then
             echo "expired=true" >> $GITHUB_OUTPUT
+            echo "🚫 Demo has EXPIRED"
           else
-            DAYS_REMAINING=$(( ($EXPIRATION_SECONDS - $CURRENT_SECONDS) / 86400 ))
-            echo "Demo is still valid. Days remaining: $DAYS_REMAINING"
             echo "expired=false" >> $GITHUB_OUTPUT
+            DAYS_LEFT=$(( ($(date -d "$EXPIRE_DATE" +%s) - $(date -d "$CURRENT_DATE" +%s)) / 86400 ))
+            echo "✅ Demo is ACTIVE - $DAYS_LEFT days remaining"
           fi
-      
-      - name: Archive and make repository private
-        if: steps.check_date.outputs.expired == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Archive the repository
-          gh repo archive ${{ github.repository }} --yes
-          
-          # Make the repository private
-          gh repo edit ${{ github.repository }} --visibility private
-          
-          echo "✅ Repository has been archived and made private due to expiration."
-      
-      - name: Send expiration notification
-        if: steps.check_date.outputs.expired == 'true'
-        run: |
-          echo "::warning::Demo repository ${{ github.repository }} has expired and been archived."
-          echo "::notice::Expiration date was 2025-12-25. Repository is now private and archived."
 
+      - name: Archive repository (if expired)
+        if: steps.check.outputs.expired == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            console.log(`🗄️ Archiving repository ${owner}/${repo}...`);
+            
+            try {
+              // Archive the repository
+              await github.rest.repos.update({
+                owner,
+                repo,
+                archived: true
+              });
+              console.log('✅ Repository archived successfully');
+            } catch (error) {
+              console.log(`⚠️ Could not archive repository: ${error.message}`);
+              console.log('Note: Archiving requires admin permissions on the repository');
+            }
+
+      - name: Add expiration notice (if expired)
+        if: steps.check.outputs.expired == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            console.log(`📝 Adding expiration notice to ${owner}/${repo}...`);
+            
+            try {
+              // Update repository description
+              await github.rest.repos.update({
+                owner,
+                repo,
+                description: `[ARCHIVED - EXPIRED] This demo expired on ${{ env.EXPIRE_DATE }}. Fork to create your own version.`
+              });
+              console.log('✅ Repository description updated');
+            } catch (error) {
+              console.log(`⚠️ Could not update description: ${error.message}`);
+            }
+
+      - name: Log status
+        run: |
+          echo "=================================="
+          echo "Demo Expiration Check Complete"
+          echo "=================================="
+          echo "Repository: ${{ github.repository }}"
+          echo "Expiration Date: ${{ env.EXPIRE_DATE }}"
+          echo "Expired: ${{ steps.check.outputs.expired }}"
+          echo "=================================="

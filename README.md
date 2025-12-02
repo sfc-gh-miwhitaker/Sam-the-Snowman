@@ -75,13 +75,14 @@ See `QUICKSTART.md` for detailed instructions and troubleshooting.
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | Agent | `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman` | Orchestrates tools and answers questions |
-| Semantic views | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Domain datasets for performance, cost, and warehouse analytics |
+| Agent Visibility | `SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT` | Controls agent visibility in Snowflake Intelligence UI |
+| Semantic views | `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_*` | Domain datasets for performance, cost, and warehouse analytics |
 | Email procedure | `SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email()` | Sends HTML mail via `SYSTEM$SEND_EMAIL` |
 | Git repository stage | `SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO` | Stores the Git clone used by `deploy_all.sql` |
 | Demo warehouse | `SFE_SAM_SNOWMAN_WH` | X-Small warehouse auto-created/resumed for all demo workloads |
 | Documentation database | `snowflake_documentation` | Supplies Cortex Search with official Snowflake guidance |
 
-Schemas follow the demo pattern: `DEPLOY` (infrastructure), `INTEGRATIONS` (external systems), and `SEMANTIC` (analytics). All account-level objects use the `SFE_` prefix for easy discovery and cleanup.
+Schemas follow the demo pattern: `DEPLOY` (infrastructure), `INTEGRATIONS` (external systems), and `SEMANTIC_MODELS` (shared semantic views). All account-level objects use the `SFE_` prefix for easy discovery and cleanup. Semantic views use the `SV_SAM_` prefix for project identification.
 
 ---
 

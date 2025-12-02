@@ -1,9 +1,13 @@
 # Auth Flow - Sam-the-Snowman
-Author: Michael Whitaker  
-Last Updated: 2025-11-18  
-Status: Reference Impl  
-![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)  
-Reference Impl: This code demonstrates prod-grade architectural patterns and best practice. review and customize security, networking, logic for your organization's specific requirements before deployment.
+
+Author: SE Community  
+Last Updated: 2025-12-02  
+Expires: 2025-12-25 (30 days from creation)  
+Status: Reference Implementation
+
+![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
+
+> **Reference Implementation:** This code demonstrates production-grade architectural patterns and best practices. Review and customize security, networking, and logic for your organization's specific requirements before deployment.
 
 ## Overview
 This sequence diagram shows how ACCOUNTADMIN provisions the demo, how SYSADMIN owns runtime assets, and how analysts authenticate to use the agent. RBAC gates every stage, no secrets are stored in code, and email delivery relies on Snowflake-managed credentials.
@@ -61,4 +65,4 @@ sequenceDiagram
   - Deps: Must assume a role with agent `USAGE`; the script ensures `SFE_SAM_SNOWMAN_WH` is available.
 
 ## Change History
-See `.cursor/docs/DIAGRAM_CHANGELOG.md` for vhistory.
+See `.cursor/DIAGRAM_CHANGELOG.md` for version history.

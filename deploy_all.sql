@@ -27,13 +27,16 @@
  *   Account-Level Objects (requires ACCOUNTADMIN):
  *   - SFE_GITHUB_API_INTEGRATION (API Integration for GitHub access)
  *   - SFE_SAM_SNOWMAN_WH (Dedicated demo warehouse, X-Small, auto-suspend 60s)
+ *   - SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT (Agent visibility control)
  *   
  *   Database Objects:
  *   - SNOWFLAKE_EXAMPLE database (shared demo database)
  *   - SNOWFLAKE_EXAMPLE.DEPLOY schema (deployment infrastructure)
  *   - SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO (Git repository stage)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS schema (shared semantic views)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_* (3 semantic views)
  *   - SNOWFLAKE_INTELLIGENCE database (agent data layer)
- *   - SNOWFLAKE_INTELLIGENCE.QUERY_INTELLIGENCE schema (semantic views)
+ *   - SNOWFLAKE_INTELLIGENCE.AGENTS schema (agent definitions)
  *   - Email notification integration (if email configured)
  *   - Snowflake Documentation (from Marketplace)
  *   - Sam-the-Snowman Cortex AI Agent with tools:

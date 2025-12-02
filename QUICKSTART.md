@@ -118,14 +118,16 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branc
 
 **What gets removed:**
 - Sam-the-Snowman agent
-- Semantic views (sfe_query_performance, sfe_cost_analysis, sfe_warehouse_operations)
+- Semantic views (SV_SAM_QUERY_PERFORMANCE, SV_SAM_COST_ANALYSIS, SV_SAM_WAREHOUSE_OPERATIONS)
 - Email integration (SFE_EMAIL_INTEGRATION)
 - Dedicated demo warehouse (SFE_SAM_SNOWMAN_WH)
-- Schemas: SNOWFLAKE_EXAMPLE.DEPLOY, SNOWFLAKE_EXAMPLE.INTEGRATIONS, SNOWFLAKE_EXAMPLE.SEMANTIC
+- Schemas: SNOWFLAKE_EXAMPLE.DEPLOY, SNOWFLAKE_EXAMPLE.INTEGRATIONS
 
 **What gets preserved:**
 - SNOWFLAKE_EXAMPLE database (shared across demos)
+- SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS schema (shared semantic views schema)
 - SNOWFLAKE_INTELLIGENCE database (required by Snowflake, may contain other agents)
+- SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT (account-level agent visibility)
 - SFE_GITHUB_API_INTEGRATION (reusable for other demos)
 - snowflake_documentation database (shared marketplace resource)
 

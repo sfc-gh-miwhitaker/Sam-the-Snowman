@@ -1,9 +1,13 @@
 # Data Flow - Sam-the-Snowman
-Author: Michael Whitaker  
-Last Updated: 2025-11-18  
-Status: Reference Impl  
-![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)  
-Reference Impl: This code demonstrates prod-grade architectural patterns and best practice. review and customize security, networking, logic for your organization's specific requirements before deployment.
+
+Author: SE Community  
+Last Updated: 2025-12-02  
+Expires: 2025-12-25 (30 days from creation)  
+Status: Reference Implementation
+
+![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
+
+> **Reference Implementation:** This code demonstrates production-grade architectural patterns and best practices. Review and customize security, networking, and logic for your organization's specific requirements before deployment.
 
 ## Overview
 This diagram traces telemetry from `SNOWFLAKE.ACCOUNT_USAGE`, through curated semantic views, into the Snowflake Intelligence agent and optional email delivery. All processing occurs inside Snowflake; only HTML notifications exit the platform via the managed email service.
@@ -18,10 +22,10 @@ graph TB
         Docs[Snowflake Documentation<br/>Marketplace Dataset]
     end
 
-    subgraph "Semantic Layer<br/>SNOWFLAKE_EXAMPLE.SEMANTIC"
-        View1[(sfe_query_performance)]
-        View2[(sfe_cost_analysis)]
-        View3[(sfe_warehouse_operations)]
+    subgraph "Semantic Layer<br/>SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS"
+        View1[(SV_SAM_QUERY_PERFORMANCE)]
+        View2[(SV_SAM_COST_ANALYSIS)]
+        View3[(SV_SAM_WAREHOUSE_OPERATIONS)]
     end
 
     subgraph "Knowledge Services"
@@ -63,7 +67,7 @@ graph TB
 - **Semantic Views**
   - Purpose: Present curated, LLM-friendly datasets for the agent tools.
   - Technology: Semantic Views defined in `sql/03_semantic_views.sql`.
-  - Location: `SNOWFLAKE_EXAMPLE.SEMANTIC`.
+  - Location: `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS` (mandatory shared schema).
   - Deps: Reads ACCOUNT_USAGE views; referenced by Cortex Analyst tools in `sql/05_agent.sql`.
 - **Snowflake Documentation Service**
   - Purpose: Supply Cortex Search with authoritative best practices.
@@ -92,4 +96,4 @@ graph TB
   - Deps: Users must activate a warehouse and hold SYSADMIN (or delegated) role.
 
 ## Change History
-See `.cursor/docs/DIAGRAM_CHANGELOG.md` for vhistory.
+See `.cursor/DIAGRAM_CHANGELOG.md` for version history.

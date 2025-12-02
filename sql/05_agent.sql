@@ -122,13 +122,13 @@ FROM SPECIFICATION $$
     ],
     "tool_resources": {
         "query_performance": {
-            "semantic_view": "SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance"
+            "semantic_view": "SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE"
         },
         "cost_analysis": {
-            "semantic_view": "SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis"
+            "semantic_view": "SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS"
         },
         "warehouse_operations": {
-            "semantic_view": "SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations"
+            "semantic_view": "SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_WAREHOUSE_OPERATIONS"
         },
         "snowflake_knowledge_ext_documentation": {
             "id_column": "SOURCE_URL",
@@ -151,6 +151,16 @@ $$;
 -- Grant usage to the configured role only (restricts agent access to authorized users)
 -- To grant access to additional roles, run: GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman TO ROLE <role_name>;
 GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman TO ROLE SYSADMIN;
+
+-- ============================================================================
+-- ADD AGENT TO SNOWFLAKE INTELLIGENCE OBJECT
+-- ============================================================================
+-- Adding the agent to the Snowflake Intelligence object makes it visible in the UI
+-- via Tier 1 (curated list). The agent is also visible via Tier 2 (fallback) since
+-- it lives in SNOWFLAKE_INTELLIGENCE.AGENTS schema.
+
+ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT 
+    ADD AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
 
 -- Agent creation complete
 

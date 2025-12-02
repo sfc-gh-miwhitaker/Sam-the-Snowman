@@ -50,6 +50,15 @@
 USE ROLE accountadmin;
 
 -- ============================================================================
+-- REMOVE AGENT FROM SNOWFLAKE INTELLIGENCE OBJECT
+-- ============================================================================
+-- First, remove the agent from the Snowflake Intelligence object
+-- This must be done before dropping the agent itself
+
+ALTER SNOWFLAKE INTELLIGENCE IF EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT 
+    REMOVE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
+
+-- ============================================================================
 -- REMOVE INTEGRATION OBJECTS (Account-Level)
 -- ============================================================================
 
@@ -60,6 +69,7 @@ DROP NOTIFICATION INTEGRATION IF EXISTS SFE_EMAIL_INTEGRATION;
 DROP WAREHOUSE IF EXISTS SFE_SAM_SNOWMAN_WH;
 
 -- Note: SFE_GITHUB_API_INTEGRATION is preserved (reusable across projects)
+-- Note: SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT is preserved (account-level, shared)
 
 -- ============================================================================
 -- REMOVE SCHEMA OBJECTS (Database-Level)
@@ -76,14 +86,20 @@ DROP WAREHOUSE IF EXISTS SFE_SAM_SNOWMAN_WH;
 
 DROP AGENT IF EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
 
+-- Remove semantic views from SEMANTIC_MODELS (explicit drops for clarity)
+DROP VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE;
+DROP VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS;
+DROP VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_WAREHOUSE_OPERATIONS;
+
 -- ============================================================================
 -- REMOVE SCHEMAS (After all objects dropped)
 -- ============================================================================
 
--- Drop the three functional schemas created by Sam-the-Snowman
+-- Drop the functional schemas created by Sam-the-Snowman
+-- Note: SEMANTIC_MODELS is a shared schema, only drop Sam-specific views (done above)
 DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.DEPLOY CASCADE;
 DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.INTEGRATIONS CASCADE;
-DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC CASCADE;
+-- Note: DO NOT drop SEMANTIC_MODELS schema (shared across projects, only drop views)
 
 -- ============================================================================
 -- LEGACY CLEANUP (For older deployments)
@@ -97,7 +113,9 @@ DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.tools CASCADE;
 
 -- Objects intentionally preserved:
 -- - SNOWFLAKE_INTELLIGENCE.AGENTS: Required by Snowflake for agents, may be used by other agents
+-- - SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT: Account-level visibility control, shared across all agents
 -- - SNOWFLAKE_EXAMPLE (Database): Shared demo database for multiple projects
+-- - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS: Shared schema for all Cortex Analyst semantic views
 -- - SFE_GITHUB_API_INTEGRATION: Reusable API integration for all GitHub repositories
 -- - snowflake_documentation: Shared Marketplace database
 

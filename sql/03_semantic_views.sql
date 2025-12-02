@@ -16,9 +16,9 @@
  *   3. warehouse_operations - Warehouse utilization and capacity planning
  * 
  * OBJECTS CREATED:
- *   - SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance (Semantic View)
- *   - SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis (Semantic View)
- *   - SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations (Semantic View)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE (Semantic View)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS (Semantic View)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_WAREHOUSE_OPERATIONS (Semantic View)
  * 
  * Prerequisites:
  *   - 01_scaffolding.sql must be run first (deploy_all.sql handles this automatically)
@@ -37,7 +37,7 @@
 
 USE ROLE SYSADMIN;
 USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
-USE SNOWFLAKE_EXAMPLE.SEMANTIC;
+USE SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;
 
 -- ============================================================================
 -- SEMANTIC VIEW: sfe_query_performance
@@ -53,7 +53,7 @@ USE SNOWFLAKE_EXAMPLE.SEMANTIC;
 -- ✓ Multiple verified queries demonstrating common use cases
 -- ✓ Strategic filtering (excludes system-managed warehouses)
 
-CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance
+CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE
 TABLES (
     SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY,
     SNOWFLAKE.ACCOUNT_USAGE.QUERY_ATTRIBUTION_HISTORY
@@ -151,7 +151,7 @@ WITH EXTENSION (CA = '{
 -- ✓ Sample values in comments showing typical warehouse names
 -- ✓ Clear distinction between compute and cloud services costs
 
-CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis
+CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS
 TABLES (
     SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
 )
@@ -208,7 +208,7 @@ WITH EXTENSION (CA = '{
 -- ✓ Multiple verified queries for common operational scenarios
 -- ✓ Clear explanation of queue types and their implications
 
-CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations
+CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_WAREHOUSE_OPERATIONS
 TABLES (
     SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY
 )

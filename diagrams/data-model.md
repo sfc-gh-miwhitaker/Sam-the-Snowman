@@ -1,22 +1,26 @@
 # Data Model - Sam-the-Snowman
-Author: Michael Whitaker  
-Last Updated: 2025-11-18  
-Status: Reference Impl  
-![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)  
-Reference Impl: This code demonstrates prod-grade architectural patterns and best practice. review and customize security, networking, logic for your organization's specific requirements before deployment.
+
+Author: SE Community  
+Last Updated: 2025-12-02  
+Expires: 2025-12-25 (30 days from creation)  
+Status: Reference Implementation
+
+![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
+
+> **Reference Implementation:** This code demonstrates production-grade architectural patterns and best practices. Review and customize security, networking, and logic for your organization's specific requirements before deployment.
 
 ## Overview
-The data model connects Snowflake telemetry (`SNOWFLAKE.ACCOUNT_USAGE`) to the semantic views in `SNOWFLAKE_EXAMPLE.SEMANTIC`, which in turn power the Intelligence agent stored in `SNOWFLAKE_INTELLIGENCE.AGENTS`. All analytical objects follow the SFE_ prefix pattern to ensure clean discovery and cleanup.
+The data model connects Snowflake telemetry (`SNOWFLAKE.ACCOUNT_USAGE`) to the semantic views in `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS`, which in turn power the Intelligence agent stored in `SNOWFLAKE_INTELLIGENCE.AGENTS`. All semantic views follow the `SV_SAM_*` prefix pattern for project identification.
 
 ## Diagram
 ```mermaid
 erDiagram
-    ACCOUNT_USAGE_QUERY_HISTORY ||--o{ SFE_QUERY_PERFORMANCE : feeds
-    ACCOUNT_USAGE_WAREHOUSE_METERING_HISTORY ||--o{ SFE_COST_ANALYSIS : feeds
-    ACCOUNT_USAGE_WAREHOUSE_LOAD_HISTORY ||--o{ SFE_WAREHOUSE_OPERATIONS : feeds
-    SFE_QUERY_PERFORMANCE ||--o{ SAM_THE_SNOWMAN_AGENT : referenced_by
-    SFE_COST_ANALYSIS ||--o{ SAM_THE_SNOWMAN_AGENT : referenced_by
-    SFE_WAREHOUSE_OPERATIONS ||--o{ SAM_THE_SNOWMAN_AGENT : referenced_by
+    ACCOUNT_USAGE_QUERY_HISTORY ||--o{ SV_SAM_QUERY_PERFORMANCE : feeds
+    ACCOUNT_USAGE_WAREHOUSE_METERING_HISTORY ||--o{ SV_SAM_COST_ANALYSIS : feeds
+    ACCOUNT_USAGE_WAREHOUSE_LOAD_HISTORY ||--o{ SV_SAM_WAREHOUSE_OPERATIONS : feeds
+    SV_SAM_QUERY_PERFORMANCE ||--o{ SAM_THE_SNOWMAN_AGENT : referenced_by
+    SV_SAM_COST_ANALYSIS ||--o{ SAM_THE_SNOWMAN_AGENT : referenced_by
+    SV_SAM_WAREHOUSE_OPERATIONS ||--o{ SAM_THE_SNOWMAN_AGENT : referenced_by
 
     ACCOUNT_USAGE_QUERY_HISTORY {
         VARCHAR QUERY_ID PK
@@ -45,7 +49,7 @@ erDiagram
         NUMBER AVG_BLOCKED
     }
 
-    SFE_QUERY_PERFORMANCE {
+    SV_SAM_QUERY_PERFORMANCE {
         VARCHAR QUERY_ID PK
         VARCHAR QUERY_TEXT
         NUMBER TOTAL_ELAPSED_TIME
@@ -54,7 +58,7 @@ erDiagram
         VARCHAR WAREHOUSE_NAME
     }
 
-    SFE_COST_ANALYSIS {
+    SV_SAM_COST_ANALYSIS {
         VARCHAR WAREHOUSE_NAME
         TIMESTAMP_NTZ START_TIME
         NUMBER CREDITS_USED
@@ -62,7 +66,7 @@ erDiagram
         NUMBER CREDITS_USED_CLOUD_SERVICES
     }
 
-    SFE_WAREHOUSE_OPERATIONS {
+    SV_SAM_WAREHOUSE_OPERATIONS {
         VARCHAR WAREHOUSE_NAME
         TIMESTAMP_NTZ START_TIME
         NUMBER AVG_RUNNING
@@ -83,16 +87,16 @@ erDiagram
   - Technology: Snowflake-provided shared views inside `SNOWFLAKE.ACCOUNT_USAGE`.
   - Location: Snowflake control plane (read-only for customers).
   - Deps: Requires ACCOUNTADMIN-granted access; data drives every semantic view.
-- **Semantic Views (SFE_QUERY_PERFORMANCE / SFE_COST_ANALYSIS / SFE_WAREHOUSE_OPERATIONS)**
+- **Semantic Views (SV_SAM_QUERY_PERFORMANCE / SV_SAM_COST_ANALYSIS / SV_SAM_WAREHOUSE_OPERATIONS)**
   - Purpose: Provide governed, LLM-friendly layers for Cortex tools.
   - Technology: Snowflake Semantic Views defined in `sql/03_semantic_views.sql`.
-  - Location: `SNOWFLAKE_EXAMPLE.SEMANTIC` schema.
+  - Location: `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS` schema (mandatory shared location).
   - Deps: Join to ACCOUNT_USAGE views and expose curated metrics plus synonyms.
 - **Sam-the-Snowman Agent Catalog Entry**
   - Purpose: Persist agent instructions, tool bindings, and semantic view references.
   - Technology: Snowflake Intelligence Agent stored in `SNOWFLAKE_INTELLIGENCE.AGENTS`.
-  - Location: `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman`.
+  - Location: `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman` (managed via Snowflake Intelligence object).
   - Deps: Relies on semantic views and procedure identifiers defined in `sql/05_agent.sql`.
 
 ## Change History
-See `.cursor/docs/DIAGRAM_CHANGELOG.md` for vhistory.
+See `.cursor/DIAGRAM_CHANGELOG.md` for version history.

@@ -1,9 +1,13 @@
 # Network Flow - Sam-the-Snowman
-Author: Michael Whitaker  
-Last Updated: 2025-11-18  
-Status: Reference Impl  
-![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)  
-Reference Impl: This code demonstrates prod-grade architectural patterns and best practice. review and customize security, networking, logic for your organization's specific requirements before deployment.
+
+Author: SE Community  
+Last Updated: 2025-12-02  
+Expires: 2025-12-25 (30 days from creation)  
+Status: Reference Implementation
+
+![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
+
+> **Reference Implementation:** This code demonstrates production-grade architectural patterns and best practices. Review and customize security, networking, and logic for your organization's specific requirements before deployment.
 
 ## Overview
 End users connect through Snowsight over TLS, Snowflake fetches artifacts from GitHub, and outbound emails are relayed through Snowflake's notification service. No inbound firewall changes are required; all traffic originates from Snowflake-managed control planes using HTTPS on port 443.
@@ -81,4 +85,4 @@ graph TB
   - Deps: Requires `SFE_EMAIL_INTEGRATION` and outbound TLS to recipient mailboxes.
 
 ## Change History
-See `.cursor/docs/DIAGRAM_CHANGELOG.md` for vhistory.
+See `.cursor/DIAGRAM_CHANGELOG.md` for version history.
