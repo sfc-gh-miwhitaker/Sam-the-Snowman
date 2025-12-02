@@ -49,9 +49,9 @@ This pattern is **reusable as a template** for production projects requiring cle
 
 | View | Location | Purpose | Primary Tables |
 |------|----------|---------|----------------|
-| `sfe_query_performance` | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Analyze slow queries, errors, spilling, cache efficiency, partition scans | `SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY`, `QUERY_ATTRIBUTION_HISTORY` |
-| `sfe_cost_analysis` | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Track warehouse credit consumption, cost trends, FinOps insights | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY` |
-| `sfe_warehouse_operations` | `SNOWFLAKE_EXAMPLE.SEMANTIC` | Evaluate warehouse sizing, queue depth, concurrency, provisioning | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY` |
+| `SV_SAM_QUERY_PERFORMANCE` | `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS` | Analyze slow queries, errors, spilling, cache efficiency, partition scans | `SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY`, `QUERY_ATTRIBUTION_HISTORY` |
+| `SV_SAM_COST_ANALYSIS` | `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS` | Track warehouse credit consumption, cost trends, FinOps insights | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY` |
+| `SV_SAM_WAREHOUSE_OPERATIONS` | `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS` | Evaluate warehouse sizing, queue depth, concurrency, provisioning | `SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY` |
 
 ### Best Practice Implementation
 
@@ -155,21 +155,21 @@ To verify the enhanced semantic views implement all best practices, run these qu
 
 ```sql
 -- Check for sample values in comments
-SELECT GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance');
+SELECT GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE');
 -- Look for: "(e.g., ...)" patterns in dimension comments showing example values
 
 -- Count verified queries per view
 SELECT 
   'sfe_query_performance' as view_name,
-  REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance'), '"name":') as verified_query_count
+  REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE'), '"name":') as verified_query_count
 UNION ALL
 SELECT 
   'sfe_cost_analysis',
-  REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis'), '"name":')
+  REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS'), '"name":')
 UNION ALL
 SELECT 
   'sfe_warehouse_operations',
-  REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_warehouse_operations'), '"name":');
+  REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_WAREHOUSE_OPERATIONS'), '"name":');
 
 -- Test synonym coverage by asking varied questions
 -- These should all route to query_performance:

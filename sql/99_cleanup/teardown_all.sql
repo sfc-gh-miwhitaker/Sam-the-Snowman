@@ -17,12 +17,12 @@
  *   - SFE_EMAIL_INTEGRATION (Notification Integration)
  *   - SFE_SAM_SNOWMAN_WH (Dedicated demo warehouse)
  *   - SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman (Agent)
- *   - SNOWFLAKE_EXAMPLE.SEMANTIC semantic views (sfe_query_performance, sfe_cost_analysis, sfe_warehouse_operations)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS semantic views (SV_SAM_QUERY_PERFORMANCE, SV_SAM_COST_ANALYSIS, SV_SAM_WAREHOUSE_OPERATIONS)
  *   - SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email procedure
  *   - SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO (Git repository)
  *   - SNOWFLAKE_EXAMPLE.DEPLOY schema
  *   - SNOWFLAKE_EXAMPLE.INTEGRATIONS schema
- *   - SNOWFLAKE_EXAMPLE.SEMANTIC schema
+ *   - Schemas: SNOWFLAKE_EXAMPLE.DEPLOY, SNOWFLAKE_EXAMPLE.INTEGRATIONS
  *
  * OBJECTS PRESERVED:
  *   - SNOWFLAKE_INTELLIGENCE.AGENTS schema (required by Snowflake)
@@ -251,7 +251,7 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
  * SYSADMIN (or configured role) owns:
  *   - SNOWFLAKE_INTELLIGENCE database (ownership transferred from ACCOUNTADMIN)
  *   - SNOWFLAKE_INTELLIGENCE.AGENTS schema
- *   - SNOWFLAKE_EXAMPLE.DEPLOY, SNOWFLAKE_EXAMPLE.INTEGRATIONS, SNOWFLAKE_EXAMPLE.SEMANTIC schemas
+ *   - SNOWFLAKE_EXAMPLE.DEPLOY, SNOWFLAKE_EXAMPLE.INTEGRATIONS schemas
  *   - All semantic views (sfe_query_performance, sfe_cost_analysis, sfe_warehouse_operations)
  *   - Agent sam_the_snowman in SNOWFLAKE_INTELLIGENCE.AGENTS
  *

@@ -65,7 +65,7 @@ Work through the result sets returned by module 06:
 3. **Stored procedure**
    - `SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;` includes `SFE_SEND_EMAIL`.
 4. **Semantic views**
-   - `SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC;` lists three `sfe_` views.
+   - `SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;` lists three `SV_SAM_*` views.
 5. **Agent**
    - `SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;` lists `SAM_THE_SNOWMAN`.
 6. **Documentation database**

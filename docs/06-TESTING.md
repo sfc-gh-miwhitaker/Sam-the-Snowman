@@ -42,13 +42,13 @@ Expected highlights:
 | Git repository stage | `SHOW GIT REPOSITORIES IN SCHEMA SNOWFLAKE_EXAMPLE.DEPLOY;` | `SFE_SAM_THE_SNOWMAN_REPO` listed |
 | Email procedure | `SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;` | `SFE_SEND_EMAIL` present |
 | Demo warehouse | `SHOW WAREHOUSES LIKE 'SFE_SAM_SNOWMAN_WH';` | One row, state = SUSPENDED or RESUMED |
-| Semantic views | `SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC;` | All three `sfe_` views listed |
+| Semantic views | `SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;` | All three `SV_SAM_*` views listed |
 | Agent | `SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;` | `SAM_THE_SNOWMAN` listed |
 | Documentation | `SHOW DATABASES LIKE 'SNOWFLAKE_DOCUMENTATION';` | One row |
 
 Optional data spot-check:
 ```sql
-SELECT COUNT(*) AS query_rows FROM SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_query_performance;
+SELECT COUNT(*) AS query_rows FROM SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE;
 ```
 A non-zero count confirms the view can read `ACCOUNT_USAGE` data.
 
@@ -78,7 +78,7 @@ Switch to the owning role (default `SYSADMIN`) and run:
 ```sql
 USE ROLE SYSADMIN;
 SELECT CURRENT_ROLE();
-SELECT COUNT(*) FROM SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_cost_analysis;
+SELECT COUNT(*) FROM SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS;
 ```
 This confirms analysts with the owning role can query the views directly if needed.
 

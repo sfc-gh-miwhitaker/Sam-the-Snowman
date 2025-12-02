@@ -75,7 +75,7 @@ Edit the generated SQL to match Sam-the-Snowman standards:
 
 1. **Add SFE_ prefix** for demo safety:
    ```sql
-   CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_pipe_monitoring
+   CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_PIPE_MONITORING
    ```
 
 2. **Add demo comment**:
@@ -122,7 +122,7 @@ Add your new view to the deployment workflow:
    -- ============================================================================
    -- SEMANTIC VIEW: sfe_pipe_monitoring
    -- ============================================================================
-   CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_pipe_monitoring
+   CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_PIPE_MONITORING
    TABLES (...)
    FACTS (...)
    DIMENSIONS (...)
@@ -132,7 +132,7 @@ Add your new view to the deployment workflow:
 2. **Update the agent** in `sql/05_agent.sql`:
    ```sql
    DEFINE TOOL sfe_pipe_monitoring
-     ENDPOINT = 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_pipe_monitoring'
+     ENDPOINT = 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_PIPE_MONITORING'
      ENABLED = true
      DESCRIPTION = 'Analyze Snowpipe ingestion patterns...';
    ```
@@ -152,7 +152,7 @@ Add your new view to the deployment workflow:
    EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/05_agent.sql';
    
    -- Validate
-   SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC;
+   SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;
    ```
 
 5. **Update documentation**:
@@ -228,7 +228,7 @@ The generator produces:
 -- ✓ Multiple verified queries for common Snowpipe scenarios
 -- ✓ Relationship between usage and error tracking
 
-CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_pipe_monitoring
+CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_PIPE_MONITORING
 TABLES (
     SNOWFLAKE.ACCOUNT_USAGE.PIPE_USAGE_HISTORY,
     SNOWFLAKE.ACCOUNT_USAGE.COPY_HISTORY
@@ -281,7 +281,7 @@ Update `sql/05_agent.sql`:
 ```sql
 -- Add tool definition
 DEFINE TOOL sfe_pipe_monitoring
-  ENDPOINT = 'SNOWFLAKE_EXAMPLE.SEMANTIC.sfe_pipe_monitoring'
+  ENDPOINT = 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_PIPE_MONITORING'
   ENABLED = true
   DESCRIPTION = 'Analyze Snowpipe ingestion patterns, file processing errors, and loading costs';
 
