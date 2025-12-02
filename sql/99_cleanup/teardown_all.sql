@@ -67,13 +67,15 @@ USE ROLE accountadmin;
 -- ============================================================================
 
 -- ============================================================================
--- REMOVE AGENT FROM SNOWFLAKE INTELLIGENCE OBJECT
+-- REMOVE AGENT FROM SNOWFLAKE INTELLIGENCE OBJECT (Optional)
 -- ============================================================================
--- Remove the agent from the Snowflake Intelligence object (but keep the object!)
--- This makes the agent invisible in the UI while preserving the object for other agents
-
-ALTER SNOWFLAKE INTELLIGENCE IF EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT 
-    REMOVE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
+-- Note: When we DROP AGENT below, it's automatically removed from the 
+-- Snowflake Intelligence object. This explicit removal is only needed if
+-- you want to hide the agent without deleting it.
+--
+-- If you need to manually remove from object without deleting:
+-- ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT 
+--     DROP AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
 
 -- ============================================================================
 -- REMOVE INTEGRATION OBJECTS (Account-Level)
@@ -101,9 +103,9 @@ DROP WAREHOUSE IF EXISTS SFE_SAM_SNOWMAN_WH;
 DROP AGENT IF EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
 
 -- Remove semantic views from SEMANTIC_MODELS (explicit drops for clarity)
-DROP VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE;
-DROP VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS;
-DROP VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_WAREHOUSE_OPERATIONS;
+DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE;
+DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS;
+DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_WAREHOUSE_OPERATIONS;
 
 -- ============================================================================
 -- REMOVE SCHEMAS (After all objects dropped)
