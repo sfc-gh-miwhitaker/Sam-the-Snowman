@@ -29,7 +29,7 @@
  * 
  * Author: SE Community (inspired by Kaitlyn Wells @snowflake)
  * Created: 2025-11-25
- * Expires: 2025-12-25
+ * Expires: 2026-01-15
  * Version: 4.0
  * License: Apache 2.0
  * 
@@ -47,19 +47,19 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Create the demo database (mandatory for all demo projects)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-COMMENT = 'DEMO: Demo/Example projects - NOT FOR PRODUCTION (Expires: 2025-12-25)';
+COMMENT = 'DEMO: Demo/Example projects - NOT FOR PRODUCTION (Expires: 2026-01-15)';
 
 -- Create functional schemas (organized by purpose)
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.DEPLOY
-COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure (Git repositories, automation) (Expires: 2025-12-25)';
+COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure (Git repositories, automation) (Expires: 2026-01-15)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.INTEGRATIONS
-COMMENT = 'DEMO: Sam-the-Snowman - External system integrations (email, webhooks, APIs) (Expires: 2025-12-25)';
+COMMENT = 'DEMO: Sam-the-Snowman - External system integrations (email, webhooks, APIs) (Expires: 2026-01-15)';
 
 -- SEMANTIC_MODELS is the mandatory location for all Cortex Analyst semantic views
 -- All semantic views must use SV_ prefix (e.g., SV_QUERY_PERFORMANCE)
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS
-COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2025-12-25)';
+COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2026-01-15)';
 
 -- ============================================================================
 -- CREATE/CONFIGURE SNOWFLAKE_INTELLIGENCE DATABASE
@@ -84,7 +84,7 @@ USE ROLE SYSADMIN;
 
 -- Create AGENTS schema within SNOWFLAKE_INTELLIGENCE
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS
-COMMENT = 'DEMO: Sam-the-Snowman - Schema for Snowflake Intelligence agents (Expires: 2025-12-25)';
+COMMENT = 'DEMO: Sam-the-Snowman - Schema for Snowflake Intelligence agents (Expires: 2026-01-15)';
 
 -- ============================================================================
 -- CREATE SNOWFLAKE INTELLIGENCE OBJECT (Agent Visibility Control)
@@ -96,7 +96,7 @@ COMMENT = 'DEMO: Sam-the-Snowman - Schema for Snowflake Intelligence agents (Exp
 USE ROLE ACCOUNTADMIN;
 
 CREATE SNOWFLAKE INTELLIGENCE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT
-    COMMENT = 'Central object for managing agent visibility in Snowflake Intelligence UI (Expires: 2025-12-25)';
+    COMMENT = 'Central object for managing agent visibility in Snowflake Intelligence UI (Expires: 2026-01-15)';
 
 -- Grant visibility to all users (they can see agents in the UI)
 GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE PUBLIC;

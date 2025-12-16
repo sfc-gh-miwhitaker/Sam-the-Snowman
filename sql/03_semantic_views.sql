@@ -26,7 +26,7 @@
  * 
  * Author: SE Community (inspired by Kaitlyn Wells @snowflake)
  * Created: 2025-11-25
- * Expires: 2025-12-25
+ * Expires: 2026-01-15
  * Version: 4.0
  * License: Apache 2.0
  * 

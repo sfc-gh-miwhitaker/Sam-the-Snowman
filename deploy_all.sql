@@ -4,7 +4,7 @@
  * 
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  * 
- * EXPIRATION: 2025-12-25
+ * EXPIRATION: 2026-01-15
  * This demo expires 30 days after creation. Deployment will be blocked after
  * the expiration date. Fork and customize for production use.
  * 
@@ -82,7 +82,7 @@
  * 
  * Author: SE Community (inspired by Kaitlyn Wells @snowflake)
  * Created: 2025-11-25
- * Expires: 2025-12-25
+ * Expires: 2026-01-15
  * Version: 4.0
  * License: Apache 2.0
  ******************************************************************************/
@@ -92,19 +92,19 @@
 -- ============================================================================
 -- This demo expires 30 days after creation.
 -- If expired, deployment should be halted and the repository forked with updated dates.
--- Expiration date: 2025-12-25
+-- Expiration date: 2026-01-15
 
 -- Display expiration status
 SELECT 
-    '2025-12-25'::DATE AS expiration_date,
+    '2026-01-15'::DATE AS expiration_date,
     CURRENT_DATE() AS current_date,
-    DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) AS days_remaining,
+    DATEDIFF('day', CURRENT_DATE(), '2026-01-15'::DATE) AS days_remaining,
     CASE 
-        WHEN DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) < 0 
+        WHEN DATEDIFF('day', CURRENT_DATE(), '2026-01-15'::DATE) < 0 
         THEN '🚫 EXPIRED - Do not deploy. Fork repository and update expiration date.'
-        WHEN DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) <= 7
-        THEN '⚠️  EXPIRING SOON - ' || DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) || ' days remaining'
-        ELSE '✅ ACTIVE - ' || DATEDIFF('day', CURRENT_DATE(), '2025-12-25'::DATE) || ' days remaining'
+        WHEN DATEDIFF('day', CURRENT_DATE(), '2026-01-15'::DATE) <= 7
+        THEN '⚠️  EXPIRING SOON - ' || DATEDIFF('day', CURRENT_DATE(), '2026-01-15'::DATE) || ' days remaining'
+        ELSE '✅ ACTIVE - ' || DATEDIFF('day', CURRENT_DATE(), '2026-01-15'::DATE) || ' days remaining'
     END AS demo_status;
 
 -- ⚠️  MANUAL CHECK REQUIRED:
@@ -137,10 +137,10 @@ USE ROLE IDENTIFIER($deployment_role);
 
 -- Create shared demo database and deployment schema (reusable across demo assets)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database (Expires: 2025-12-25)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database (Expires: 2026-01-15)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.DEPLOY
-    COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure schema (Expires: 2025-12-25)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Deployment infrastructure schema (Expires: 2026-01-15)';
 
 -- Elevate privilege for account-level objects (warehouse, integrations)
 USE ROLE ACCOUNTADMIN;
@@ -154,7 +154,7 @@ CREATE OR REPLACE WAREHOUSE SFE_SAM_SNOWMAN_WH
     AUTO_RESUME = TRUE
     INITIALLY_SUSPENDED = TRUE
     SCALING_POLICY = 'ECONOMY'
-    COMMENT = 'DEMO: Sam-the-Snowman - Dedicated warehouse for deployment and runtime (Expires: 2025-12-25)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Dedicated warehouse for deployment and runtime (Expires: 2026-01-15)';
 
 GRANT USAGE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE IDENTIFIER($deployment_role);
 GRANT OPERATE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE IDENTIFIER($deployment_role);
@@ -164,7 +164,7 @@ CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
     API_PROVIDER = git_https_api
     ENABLED = TRUE
     API_ALLOWED_PREFIXES = ('https://github.com/')
-    COMMENT = 'DEMO: GitHub integration for Git-based deployments (Expires: 2025-12-25)';
+    COMMENT = 'DEMO: GitHub integration for Git-based deployments (Expires: 2026-01-15)';
 
 -- Grant usage to deployment role
 GRANT USAGE ON INTEGRATION SFE_GITHUB_API_INTEGRATION TO ROLE IDENTIFIER($deployment_role);
@@ -182,7 +182,7 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 CREATE OR REPLACE GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO
     API_INTEGRATION = SFE_GITHUB_API_INTEGRATION
     ORIGIN = 'https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git'
-    COMMENT = 'DEMO: Sam-the-Snowman - Git repository for modular SQL execution (Expires: 2025-12-25)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Git repository for modular SQL execution (Expires: 2026-01-15)';
 
 -- Fetch the latest commit from the main branch
 ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO FETCH;

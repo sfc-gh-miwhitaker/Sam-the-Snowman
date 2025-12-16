@@ -1,8 +1,8 @@
 # Network Flow - Sam-the-Snowman
 
 Author: SE Community  
-Last Updated: 2025-12-02  
-Expires: 2025-12-25 (30 days from creation)  
+Last Updated: 2025-12-16  
+Expires: 2026-01-15 (30 days from creation)  
 Status: Reference Implementation
 
 ![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
