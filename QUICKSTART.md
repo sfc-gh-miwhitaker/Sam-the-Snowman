@@ -20,9 +20,9 @@ Deploy the Sam-the-Snowman Cortex AI Agent with a single copy/paste operation in
 
 ### Step 1: Copy the Deployment Script
 
-Open the deployment script on GitHub:
+Open the deployment script in this repository:
 
-**→ [`deploy_all.sql`](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/blob/main/deploy_all.sql)**
+**→ `deploy_all.sql`**
 
 Select all content (Cmd/Ctrl+A) and copy (Cmd/Ctrl+C).
 
@@ -30,7 +30,7 @@ Select all content (Cmd/Ctrl+A) and copy (Cmd/Ctrl+C).
 
 1. Open Snowsight and create a new SQL worksheet
 2. Paste the entire deployment script (Cmd/Ctrl+V)
-3. Click **"Run All"** (▶▶) or press **Cmd/Ctrl+Shift+Enter**
+3. Click **"Run All"** or press **Cmd/Ctrl+Shift+Enter**
 
 **Expected runtime**: 3-5 minutes
 
@@ -52,7 +52,7 @@ The script will automatically:
 The final query result should show:
 
 ```
-🎉 Deployment Complete! Sam-the-Snowman is ready.
+Deployment Complete! Sam-the-Snowman is ready.
 ```
 
 If you see this message, all components were deployed successfully.
@@ -88,19 +88,19 @@ The agent will use semantic views and Snowflake documentation to analyze your ac
 
 ## Troubleshooting
 
-**Error: "Warehouse must be specified"**  
+**Error: "Warehouse must be specified"**
 → Resume the dedicated warehouse: `ALTER WAREHOUSE SFE_SAM_SNOWMAN_WH RESUME;` and rerun the script.
 
-**Error: "Insufficient privileges"**  
+**Error: "Insufficient privileges"**
 → Ensure you're using `USE ROLE ACCOUNTADMIN;`
 
-**Error: "Failed to connect to GitHub"**  
+**Error: "Failed to connect to GitHub"**
 → Check that your account allows network access to https://github.com/
 
-**Agent not visible after deployment**  
+**Agent not visible after deployment**
 → Re-run the validation module:
 ```sql
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
 ```
 
 For complete troubleshooting, see: `docs/07-TROUBLESHOOTING.md`
@@ -113,7 +113,7 @@ To remove all Sam-the-Snowman objects while preserving shared infrastructure:
 
 ```sql
 USE ROLE ACCOUNTADMIN;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
 **What gets removed:**
@@ -121,12 +121,13 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branc
 - Semantic views (SV_SAM_QUERY_PERFORMANCE, SV_SAM_COST_ANALYSIS, SV_SAM_WAREHOUSE_OPERATIONS)
 - Email integration (SFE_EMAIL_INTEGRATION)
 - Dedicated demo warehouse (SFE_SAM_SNOWMAN_WH)
-- Schemas: SNOWFLAKE_EXAMPLE.DEPLOY, SNOWFLAKE_EXAMPLE.INTEGRATIONS
+- Git repository clone: SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO
+- Schema: SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN
 
 **What gets preserved:**
 - SNOWFLAKE_EXAMPLE database (shared across demos)
+- SNOWFLAKE_EXAMPLE.GIT_REPOS schema (shared Git repository clones)
 - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS schema (shared semantic views schema)
-- SNOWFLAKE_INTELLIGENCE database (required by Snowflake, may contain other agents)
 - SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT (account-level agent visibility)
 - SFE_GITHUB_API_INTEGRATION (reusable for other demos)
 - snowflake_documentation database (shared marketplace resource)
@@ -140,4 +141,3 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO/branc
 - **Role-based access control**: See `docs/05-ROLE-BASED-ACCESS.md`
 - **Testing and validation**: See `docs/06-TESTING.md`
 - **Troubleshooting guide**: See `docs/07-TROUBLESHOOTING.md`
-

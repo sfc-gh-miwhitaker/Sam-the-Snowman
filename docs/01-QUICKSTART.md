@@ -26,10 +26,10 @@ USE ROLE ACCOUNTADMIN;
 ## 1. Create a Snowsight Git Workspace
 
 1. In Snowsight, open **Projects → Workspaces → From Git repository**.
-2. Repository URL: `https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git`.
+2. Repository URL: this repository’s Git URL (for example, your fork).
 3. Select or create a Git API integration:
    - Name: any descriptive value (for example `GITHUB_API_INTEGRATION`).
-   - Allowed prefixes: `https://github.com/` *(important: include the trailing slash).* 
+   - Allowed prefixes: `https://github.com/` *(important: include the trailing slash).*
    - Authentication: **Public repository**.
 4. Click **Create**. The repository’s files appear in the left navigator.
 
@@ -61,13 +61,13 @@ Work through the result sets returned by module 06:
 1. **Notification integration**
    - Expect `SFE_EMAIL_INTEGRATION` in the `SHOW NOTIFICATION INTEGRATIONS` output.
 2. **Git repository stage**
-   - `SHOW GIT REPOSITORIES IN SCHEMA SNOWFLAKE_EXAMPLE.DEPLOY;` should list `SFE_SAM_THE_SNOWMAN_REPO`.
+   - `SHOW GIT REPOSITORIES IN SCHEMA SNOWFLAKE_EXAMPLE.GIT_REPOS;` should list `SFE_SAM_THE_SNOWMAN_REPO`.
 3. **Stored procedure**
-   - `SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;` includes `SFE_SEND_EMAIL`.
+   - `SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;` includes `SFE_SEND_EMAIL`.
 4. **Semantic views**
    - `SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;` lists three `SV_SAM_*` views.
 5. **Agent**
-   - `SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;` lists `SAM_THE_SNOWMAN`.
+   - `SHOW AGENTS IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;` lists `SAM_THE_SNOWMAN`.
 6. **Documentation database**
    - `SHOW DATABASES LIKE 'SNOWFLAKE_DOCUMENTATION';` returns a single row.
 7. **Schema inventory**
@@ -96,7 +96,7 @@ Need to redeploy a component without running the full orchestrator? Execute modu
 -- Example: rerun semantic views
 USE ROLE ACCOUNTADMIN;
 USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
 ```
 
 Modules are idempotent—rerunning them is safe. After rerunning a module, execute `sql/06_validation.sql` to confirm the change.
@@ -109,10 +109,10 @@ Remove all demo objects while preserving shared databases:
 
 ```sql
 USE ROLE ACCOUNTADMIN;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
-This drops the agent, semantic views, email procedure, and Git stage. `SNOWFLAKE_EXAMPLE` and `SNOWFLAKE_INTELLIGENCE` remain for audit purposes.
+This drops the agent, semantic views, email procedure, and Git repository clone. `SNOWFLAKE_EXAMPLE` and shared infrastructure remain for audit/reuse.
 
 ---
 
@@ -126,4 +126,3 @@ This drops the agent, semantic views, email procedure, and Git stage. `SNOWFLAKE
 - **Troubleshooting** – `docs/07-TROUBLESHOOTING.md`
 
 With validation complete, you are ready to adapt Sam-the-Snowman to your environment or use it as a blueprint for your own Snowflake Intelligence agents.
-

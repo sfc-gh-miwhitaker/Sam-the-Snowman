@@ -1,8 +1,8 @@
 # Auth Flow - Sam-the-Snowman
 
-Author: SE Community  
-Last Updated: 2025-12-16  
-Expires: 2026-01-15 (30 days from creation)  
+Author: SE Community
+Last Updated: 2025-12-16
+Expires: 2026-01-15 (30 days from creation)
 Status: Reference Implementation
 
 ![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
@@ -50,7 +50,7 @@ sequenceDiagram
   - Deps: Receives `SNOWFLAKE.CORTEX_USER` database role plus `USAGE` on agent and schemas.
 - **Sam-the-Snowman Agent**
   - Purpose: Orchestrate semantic analytics, documentation lookup, and email delivery.
-  - Technology: Snowflake Intelligence Agent stored in `SNOWFLAKE_INTELLIGENCE.AGENTS`.
+  - Technology: Snowflake Intelligence Agent stored in `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN`.
   - Location: Snowflake account.
   - Deps: Uses the dedicated warehouse `SFE_SAM_SNOWMAN_WH` plus permissions on semantic views/procedure.
 - **SFE_EMAIL_INTEGRATION**
@@ -63,6 +63,3 @@ sequenceDiagram
   - Technology: Snowsight agent interface.
   - Location: Customer workforce authenticated through SSO.
   - Deps: Must assume a role with agent `USAGE`; the script ensures `SFE_SAM_SNOWMAN_WH` is available.
-
-## Change History
-See `.cursor/DIAGRAM_CHANGELOG.md` for version history.

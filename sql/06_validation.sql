@@ -1,12 +1,12 @@
 /*******************************************************************************
  * DEMO PROJECT: Sam-the-Snowman
  * Module: 06_validation.sql
- * 
+ *
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
- * 
+ *
  * Synopsis:
  *   Validates that all Sam-the-Snowman components were deployed successfully.
- * 
+ *
  * Description:
  *   This module issues targeted SHOW statements so you can inspect the
  *   actual Snowflake objects created by the previous deployment modules.
@@ -15,13 +15,13 @@
  *
  * Prerequisites:
  *   - All previous modules (00-05) must be run first
- * 
- * Author: SE Community (inspired by Kaitlyn Wells @snowflake)
+ *
+ * Author: SE Community
  * Created: 2025-11-25
  * Expires: 2026-01-15
  * Version: 4.0
  * License: Apache 2.0
- * 
+ *
  * Usage:
  *   This module is called by deploy_all.sql or can be run standalone
  *   to check deployment status.
@@ -36,13 +36,13 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 SHOW NOTIFICATION INTEGRATIONS LIKE 'SFE_EMAIL_INTEGRATION';
 
-SHOW GIT REPOSITORIES IN SCHEMA SNOWFLAKE_EXAMPLE.DEPLOY;
+SHOW GIT REPOSITORIES IN SCHEMA SNOWFLAKE_EXAMPLE.GIT_REPOS;
 
-SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;
+SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;
 
 SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;
 
-SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
+SHOW AGENTS IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;
 
 -- Verify Snowflake Intelligence object exists and has our agent
 SHOW SNOWFLAKE INTELLIGENCES;
@@ -52,4 +52,3 @@ SHOW DATABASES LIKE 'SNOWFLAKE_DOCUMENTATION';
 SHOW SCHEMAS IN DATABASE SNOWFLAKE_EXAMPLE;
 
 SELECT 'Validation complete. Review the SHOW results above for object status.' AS validation_summary;
-

@@ -6,40 +6,39 @@
  *
  * Synopsis:
  *   Complete teardown script for removing all Sam-the-Snowman components.
- * 
+ *
  * Description:
  *   This script removes all resources created by `deploy_all.sql` (modules `sql/01_scaffolding.sql` … `sql/06_validation.sql`) following
  *   demo project standards. The SNOWFLAKE_EXAMPLE database is preserved per
  *   demo standards (shared across demos for audit/reuse). Only schema-level
  *   objects specific to Sam-the-Snowman are removed.
- * 
+ *
  * OBJECTS REMOVED:
  *   - SFE_EMAIL_INTEGRATION (Notification Integration)
  *   - SFE_SAM_SNOWMAN_WH (Dedicated demo warehouse)
- *   - SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman (Agent)
+ *   - SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN (Agent)
  *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS semantic views (SV_SAM_QUERY_PERFORMANCE, SV_SAM_COST_ANALYSIS, SV_SAM_WAREHOUSE_OPERATIONS)
- *   - SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email procedure
- *   - SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO (Git repository)
- *   - SNOWFLAKE_EXAMPLE.DEPLOY schema
- *   - SNOWFLAKE_EXAMPLE.INTEGRATIONS schema
- *   - Schemas: SNOWFLAKE_EXAMPLE.DEPLOY, SNOWFLAKE_EXAMPLE.INTEGRATIONS
+ *   - SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SFE_SEND_EMAIL procedure
+ *   - SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO (Git repository clone)
+ *   - SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN schema
  *
  * OBJECTS PRESERVED:
- *   - SNOWFLAKE_INTELLIGENCE.AGENTS schema (required by Snowflake)
  *   - snowflake_documentation database (shared marketplace resource used by multiple projects)
  *   - SNOWFLAKE_EXAMPLE (Database) - Shared demo database
+ *   - SNOWFLAKE_EXAMPLE.GIT_REPOS schema (shared Git repository clones)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS schema (shared semantic views schema)
  *   - SFE_GITHUB_API_INTEGRATION - Reusable across projects
- * 
+ *
  * Prerequisites:
  *   - ACCOUNTADMIN role privileges
  *   - Sam-the-Snowman previously deployed via `deploy_all.sql`
- * 
- * Author: SE Community (inspired by Kaitlyn Wells @snowflake)
+ *
+ * Author: SE Community
  * Created: 2025-11-25
  * Expires: 2026-01-15
  * Version: 4.0
  * License: Apache 2.0
- * 
+ *
  * Usage:
  *   Execute this entire script as ACCOUNTADMIN. Safe to run multiple times.
  *   This script is idempotent and can be run multiple times without errors.
@@ -55,13 +54,13 @@ USE ROLE accountadmin;
 -- The following account-level objects are SHARED across all demo projects
 -- and must NEVER be dropped by any individual teardown script:
 --
---   ❌ DO NOT DROP: SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT
+--   DO NOT DROP: SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT
 --      (Account-level agent visibility control - used by ALL agents)
 --
---   ❌ DO NOT DROP: SFE_GITHUB_API_INTEGRATION  
+--   DO NOT DROP: SFE_GITHUB_API_INTEGRATION
 --      (Reusable GitHub integration - used by multiple repos)
 --
---   ❌ DO NOT DROP: SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS schema
+--   DO NOT DROP: SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS schema
 --      (Shared semantic views schema - only drop individual SV_* views)
 --
 -- ============================================================================
@@ -69,13 +68,13 @@ USE ROLE accountadmin;
 -- ============================================================================
 -- REMOVE AGENT FROM SNOWFLAKE INTELLIGENCE OBJECT (Optional)
 -- ============================================================================
--- Note: When we DROP AGENT below, it's automatically removed from the 
+-- Note: When we DROP AGENT below, it's automatically removed from the
 -- Snowflake Intelligence object. This explicit removal is only needed if
 -- you want to hide the agent without deleting it.
 --
 -- If you need to manually remove from object without deleting:
--- ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT 
---     DROP AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
+-- ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT
+--     DROP AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN;
 
 -- ============================================================================
 -- REMOVE INTEGRATION OBJECTS (Account-Level)
@@ -96,39 +95,39 @@ DROP WAREHOUSE IF EXISTS SFE_SAM_SNOWMAN_WH;
 -- no longer required.
 
 -- Remove the Sam-the-Snowman agent
--- Note: Agents are schema-level objects in SNOWFLAKE_INTELLIGENCE.AGENTS
+-- Note: This demo creates the agent in the project schema for collision-proof cleanup.
 -- It is safe to drop an agent - it does not affect any underlying data
 -- Re-running the setup script will recreate the agent
 
-DROP AGENT IF EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
+DROP AGENT IF EXISTS SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN;
 
 -- Remove semantic views from SEMANTIC_MODELS (explicit drops for clarity)
 DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE;
 DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS;
 DROP SEMANTIC VIEW IF EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_WAREHOUSE_OPERATIONS;
 
+-- Drop the Git repository clone (do not drop the shared GIT_REPOS schema)
+DROP GIT REPOSITORY IF EXISTS SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO;
+
 -- ============================================================================
 -- REMOVE SCHEMAS (After all objects dropped)
 -- ============================================================================
 
--- Drop the functional schemas created by Sam-the-Snowman
--- Note: SEMANTIC_MODELS is a shared schema, only drop Sam-specific views (done above)
-DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.DEPLOY CASCADE;
-DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.INTEGRATIONS CASCADE;
--- Note: DO NOT drop SEMANTIC_MODELS schema (shared across projects, only drop views)
+-- Drop the collision-proof project schema (removes procedures and any other project-scoped objects)
+DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN CASCADE;
+-- Note: DO NOT drop SEMANTIC_MODELS or GIT_REPOS schemas (shared across projects)
 
 -- ============================================================================
 -- LEGACY CLEANUP (For older deployments)
 -- ============================================================================
 
-DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.tools CASCADE;
+DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.TOOLS CASCADE;
 
 -- ============================================================================
 -- PRESERVATION NOTES
 -- ============================================================================
 
 -- Objects intentionally preserved:
--- - SNOWFLAKE_INTELLIGENCE.AGENTS: Required by Snowflake for agents, may be used by other agents
 -- - SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT: Account-level visibility control, shared across all agents
 -- - SNOWFLAKE_EXAMPLE (Database): Shared demo database for multiple projects
 -- - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS: Shared schema for all Cortex Analyst semantic views
@@ -141,7 +140,7 @@ DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.tools CASCADE;
 -- Only schema-level objects are removed; the database itself remains
 
 -- Final confirmation message
-SELECT 
+SELECT
     'All Sam-the-Snowman components have been removed' as message;
 
 /*************************************************************************************************************************
@@ -160,11 +159,10 @@ USE ROLE accountadmin;
 -- DROP NOTIFICATION INTEGRATION IF EXISTS SFE_EMAIL_INTEGRATION;
 
 -- Manually drop agents
--- DROP AGENT IF EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
+-- DROP AGENT IF EXISTS SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN;
 
 -- Manually drop schemas (only if verified no other demos use them)
--- DROP SCHEMA IF EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
--- DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.tools;
+-- DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.TOOLS;
 
 /*************************************************************************************************************************
  * --- COMPLETE ACCOUNT CLEANUP (Caution!) ---
@@ -182,17 +180,17 @@ USE ROLE accountadmin;
 -- Drop notification integration
 DROP NOTIFICATION INTEGRATION IF EXISTS SFE_EMAIL_INTEGRATION;
 
-DROP AGENT IF EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman;
+-- Modern deployments create the agent in the collision-proof project schema:
+DROP AGENT IF EXISTS SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN;
 
 -- Drop database schemas (ONLY after confirming no other demos use them)
--- DROP SCHEMA IF EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS CASCADE;
-DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.tools CASCADE;
+DROP SCHEMA IF EXISTS SNOWFLAKE_EXAMPLE.TOOLS CASCADE;
 
 -- Intentionally preserved: snowflake_documentation is shared across demos; do not drop
 
 -- Final confirmation message
-SELECT 
-    'All Sam-the-Snowman components have been removed. SNOWFLAKE_EXAMPLE and SNOWFLAKE_INTELLIGENCE databases preserved.' as message;
+SELECT
+    'All Sam-the-Snowman components have been removed. Shared infrastructure is preserved.' as message;
 
 /*************************************************************************************************************************
  * --- Verification Queries ---
@@ -210,14 +208,12 @@ SHOW NOTIFICATION INTEGRATIONS LIKE 'SFE_EMAIL_INTEGRATION';
 
 -- Check for database schemas
 SHOW SCHEMAS IN DATABASE SNOWFLAKE_EXAMPLE;
-SHOW SCHEMAS IN DATABASE SNOWFLAKE_INTELLIGENCE;
 
--- Check for agents in SNOWFLAKE_INTELLIGENCE
--- Note: This will fail if the database/schemas no longer exist
-SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
+-- Check for the agent (will return no rows if removed)
+SHOW AGENTS IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;
 
 -- Check for Cortex Search service
--- SHOW SERVICES IN SCHEMA SNOWFLAKE_EXAMPLE.tools;
+-- SHOW SERVICES IN SCHEMA SNOWFLAKE_EXAMPLE.TOOLS;
 
 /*************************************************************************************************************************
  * --- Notes on Shared Resources ---
@@ -225,18 +221,12 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
  * Database (SNOWFLAKE_EXAMPLE):
  *   - Per demo project standards, the SNOWFLAKE_EXAMPLE database is NEVER dropped.
  *   - This database is shared across multiple demo/example projects.
- *   - Only schema-level objects (DEPLOY, INTEGRATIONS, SEMANTIC) are removed.
+ *   - Only schema-level objects specific to this demo are removed.
  *   - The database remains for audit trails and reuse by other demos.
  *
- * Database (SNOWFLAKE_INTELLIGENCE):
- *   - Required by Snowflake for hosting agents in SNOWFLAKE_INTELLIGENCE.AGENTS.
- *   - This database is NEVER dropped as it may contain other agents.
- *   - Only the sam_the_snowman agent is removed.
- *
- * Schemas (SNOWFLAKE_INTELLIGENCE.AGENTS, SNOWFLAKE_EXAMPLE.DEPLOY/INTEGRATIONS/SEMANTIC):
- *   - These schemas are SHARED across demo projects and other agents.
- *   - The default teardown preserves the schemas and removes only Sam-the-Snowman objects.
- *   - Drop the schemas ONLY after confirming no other demos or agents rely on them.
+ * Shared schemas:
+ *   - SNOWFLAKE_EXAMPLE.GIT_REPOS and SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS are shared across demos.
+ *   - This teardown preserves those schemas and removes only Sam-the-Snowman objects.
  *
  * Notification Integration (SFE_EMAIL_INTEGRATION):
  *   - Uses the SFE_ prefix following demo project naming standards.
@@ -251,22 +241,18 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
  * therefore required to drop them. ACCOUNTADMIN can drop all objects.
  *
  * SYSADMIN (or configured role) owns:
- *   - SNOWFLAKE_INTELLIGENCE database (ownership transferred from ACCOUNTADMIN)
- *   - SNOWFLAKE_INTELLIGENCE.AGENTS schema
- *   - SNOWFLAKE_EXAMPLE.DEPLOY, SNOWFLAKE_EXAMPLE.INTEGRATIONS schemas
- *   - All semantic views (sfe_query_performance, sfe_cost_analysis, sfe_warehouse_operations)
- *   - Agent sam_the_snowman in SNOWFLAKE_INTELLIGENCE.AGENTS
+ *   - SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN schema
+ *   - SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO (Git repository clone)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_* (semantic views)
+ *   - SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN (agent)
+ *   - SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SFE_SEND_EMAIL (procedure)
  *
  * ACCOUNTADMIN owns:
  *   - SFE_EMAIL_INTEGRATION (Notification Integration)
- *
- * SYSADMIN (or configured role) has USAGE on:
- *   - SNOWFLAKE_EXAMPLE database and functional schemas
- *   - SNOWFLAKE_INTELLIGENCE database and AGENTS schema
- *   - Agent sam_the_snowman
+ *   - SFE_SAM_SNOWMAN_WH (Warehouse)
+ *   - SFE_GITHUB_API_INTEGRATION (API Integration)
  *
  *************************************************************************************************************************/
 
 -- For additional verification, query SNOWFLAKE.INFORMATION_SCHEMA.OBJECTS or rerun
 -- deploy_all.sql to rebuild the environment as needed.
-

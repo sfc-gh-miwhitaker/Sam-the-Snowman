@@ -159,15 +159,15 @@ SELECT GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMAN
 -- Look for: "(e.g., ...)" patterns in dimension comments showing example values
 
 -- Count verified queries per view
-SELECT 
+SELECT
   'sfe_query_performance' as view_name,
   REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE'), '"name":') as verified_query_count
 UNION ALL
-SELECT 
+SELECT
   'sfe_cost_analysis',
   REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS'), '"name":')
 UNION ALL
-SELECT 
+SELECT
   'sfe_warehouse_operations',
   REGEXP_COUNT(GET_DDL('VIEW', 'SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_WAREHOUSE_OPERATIONS'), '"name":');
 
@@ -179,10 +179,10 @@ SELECT
 ```
 
 **Expected Results**:
-- ✅ Each view has dimension comments with example values (e.g., patterns)
-- ✅ Each view has rich contextual descriptions explaining implications
-- ✅ Each view has 3+ verified queries
-- ✅ Synonyms allow natural language variation
+- Each view has dimension comments with example values (e.g., patterns)
+- Each view has rich contextual descriptions explaining implications
+- Each view has 3+ verified queries
+- Synonyms allow natural language variation
 
 ---
 
@@ -200,4 +200,3 @@ SELECT
 | `docs/08-SEMANTIC-VIEW-EXPANSION.md` | Guide for adding new semantic views using AI assistance |
 
 Use this reference when you need to extend the agent or explain its architecture to stakeholders.
-

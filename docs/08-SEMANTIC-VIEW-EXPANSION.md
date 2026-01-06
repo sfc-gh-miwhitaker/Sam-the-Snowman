@@ -71,7 +71,7 @@ This generates a `CREATE SEMANTIC VIEW` statement compatible with your existing 
 
 Edit the generated SQL to match Sam-the-Snowman standards:
 
-#### ✅ Required Refinements
+#### Required Refinements
 
 1. **Add SFE_ prefix** for demo safety:
    ```sql
@@ -86,7 +86,7 @@ Edit the generated SQL to match Sam-the-Snowman standards:
 3. **Enhance column comments with contextual information**:
    ```sql
    -- In FACTS and DIMENSIONS, add rich descriptions
-   PIPE_USAGE_HISTORY.CREDITS_USED as CREDITS_USED 
+   PIPE_USAGE_HISTORY.CREDITS_USED as CREDITS_USED
      comment='Snowpipe credits consumed. High values relative to BYTES_INSERTED suggest inefficient file sizing. Synonyms: ingestion cost, pipe cost.',
    ```
 
@@ -95,7 +95,7 @@ Edit the generated SQL to match Sam-the-Snowman standards:
    /*******************************************************************************
     * DEMO PROJECT: Sam-the-Snowman
     * Module: 03_semantic_views.sql (extended)
-    * 
+    *
     * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
     ******************************************************************************/
    ```
@@ -148,9 +148,9 @@ Add your new view to the deployment workflow:
 4. **Test the integration**:
    ```sql
    -- Redeploy
-   EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
-   EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/05_agent.sql';
-   
+   EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
+   EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/05_agent.sql';
+
    -- Validate
    SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;
    ```
@@ -170,7 +170,7 @@ Let's walk through a complete example of adding Snowpipe monitoring.
 
 **Description entered**:
 ```
-Monitor Snowpipe ingestion reliability, file processing rates, 
+Monitor Snowpipe ingestion reliability, file processing rates,
 error patterns, and credit consumption for data loading pipelines.
 ```
 
@@ -192,7 +192,7 @@ GROUP BY pipe_name, error_message
 ORDER BY error_count DESC;
 
 -- Query 3: Ingestion latency by pipe
-SELECT pipe_name, 
+SELECT pipe_name,
        AVG(DATEDIFF('second', last_received_message_timestamp, last_load_time)) as avg_latency_sec
 FROM SNOWFLAKE.ACCOUNT_USAGE.PIPE_USAGE_HISTORY
 WHERE start_time >= DATEADD('day', -7, CURRENT_TIMESTAMP())
@@ -206,10 +206,10 @@ GROUP BY pipe_name;
 ### AI-Generated Output
 
 The generator produces:
-- ✅ Relationship between PIPE_USAGE_HISTORY and COPY_HISTORY (via `pipe_name`)
-- ✅ Verified queries based on examples + query history patterns
-- ✅ Sample values for `pipe_name` column
-- ✅ AI-generated descriptions for metrics
+- Relationship between PIPE_USAGE_HISTORY and COPY_HISTORY (via `pipe_name`)
+- Verified queries based on examples + query history patterns
+- Sample values for `pipe_name` column
+- AI-generated descriptions for metrics
 
 ### Refined SQL (Production-Ready)
 
@@ -234,27 +234,27 @@ TABLES (
     SNOWFLAKE.ACCOUNT_USAGE.COPY_HISTORY
 )
 FACTS (
-  PIPE_USAGE_HISTORY.CREDITS_USED as CREDITS_USED 
+  PIPE_USAGE_HISTORY.CREDITS_USED as CREDITS_USED
     comment='Snowpipe credits consumed for continuous file ingestion. Synonyms: ingestion cost, pipe cost, loading cost.',
-  PIPE_USAGE_HISTORY.FILES_INSERTED as FILES_INSERTED 
+  PIPE_USAGE_HISTORY.FILES_INSERTED as FILES_INSERTED
     comment='Number of files successfully loaded. Synonyms: files loaded, ingested files, processed files.',
-  PIPE_USAGE_HISTORY.BYTES_INSERTED as BYTES_INSERTED 
+  PIPE_USAGE_HISTORY.BYTES_INSERTED as BYTES_INSERTED
     comment='Total bytes successfully loaded. Synonyms: data ingested, bytes loaded, volume processed.',
-  COPY_HISTORY.ROW_COUNT as ROWS_LOADED 
+  COPY_HISTORY.ROW_COUNT as ROWS_LOADED
     comment='Rows loaded from staged files. Synonyms: records inserted, rows ingested.',
-  COPY_HISTORY.ERROR_COUNT as ERROR_COUNT 
+  COPY_HISTORY.ERROR_COUNT as ERROR_COUNT
     comment='Number of errors during file loading. Non-zero indicates data quality issues. Synonyms: load errors, ingestion errors.'
 )
 DIMENSIONS (
-  PIPE_USAGE_HISTORY.PIPE_NAME as PIPE_NAME 
+  PIPE_USAGE_HISTORY.PIPE_NAME as PIPE_NAME
     comment='Snowpipe object name (e.g., MY_S3_PIPE, EVENT_STREAM_PIPE, CDC_PIPE). Synonyms: pipe, ingestion pipe.',
-  PIPE_USAGE_HISTORY.START_TIME as START_TIME 
+  PIPE_USAGE_HISTORY.START_TIME as START_TIME
     comment='Measurement period start. Synonyms: period start, ingestion start.',
-  COPY_HISTORY.FILE_NAME as FILE_NAME 
+  COPY_HISTORY.FILE_NAME as FILE_NAME
     comment='Staged file path loaded by pipe. Synonyms: source file, staged file.',
-  COPY_HISTORY.STATUS as STATUS 
+  COPY_HISTORY.STATUS as STATUS
     comment='Load status for each file (LOADED, LOAD_FAILED, PARTIALLY_LOADED). Synonyms: load status, ingestion status.',
-  COPY_HISTORY.ERROR_MESSAGE as ERROR_MESSAGE 
+  COPY_HISTORY.ERROR_MESSAGE as ERROR_MESSAGE
     comment='Detailed error description for failed loads. Synonyms: failure reason, error details.'
 )
 COMMENT = 'DEMO: Sam-the-Snowman - Snowpipe ingestion monitoring, error tracking, and cost analysis.'
@@ -288,7 +288,7 @@ DEFINE TOOL sfe_pipe_monitoring
 -- Update orchestration instructions
 INSTRUCTIONS $$
   You are Sam-the-Snowman, a Snowflake operations assistant...
-  
+
   Use these tools based on user intent:
   - sfe_query_performance: slow queries, errors, spilling, optimization
   - sfe_cost_analysis: credits, spend, expensive warehouses
@@ -303,7 +303,7 @@ $$;
 
 ## Best Practices Summary
 
-### ✅ DO
+### DO
 
 - **Use AI generator for discovery** - let it find patterns in your query history
 - **Export to YAML** - capture the AI-generated structure
@@ -314,7 +314,7 @@ $$;
 - **Write rich contextual descriptions** - explain what metrics mean and when values indicate problems in comments
 - **Test verified queries** - ensure they work and demonstrate value
 
-### ❌ DON'T
+### DON'T
 
 - **Don't abandon Git workflow** - UI-only authoring breaks automation
 - **Don't skip refinement** - AI output needs human curation
@@ -331,7 +331,7 @@ $$;
 
 **Problem**: Generator creates relationships that don't match your data
 
-**Solution**: 
+**Solution**:
 - Review join keys in source tables
 - Manually specify the correct relationship in SQL
 - Use `DESCRIBE TABLE` to verify column types match
@@ -405,4 +405,3 @@ After successfully adding your first custom semantic view:
 ---
 
 **Pro Tip**: Start with the AI generator to rapidly explore new domains, but always productionize through SQL to maintain your Git-based, auditable, reproducible deployment workflow. The best approach combines AI discovery with human refinement and version control discipline.
-

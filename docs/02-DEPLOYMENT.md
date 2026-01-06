@@ -19,7 +19,7 @@ Use this checklist before and after running `deploy_all.sql` (or the individual 
 - [ ] Optional: edit the SQL modules if you plan to deploy with a role other than SYSADMIN
 
 ### Stage Preparation
-- [ ] Snowsight Git workspace created from `https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git`
+- [ ] Snowsight Git workspace created from this repository’s Git URL (for example, your fork)
 
 ---
 
@@ -32,7 +32,7 @@ Use this checklist before and after running `deploy_all.sql` (or the individual 
 
 Need to re-run a single component? Execute the corresponding module directly:
 ```sql
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/<module>.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/<module>.sql';
 ```
 
 ---
@@ -44,7 +44,7 @@ Run these commands (or consult the output from `sql/06_validation.sql`) to confi
 ```sql
 -- Integration & email procedure
 SHOW NOTIFICATION INTEGRATIONS LIKE 'SFE_EMAIL_INTEGRATION';
-SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;
+SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;
 
 -- Dedicated warehouse
 SHOW WAREHOUSES LIKE 'SFE_SAM_SNOWMAN_WH';
@@ -53,7 +53,7 @@ SHOW WAREHOUSES LIKE 'SFE_SAM_SNOWMAN_WH';
 SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;
 
 -- Agent & schemas
-SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
+SHOW AGENTS IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;
 SHOW SCHEMAS IN DATABASE SNOWFLAKE_EXAMPLE;
 SHOW DATABASES LIKE 'SNOWFLAKE_DOCUMENTATION';
 ```
@@ -81,7 +81,7 @@ To remove the demo artifacts while preserving shared databases:
 
 ```sql
 USE ROLE ACCOUNTADMIN;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
 ---

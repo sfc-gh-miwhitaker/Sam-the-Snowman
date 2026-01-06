@@ -30,11 +30,11 @@ When you only need to redeploy a subset of components:
 
 1. Ensure the Git repository stage is up to date (re-run `deploy_all.sql` or run the snippet below).
    ```sql
-   ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO FETCH;
+   ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO FETCH;
    ```
 2. Execute the module you want to refresh:
    ```sql
-   EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
+   EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
    ```
 3. Run `sql/05_agent.sql` if your changes affect the agent’s tool bindings.
 4. Finish with `sql/06_validation.sql` to confirm the object now appears in the `SHOW` output.
@@ -60,7 +60,7 @@ snow sql -f sql/06_validation.sql
 
 Tips:
 - Set your profile with ACCOUNTADMIN privileges before invoking the commands.
-- When using the CLI, refresh the Git stage with `ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO FETCH;` before invoking modules (or simply re-run `deploy_all.sql`, which is idempotent).
+- When using the CLI, refresh the Git stage with `ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO FETCH;` before invoking modules (or simply re-run `deploy_all.sql`, which is idempotent).
 - Use `--variable` or environment variables if you need to parameterise custom scripts (the shipped modules do not require parameters).
 
 ---
@@ -102,7 +102,7 @@ EXECUTE IMMEDIATE FROM '@.../sql/06_validation.sql';
 
 If you want to pull the latest commit from GitHub after initial deployment:
 
-1. Run `ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO FETCH;`
+1. Run `ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO FETCH;`
 2. Execute any modules that changed in the new commit or rerun `deploy_all.sql`.
 3. Run `sql/06_validation.sql` to confirm the update.
 
@@ -112,7 +112,7 @@ If you want to pull the latest commit from GitHub after initial deployment:
 
 | Symptom | Resolution |
 |---------|------------|
-| Stage not found when running a module | Run `ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO FETCH;` (or rerun `deploy_all.sql`) |
+| Stage not found when running a module | Run `ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO FETCH;` (or rerun `deploy_all.sql`) |
 | Permission error in a module | Ensure the module’s `USE ROLE SYSADMIN;` matches your target role or edit the statements |
 | Agent missing after redeploy | Run `sql/05_agent.sql`, then `sql/06_validation.sql` |
 | Marketplace listing blocked | Accept the legal terms manually, then execute `sql/04_marketplace.sql` again |
@@ -129,4 +129,3 @@ If you want to pull the latest commit from GitHub after initial deployment:
 - `docs/07-TROUBLESHOOTING.md` – extended troubleshooting catalogue
 
 Use this guide whenever you need to rerun part of the deployment, promote changes between environments, or execute the scripts from automation tooling.
-

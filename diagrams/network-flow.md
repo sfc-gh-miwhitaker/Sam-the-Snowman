@@ -1,8 +1,8 @@
 # Network Flow - Sam-the-Snowman
 
-Author: SE Community  
-Last Updated: 2025-12-16  
-Expires: 2026-01-15 (30 days from creation)  
+Author: SE Community
+Last Updated: 2025-12-16
+Expires: 2026-01-15 (30 days from creation)
 Status: Reference Implementation
 
 ![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
@@ -24,7 +24,7 @@ graph TB
         Gateway[Snowflake Cloud Services\nHTTPS :443]
         Warehouse[Demo Warehouse\nSFE_SAM_SNOWMAN_WH]
         Db[SNOWFLAKE_EXAMPLE Database]
-        Agents[SNOWFLAKE_INTELLIGENCE.AGENTS]
+        Agent[Agent\nSNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN]
         EmailProc[sfe_send_email() Procedure]
     end
 
@@ -39,8 +39,8 @@ graph TB
     Snowsight -->|HTTPS :443| Gateway
     Gateway -->|Execute SQL| Warehouse
     Warehouse --> Db
-    Warehouse --> Agents
-    Agents --> EmailProc
+    Warehouse --> Agent
+    Agent --> EmailProc
     EmailProc --> EmailSvc
     EmailSvc -->|TLS Email Delivery| SMTP
     Gateway -->|FETCH via SFE_GITHUB_API_INTEGRATION| GitHub
@@ -64,14 +64,14 @@ graph TB
   - Location: Customer Snowflake account.
   - Deps: Script auto-creates/resumes it; you can resize or grant additional roles as needed.
 - **SNOWFLAKE_EXAMPLE Database**
-  - Purpose: Stores deployment (`DEPLOY`), integration, and semantic schemas used by the agent.
+  - Purpose: Stores shared Git clones (`GIT_REPOS`), the project schema (`SAM_THE_SNOWMAN`), and shared semantic views (`SEMANTIC_MODELS`).
   - Technology: Snowflake database created by `sql/01_scaffolding.sql`.
   - Location: Customer Snowflake account.
   - Deps: Requires SYSADMIN (or delegated) ownership for ongoing maintenance.
-- **SNOWFLAKE_INTELLIGENCE.AGENTS**
+- **Agent (Sam-the-Snowman)**
   - Purpose: Hosts the Sam-the-Snowman agent specification and tool bindings.
   - Technology: Snowflake Intelligence Agents service.
-  - Location: `SNOWFLAKE_INTELLIGENCE.AGENTS` schema.
+  - Location: `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN`.
   - Deps: Needs `SNOWFLAKE.CORTEX_USER` database role plus access to semantic views.
 - **GitHub Integration**
   - Purpose: Supplies deployment artifacts through `SFE_GITHUB_API_INTEGRATION`.
@@ -81,8 +81,5 @@ graph TB
 - **Notification Service & Email**
   - Purpose: Deliver HTML summaries without exposing SMTP credentials.
   - Technology: Python procedure `sfe_send_email` calling `SYSTEM$SEND_EMAIL`.
-  - Location: Procedure in `SNOWFLAKE_EXAMPLE.INTEGRATIONS`; relay managed by Snowflake.
+  - Location: Procedure in `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN`; relay managed by Snowflake.
   - Deps: Requires `SFE_EMAIL_INTEGRATION` and outbound TLS to recipient mailboxes.
-
-## Change History
-See `.cursor/DIAGRAM_CHANGELOG.md` for version history.

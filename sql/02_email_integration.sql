@@ -1,33 +1,33 @@
 /*******************************************************************************
  * DEMO PROJECT: Sam-the-Snowman
  * Module: 02_email_integration.sql
- * 
+ *
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
- * 
+ *
  * Synopsis:
  *   Creates email notification integration and stored procedure for Sam-the-Snowman.
- * 
+ *
  * Description:
  *   This module sets up email delivery capabilities:
  *   - Creates SFE_EMAIL_INTEGRATION notification integration
  *   - Creates sfe_send_email stored procedure with SQL injection protection
  *   - Tests the email integration (auto-detects your email address)
- * 
+ *
  * OBJECTS CREATED:
  *   - SFE_EMAIL_INTEGRATION (Notification Integration)
- *   - SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email (Stored Procedure)
- * 
+ *   - SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.sfe_send_email (Stored Procedure)
+ *
  * Prerequisites:
  *   - deploy_all.sql handles infrastructure automatically; if running manually ensure 01_scaffolding.sql succeeded
  *   - Email domain allow-listed for notification integrations
  *   - ACCOUNTADMIN role privileges
- * 
- * Author: SE Community (inspired by Kaitlyn Wells @snowflake)
+ *
+ * Author: SE Community
  * Created: 2025-11-25
  * Expires: 2026-01-15
  * Version: 4.0
  * License: Apache 2.0
- * 
+ *
  * Usage:
  *   This module is called by deploy_all.sql or can be run standalone
  *   after setting configuration variables.
@@ -82,7 +82,7 @@ USE ROLE SYSADMIN;
 -- ============================================================================
 
 -- Create stored procedure to send HTML emails (sfe_ prefix for demo safety)
-CREATE OR REPLACE PROCEDURE SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email(
+CREATE OR REPLACE PROCEDURE SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.sfe_send_email(
     recipient_email VARCHAR,
     subject VARCHAR,
     body VARCHAR
@@ -100,24 +100,24 @@ import snowflake.snowpark as snowpark
 def send_email(session: snowpark.Session, recipient_email: str, subject: str, body: str):
     """
     Send HTML email via Snowflake notification integration.
-    
+
     Security: Uses session.call() to prevent SQL injection.
-    
+
     Args:
         session: Snowpark session object
         recipient_email: Email address of the recipient
         subject: Email subject line
         body: HTML body content
-        
+
     Returns:
         Success message or error description
     """
     try:
-        session.call("SYSTEM$SEND_EMAIL", 
-                     'SFE_EMAIL_INTEGRATION', 
-                     recipient_email, 
-                     subject, 
-                     body, 
+        session.call("SYSTEM$SEND_EMAIL",
+                     'SFE_EMAIL_INTEGRATION',
+                     recipient_email,
+                     subject,
+                     body,
                      'text/html')
         return "Email sent successfully"
     except Exception as e:
@@ -130,7 +130,7 @@ $$;
 
 -- Test the email integration using configured recipient
 -- This will send a test email to verify the notification integration works
-CALL SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email(
+CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.sfe_send_email(
     $effective_notification_email,
     'Sam-the-Snowman - Test Email',
     '<h1>Email Integration Test</h1><p>This is a test of the Sam-the-Snowman email notification system.</p>'
@@ -150,4 +150,3 @@ CALL SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email(
 -- your email domain is allow-listed in Snowflake notification settings
 
 -- Email integration complete
-

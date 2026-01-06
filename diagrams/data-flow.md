@@ -1,8 +1,8 @@
 # Data Flow - Sam-the-Snowman
 
-Author: SE Community  
-Last Updated: 2025-12-16  
-Expires: 2026-01-15 (30 days from creation)  
+Author: SE Community
+Last Updated: 2025-12-16
+Expires: 2026-01-15 (30 days from creation)
 Status: Reference Implementation
 
 ![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
@@ -82,18 +82,15 @@ graph TB
 - **Sam-the-Snowman Agent**
   - Purpose: Orchestrate semantic analytics, documentation lookup, and email delivery.
   - Technology: Snowflake Intelligence Agent.
-  - Location: `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman`.
+  - Location: `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN`.
   - Deps: Needs semantic views, Cortex Search dataset, and email procedure to exist.
 - **Email Delivery Path**
   - Purpose: Send optional HTML recaps to stakeholders.
   - Technology: Python procedure `sfe_send_email` calling `SYSTEM$SEND_EMAIL`.
-  - Location: `SNOWFLAKE_EXAMPLE.INTEGRATIONS`.
+  - Location: `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN`.
   - Deps: Uses `SFE_EMAIL_INTEGRATION` and the agent `cortex_email_tool`.
 - **Snowsight Consumers**
   - Purpose: Provide conversational and worksheet access for admins/analysts.
   - Technology: Snowsight UI.
   - Location: Snowflake web interface.
   - Deps: Users must activate a warehouse and hold SYSADMIN (or delegated) role.
-
-## Change History
-See `.cursor/DIAGRAM_CHANGELOG.md` for version history.

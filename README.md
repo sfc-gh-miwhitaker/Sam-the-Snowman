@@ -4,12 +4,12 @@
 
 # Sam-the-Snowman
 
-> **DEMONSTRATION PROJECT - EXPIRES: 2026-01-15**  
-> This demo uses Snowflake features current as of November 2025.  
+> **DEMONSTRATION PROJECT - EXPIRES: 2026-01-15**
+> This demo uses Snowflake features current as of November 2025.
 > After expiration, this repository will be archived and made private.
 
-**Author:** SE Community  
-**Purpose:** Reference implementation for Snowflake Intelligence agent with query performance analysis  
+**Author:** SE Community
+**Purpose:** Reference implementation for Snowflake Intelligence agent with query performance analysis
 **Created:** 2025-11-25 | **Expires:** 2026-01-15 (30 days) | **Status:** ACTIVE
 
 ---
@@ -18,9 +18,9 @@
 
 Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usage data and returns actionable guidance on query performance, cost control, and warehouse operations. Deploy the agent in a few minutes, ask natural-language questions, and receive answers backed by live telemetry from your environment.
 
-👋 **First time here? Follow these steps:**
+**First time here? Follow these steps:**
 1. `QUICKSTART.md` - Copy/paste deployment guide (< 5 min)
-2. Open [`deploy_all.sql`](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/blob/main/deploy_all.sql) on GitHub
+2. Open `deploy_all.sql` in this repository
 3. Copy entire script → Paste into Snowsight worksheet → Click "Run All"
 4. Navigate to **AI & ML → Agents** → Select **Sam-the-Snowman**
 
@@ -47,10 +47,10 @@ Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usa
 
 **Single-script deployment** – No Git workspace or file system navigation required:
 
-1. **Copy** the [`deploy_all.sql`](https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/blob/main/deploy_all.sql) script from GitHub
+1. **Copy** the `deploy_all.sql` script from this repository
 2. **Open Snowsight** → Create new SQL worksheet
 3. **Paste** the entire script
-4. **Click "Run All"** (▶▶) or press Cmd/Ctrl+Shift+Enter
+4. **Click "Run All"** or press Cmd/Ctrl+Shift+Enter
 5. **Wait ~3-5 minutes** for automated deployment
 6. **Navigate to AI & ML → Agents** → Select `Sam-the-Snowman`
 
@@ -74,15 +74,15 @@ See `QUICKSTART.md` for detailed instructions and troubleshooting.
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Agent | `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman` | Orchestrates tools and answers questions |
+| Agent | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN` | Orchestrates tools and answers questions |
 | Agent Visibility | `SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT` | Controls agent visibility in Snowflake Intelligence UI |
 | Semantic views | `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_*` | Domain datasets for performance, cost, and warehouse analytics |
-| Email procedure | `SNOWFLAKE_EXAMPLE.INTEGRATIONS.sfe_send_email()` | Sends HTML mail via `SYSTEM$SEND_EMAIL` |
-| Git repository stage | `SNOWFLAKE_EXAMPLE.DEPLOY.SFE_SAM_THE_SNOWMAN_REPO` | Stores the Git clone used by `deploy_all.sql` |
+| Email procedure | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SFE_SEND_EMAIL()` | Sends HTML mail via `SYSTEM$SEND_EMAIL` |
+| Git repository stage | `SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO` | Stores the Git clone used by `deploy_all.sql` |
 | Demo warehouse | `SFE_SAM_SNOWMAN_WH` | X-Small warehouse auto-created/resumed for all demo workloads |
 | Documentation database | `snowflake_documentation` | Supplies Cortex Search with official Snowflake guidance |
 
-Schemas follow the demo pattern: `DEPLOY` (infrastructure), `INTEGRATIONS` (external systems), and `SEMANTIC_MODELS` (shared semantic views). All account-level objects use the `SFE_` prefix for easy discovery and cleanup. Semantic views use the `SV_SAM_` prefix for project identification.
+Schemas follow the demo pattern: `GIT_REPOS` (shared Git clones), `SAM_THE_SNOWMAN` (project schema), and `SEMANTIC_MODELS` (shared semantic views). All account-level objects use the `SFE_` prefix for easy discovery and cleanup. Semantic views use the `SV_SAM_` prefix for project identification.
 
 ---
 
@@ -140,10 +140,10 @@ Run the teardown script to remove demo objects while leaving shared databases in
 
 ```sql
 USE ROLE ACCOUNTADMIN;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
-The script drops the agent, semantic views, email procedure, and Git stage, but preserves `SNOWFLAKE_EXAMPLE` and `SNOWFLAKE_INTELLIGENCE` databases per demo standards.
+The script drops the agent, semantic views, email procedure, and Git repository clone, but preserves `SNOWFLAKE_EXAMPLE` and shared infrastructure (for example `SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT`).
 
 ---
 
@@ -162,9 +162,9 @@ To extend this demo or create a production version, fork the repository before t
 
 ## Support & Contributing
 
-- Report issues on GitHub: <https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman/issues>
+- Report issues in your repository’s issue tracker.
 - Follow the existing coding style, run the test plan in `docs/06-TESTING.md`, and update documentation with your changes before opening a PR.
 - Questions? The Snowflake Community forums are a great place to ask.
 
-**Author:** SE Community  
-Inspired by work from Kaitlyn Wells (@snowflake)
+**Author:** SE Community
+Inspired by prior SE Community agent demos.

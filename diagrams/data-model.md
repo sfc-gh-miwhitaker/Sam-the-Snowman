@@ -1,8 +1,8 @@
 # Data Model - Sam-the-Snowman
 
-Author: SE Community  
-Last Updated: 2025-12-16  
-Expires: 2026-01-15 (30 days from creation)  
+Author: SE Community
+Last Updated: 2025-12-16
+Expires: 2026-01-15 (30 days from creation)
 Status: Reference Implementation
 
 ![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)
@@ -10,7 +10,7 @@ Status: Reference Implementation
 > **Reference Implementation:** This code demonstrates production-grade architectural patterns and best practices. Review and customize security, networking, and logic for your organization's specific requirements before deployment.
 
 ## Overview
-The data model connects Snowflake telemetry (`SNOWFLAKE.ACCOUNT_USAGE`) to the semantic views in `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS`, which in turn power the Intelligence agent stored in `SNOWFLAKE_INTELLIGENCE.AGENTS`. All semantic views follow the `SV_SAM_*` prefix pattern for project identification.
+The data model connects Snowflake telemetry (`SNOWFLAKE.ACCOUNT_USAGE`) to the semantic views in `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS`, which in turn power the Intelligence agent stored in `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN`. All semantic views follow the `SV_SAM_*` prefix pattern for project identification.
 
 ## Diagram
 ```mermaid
@@ -94,9 +94,6 @@ erDiagram
   - Deps: Join to ACCOUNT_USAGE views and expose curated metrics plus synonyms.
 - **Sam-the-Snowman Agent Catalog Entry**
   - Purpose: Persist agent instructions, tool bindings, and semantic view references.
-  - Technology: Snowflake Intelligence Agent stored in `SNOWFLAKE_INTELLIGENCE.AGENTS`.
-  - Location: `SNOWFLAKE_INTELLIGENCE.AGENTS.sam_the_snowman` (managed via Snowflake Intelligence object).
+  - Technology: Snowflake Intelligence Agent stored in `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN`.
+  - Location: `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN` (managed via Snowflake Intelligence object).
   - Deps: Relies on semantic views and procedure identifiers defined in `sql/05_agent.sql`.
-
-## Change History
-See `.cursor/DIAGRAM_CHANGELOG.md` for version history.

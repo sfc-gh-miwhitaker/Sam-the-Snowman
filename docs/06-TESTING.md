@@ -31,7 +31,7 @@ If any check fails, resolve it before continuing (for example, add an email with
 ```sql
 USE ROLE ACCOUNTADMIN;
 USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
 ```
 
 Expected highlights:
@@ -39,11 +39,11 @@ Expected highlights:
 | Check | Command | Expected |
 |-------|---------|----------|
 | Notification integration | `SHOW NOTIFICATION INTEGRATIONS LIKE 'SFE_EMAIL_INTEGRATION';` | One row, `ENABLED = TRUE` |
-| Git repository stage | `SHOW GIT REPOSITORIES IN SCHEMA SNOWFLAKE_EXAMPLE.DEPLOY;` | `SFE_SAM_THE_SNOWMAN_REPO` listed |
-| Email procedure | `SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.INTEGRATIONS;` | `SFE_SEND_EMAIL` present |
+| Git repository stage | `SHOW GIT REPOSITORIES IN SCHEMA SNOWFLAKE_EXAMPLE.GIT_REPOS;` | `SFE_SAM_THE_SNOWMAN_REPO` listed |
+| Email procedure | `SHOW PROCEDURES IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;` | `SFE_SEND_EMAIL` present |
 | Demo warehouse | `SHOW WAREHOUSES LIKE 'SFE_SAM_SNOWMAN_WH';` | One row, state = SUSPENDED or RESUMED |
 | Semantic views | `SHOW SEMANTIC VIEWS IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;` | All three `SV_SAM_*` views listed |
-| Agent | `SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;` | `SAM_THE_SNOWMAN` listed |
+| Agent | `SHOW AGENTS IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;` | `SAM_THE_SNOWMAN` listed |
 | Documentation | `SHOW DATABASES LIKE 'SNOWFLAKE_DOCUMENTATION';` | One row |
 
 Optional data spot-check:
@@ -90,7 +90,7 @@ If you granted access to another role (for example `ANALYTICS_TEAM`):
 
 ```sql
 USE ROLE ANALYTICS_TEAM;
-SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
+SHOW AGENTS IN SCHEMA SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN;
 ```
 
 You should see `SAM_THE_SNOWMAN`. If not, reapply the grants in `docs/05-ROLE-BASED-ACCESS.md`.
@@ -103,7 +103,7 @@ Ensure the teardown script runs without errors:
 
 ```sql
 USE ROLE ACCOUNTADMIN;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.deploy.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
 ```
 
 Then redeploy (steps in `QUICKSTART.md`) to confirm modular scripts remain idempotent.
@@ -121,4 +121,3 @@ A deployment is considered healthy when all of the following are true:
 - Teardown script completes and a fresh deployment succeeds.
 
 Document the results of each test for your change log or release checklist.
-
