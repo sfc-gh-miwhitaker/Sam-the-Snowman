@@ -4,6 +4,9 @@
  *
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
+ * PURPOSE:
+ *   Install the Snowflake Documentation listing used by Cortex Search.
+ *
  * Synopsis:
  *   Installs Snowflake Documentation from the Marketplace for Cortex Search.
  *
@@ -23,7 +26,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-01-15
+ * Expires: 2026-02-14
  * Version: 4.0
  * License: Apache 2.0
  *
@@ -46,7 +49,7 @@ CALL SYSTEM$ACCEPT_LEGAL_TERMS('DATA_EXCHANGE_LISTING', 'GZSTZ67BY9OQ4');
 -- Import Snowflake Documentation database from Marketplace
 CREATE OR REPLACE DATABASE snowflake_documentation
     FROM LISTING 'GZSTZ67BY9OQ4'
-    COMMENT = 'DEMO: Sam-the-Snowman - Snowflake Documentation from the Marketplace.';
+    COMMENT = 'DEMO: Sam-the-Snowman - Snowflake Documentation from the Marketplace. (Expires: 2026-02-14)';
 
 -- Grant configured role access to Snowflake Documentation
 -- This restricts documentation access to only users with the configured role

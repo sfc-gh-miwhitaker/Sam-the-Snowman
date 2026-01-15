@@ -1,16 +1,16 @@
 ![Reference Implementation](https://img.shields.io/badge/Reference-Implementation-blue)
 ![Ready to Run](https://img.shields.io/badge/Ready%20to%20Run-Yes-green)
-![Expires](https://img.shields.io/badge/Expires-2026--01--15-orange)
+![Expires](https://img.shields.io/badge/Expires-2026--02--14-orange)
 
 # Sam-the-Snowman
 
-> **DEMONSTRATION PROJECT - EXPIRES: 2026-01-15**
+> **DEMONSTRATION PROJECT - EXPIRES: 2026-02-14**
 > This demo uses Snowflake features current as of November 2025.
 > After expiration, this repository will be archived and made private.
 
 **Author:** SE Community
 **Purpose:** Reference implementation for Snowflake Intelligence agent with query performance analysis
-**Created:** 2025-11-25 | **Expires:** 2026-01-15 (30 days) | **Status:** ACTIVE
+**Created:** 2025-11-25 | **Expires:** 2026-02-14 (30 days) | **Status:** ACTIVE
 
 ---
 
@@ -26,7 +26,7 @@ Sam-the-Snowman is a Snowflake Intelligence agent that inspects your account usa
 
 **Total setup time: ~5 minutes**
 
-**Expected cost to deploy:** ~0.10 credits of X-Small warehouse time (≈$0.20 on Snowflake Standard) plus <1 GB storage (<$0.05/mo).
+**Estimated Cost to Deploy:** ~0.10 credits of X-Small warehouse time (≈$0.20 on Snowflake Standard) plus <1 GB storage (<$0.05/mo).
 
 **Version**: 4.0 · **License**: Apache 2.0
 
@@ -149,7 +149,7 @@ The script drops the agent, semantic views, email procedure, and Git repository 
 
 ## Expiration & Archival
 
-**This demo automatically expires on 2026-01-15.**
+**This demo automatically expires on 2026-02-14.**
 
 After expiration:
 - GitHub Actions will automatically archive this repository

@@ -4,6 +4,9 @@
  *
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
+ * PURPOSE:
+ *   Configure email delivery integration and helper procedure for the agent.
+ *
  * Synopsis:
  *   Creates email notification integration and stored procedure for Sam-the-Snowman.
  *
@@ -24,7 +27,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-01-15
+ * Expires: 2026-02-14
  * Version: 4.0
  * License: Apache 2.0
  *
@@ -69,7 +72,7 @@ CREATE OR REPLACE NOTIFICATION INTEGRATION SFE_EMAIL_INTEGRATION
     TYPE = EMAIL
     ENABLED = TRUE
     DEFAULT_SUBJECT = 'Sam-the-Snowman'
-    COMMENT = 'DEMO: Sam-the-Snowman - Email notification integration for delivering agent output.';
+    COMMENT = 'DEMO: Sam-the-Snowman - Email notification integration for delivering agent output (Expires: 2026-02-14).';
 
 -- Grant usage on notification integration to the specified role
 GRANT USAGE ON INTEGRATION SFE_EMAIL_INTEGRATION TO ROLE SYSADMIN;
@@ -92,7 +95,7 @@ LANGUAGE PYTHON
 RUNTIME_VERSION = '3.12'
 PACKAGES = ('snowflake-snowpark-python')
 HANDLER = 'send_email'
-COMMENT = 'DEMO: Sam-the-Snowman - Sends HTML email using SYSTEM$SEND_EMAIL with proper SQL injection protection'
+COMMENT = 'DEMO: Sam-the-Snowman - Sends HTML email using SYSTEM$SEND_EMAIL with proper SQL injection protection (Expires: 2026-02-14)'
 AS
 $$
 import snowflake.snowpark as snowpark

@@ -4,6 +4,9 @@
  *
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
+ * PURPOSE:
+ *   Verify that all demo objects were created and are visible in Snowflake.
+ *
  * Synopsis:
  *   Validates that all Sam-the-Snowman components were deployed successfully.
  *
@@ -18,7 +21,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-01-15
+ * Expires: 2026-02-14
  * Version: 4.0
  * License: Apache 2.0
  *

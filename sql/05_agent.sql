@@ -4,6 +4,9 @@
  *
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
+ * PURPOSE:
+ *   Create the Sam-the-Snowman agent and bind it to its tools and semantic views.
+ *
  * Synopsis:
  *   Creates the Sam-the-Snowman AI agent with domain-specific tools.
  *
@@ -29,7 +32,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-01-15
+ * Expires: 2026-02-14
  * Version: 4.0
  * License: Apache 2.0
  *
@@ -51,7 +54,7 @@ USE SCHEMA SAM_THE_SNOWMAN;
 -- Create the Sam-the-Snowman agent with domain-specific semantic views.
 -- Note: Agent visibility is managed via the Snowflake Intelligence object.
 CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
-  COMMENT = 'DEMO: Sam-the-Snowman - AI assistant for query performance, cost control, and warehouse operations (Expires: 2026-01-15)'
+  COMMENT = 'DEMO: Sam-the-Snowman - AI assistant for query performance, cost control, and warehouse operations (Expires: 2026-02-14)'
   PROFILE = '{"display_name": "Sam-the-Snowman"}'
   FROM SPECIFICATION
   $$

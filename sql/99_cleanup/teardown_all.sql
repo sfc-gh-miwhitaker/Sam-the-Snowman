@@ -4,6 +4,9 @@
  *
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
+ * PURPOSE:
+ *   Remove all Sam-the-Snowman objects while preserving shared demo infrastructure.
+ *
  * Synopsis:
  *   Complete teardown script for removing all Sam-the-Snowman components.
  *
@@ -35,7 +38,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-01-15
+ * Expires: 2026-02-14
  * Version: 4.0
  * License: Apache 2.0
  *

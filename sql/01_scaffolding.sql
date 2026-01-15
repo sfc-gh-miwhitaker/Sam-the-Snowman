@@ -4,6 +4,9 @@
  *
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
+ * PURPOSE:
+ *   Establish the shared demo database, required schemas, and visibility control.
+ *
  * Synopsis:
  *   Creates databases, schemas, and grants privileges for Sam-the-Snowman.
  *
@@ -29,7 +32,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-01-15
+ * Expires: 2026-02-14
  * Version: 4.0
  * License: Apache 2.0
  *
@@ -47,20 +50,20 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Create the demo database (mandatory for all demo projects)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-COMMENT = 'DEMO: Demo/Example projects - NOT FOR PRODUCTION (Expires: 2026-01-15)';
+COMMENT = 'DEMO: Demo/Example projects - NOT FOR PRODUCTION (Expires: 2026-02-14)';
 
 -- Shared schema for Snowflake Git repository clones (shared across demos).
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.GIT_REPOS
-COMMENT = 'DEMO: Shared Git repository clones for demo deployments (Expires: 2026-01-15)';
+COMMENT = 'DEMO: Shared Git repository clones for demo deployments (Expires: 2026-02-14)';
 
 -- Project schema (collision-proof) for Sam-the-Snowman objects that are not semantic views.
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN
-COMMENT = 'DEMO: Sam-the-Snowman - Project schema (Expires: 2026-01-15)';
+COMMENT = 'DEMO: Sam-the-Snowman - Project schema (Expires: 2026-02-14)';
 
 -- SEMANTIC_MODELS is the mandatory location for all Cortex Analyst semantic views
 -- All semantic views must use SV_ prefix (e.g., SV_QUERY_PERFORMANCE)
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS
-COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2026-01-15)';
+COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2026-02-14)';
 
 -- ============================================================================
 -- CREATE SNOWFLAKE INTELLIGENCE OBJECT (Agent Visibility Control)

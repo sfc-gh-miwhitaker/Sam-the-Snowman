@@ -4,6 +4,9 @@
  *
  * ⚠️  NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
+ * PURPOSE:
+ *   Create the semantic views that power Sam-the-Snowman's analytics tools.
+ *
  * Synopsis:
  *   Creates semantic views for query performance, cost analysis, and warehouse operations.
  *
@@ -26,7 +29,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-01-15
+ * Expires: 2026-02-14
  * Version: 4.0
  * License: Apache 2.0
  *
@@ -116,7 +119,7 @@ DIMENSIONS (
   QUERY_HISTORY.SCHEMA_NAME as SCHEMA_NAME
     comment='Primary schema accessed by the query. Synonyms: schema, database schema.'
 )
-COMMENT = 'DEMO: Sam-the-Snowman - Query performance metrics, errors, and optimization insights. Ask about slow queries, errors, and optimization opportunities. Excludes system-managed warehouses for clarity.'
+COMMENT = 'DEMO: Sam-the-Snowman - Query performance metrics, errors, and optimization insights. Ask about slow queries, errors, and optimization opportunities. Excludes system-managed warehouses for clarity. (Expires: 2026-02-14)'
 WITH EXTENSION (CA = '{
   "verified_queries": [
     {
@@ -173,7 +176,7 @@ DIMENSIONS (
   WAREHOUSE_METERING_HISTORY.END_TIME as END_TIME
     comment='Billing period end timestamp (UTC). Synonyms: period end, metering end, billing end, measurement end.'
 )
-COMMENT = 'DEMO: Sam-the-Snowman - Warehouse cost analysis and credit consumption tracking. Ask about costs, spend trends, and expensive warehouses. Excludes system-managed warehouses for clarity.'
+COMMENT = 'DEMO: Sam-the-Snowman - Warehouse cost analysis and credit consumption tracking. Ask about costs, spend trends, and expensive warehouses. Excludes system-managed warehouses for clarity. (Expires: 2026-02-14)'
 WITH EXTENSION (CA = '{
   "verified_queries": [
     {
@@ -232,7 +235,7 @@ DIMENSIONS (
   WAREHOUSE_LOAD_HISTORY.END_TIME as END_TIME
     comment='Measurement period end timestamp (UTC). Synonyms: load end time, measurement end, period end, sample end.'
 )
-COMMENT = 'DEMO: Sam-the-Snowman - Warehouse utilization and capacity planning metrics. Ask about warehouse sizing, queue times, and utilization patterns. Excludes system-managed warehouses for clarity.'
+COMMENT = 'DEMO: Sam-the-Snowman - Warehouse utilization and capacity planning metrics. Ask about warehouse sizing, queue times, and utilization patterns. Excludes system-managed warehouses for clarity. (Expires: 2026-02-14)'
 WITH EXTENSION (CA = '{
   "verified_queries": [
     {
