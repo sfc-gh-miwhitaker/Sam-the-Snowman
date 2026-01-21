@@ -1,0 +1,490 @@
+# =============================================================================
+# SEMANTIC MODEL: Warehouse Operations
+# =============================================================================
+# Best Practice Reference for Sam-the-Snowman
+#
+# This YAML file demonstrates world-class semantic model patterns for
+# warehouse utilization monitoring and capacity planning.
+#
+# Author: SE Community
+# Version: 5.0
+# =============================================================================
+
+name: SV_SAM_WAREHOUSE_OPERATIONS
+description: >-
+  Warehouse utilization and capacity planning metrics. Monitor concurrency,
+  queue depth, provisioning delays, and lock contention. Use this model for
+  warehouse sizing decisions and identifying resource constraints.
+
+# =============================================================================
+# TABLES
+# =============================================================================
+tables:
+  - name: WAREHOUSE_LOAD_HISTORY
+    description: >-
+      Time-series load metrics for all virtual warehouses. Captures
+      concurrent query counts, queue depths, and blocked query counts at
+      regular intervals. Essential for capacity planning and sizing decisions.
+    base_table:
+      database: SNOWFLAKE
+      schema: ACCOUNT_USAGE
+      table: WAREHOUSE_LOAD_HISTORY
+    primary_key:
+      columns:
+        - WAREHOUSE_ID
+        - START_TIME
+
+# =============================================================================
+# DIMENSIONS
+# =============================================================================
+dimensions:
+  - name: WAREHOUSE_NAME
+    description: >-
+      Virtual warehouse name (e.g., COMPUTE_WH, ANALYTICS_WH, ETL_WH).
+      System-managed warehouses like SYSTEM$STREAMLIT_NOTEBOOK_WH are
+      automatically filtered out as users cannot control them.
+    synonyms:
+      - compute cluster
+      - warehouse
+      - cluster name
+      - virtual warehouse
+      - compute
+    expr: WAREHOUSE_LOAD_HISTORY.WAREHOUSE_NAME
+    data_type: TEXT
+    sample_values:
+      - COMPUTE_WH
+      - ANALYTICS_WH
+      - ETL_WH
+      - TRANSFORM_WH
+      - LOADING_WH
+
+  - name: WAREHOUSE_ID
+    description: >-
+      Unique warehouse identifier. Persists across warehouse renames.
+    synonyms:
+      - warehouse uuid
+      - warehouse identifier
+    expr: WAREHOUSE_LOAD_HISTORY.WAREHOUSE_ID
+    data_type: NUMBER
+    unique: true
+
+# =============================================================================
+# TIME DIMENSIONS
+# =============================================================================
+time_dimensions:
+  - name: START_TIME
+    description: >-
+      Start of the load measurement period (UTC). Load metrics are
+      captured at regular intervals (typically every few minutes).
+    synonyms:
+      - load start time
+      - measurement start
+      - period start
+      - sample start
+      - when
+      - date
+      - time
+    expr: WAREHOUSE_LOAD_HISTORY.START_TIME
+    data_type: TIMESTAMP_LTZ
+
+  - name: END_TIME
+    description: >-
+      End of the load measurement period (UTC).
+    synonyms:
+      - load end time
+      - measurement end
+      - period end
+      - sample end
+    expr: WAREHOUSE_LOAD_HISTORY.END_TIME
+    data_type: TIMESTAMP_LTZ
+
+# =============================================================================
+# FACTS (Measures)
+# =============================================================================
+facts:
+  - name: AVG_RUNNING
+    description: >-
+      Average number of queries executing concurrently during the
+      measurement period. High values indicate good warehouse utilization.
+      Very high values may indicate need for larger warehouse or multi-cluster.
+    synonyms:
+      - concurrency
+      - active queries
+      - concurrent queries
+      - running queries
+      - parallel queries
+      - utilization
+    expr: WAREHOUSE_LOAD_HISTORY.AVG_RUNNING
+    data_type: NUMBER
+
+  - name: AVG_QUEUED_LOAD
+    description: >-
+      Average queries queued due to warehouse load/capacity constraints.
+      Non-zero values indicate the warehouse is undersized or needs
+      multi-cluster scaling. Users experience this as wait time.
+    synonyms:
+      - queue depth
+      - waiting queries
+      - queued queries
+      - overload queue
+      - capacity queue
+      - backlog
+    expr: WAREHOUSE_LOAD_HISTORY.AVG_QUEUED_LOAD
+    data_type: NUMBER
+
+  - name: AVG_QUEUED_PROVISIONING
+    description: >-
+      Average queries queued during warehouse startup/provisioning.
+      Occurs when warehouse resumes from suspended state. Consider
+      auto-resume policies or always-on for latency-sensitive workloads.
+    synonyms:
+      - startup queue
+      - provisioning queue
+      - cold start queue
+      - warmup queue
+      - resume queue
+    expr: WAREHOUSE_LOAD_HISTORY.AVG_QUEUED_PROVISIONING
+    data_type: NUMBER
+
+  - name: AVG_BLOCKED
+    description: >-
+      Average queries blocked by locks or resource contention. High
+      values indicate lock contention on tables, often from concurrent
+      DML operations. May require transaction isolation review.
+    synonyms:
+      - contentions
+      - blocked queries
+      - lock waits
+      - resource conflicts
+      - locked queries
+      - blocking
+    expr: WAREHOUSE_LOAD_HISTORY.AVG_BLOCKED
+    data_type: NUMBER
+
+# =============================================================================
+# METRICS (Pre-aggregated calculations)
+# =============================================================================
+metrics:
+  - name: MEASUREMENT_COUNT
+    description: >-
+      Number of measurement periods. Indicates sample size for
+      statistical reliability.
+    synonyms:
+      - samples
+      - periods
+    expr: COUNT(*)
+    data_type: NUMBER
+
+  - name: AVG_CONCURRENCY
+    description: >-
+      Average concurrent query count across all measurement periods.
+      Key utilization metric.
+    synonyms:
+      - average running
+      - mean concurrency
+      - typical load
+    expr: AVG(WAREHOUSE_LOAD_HISTORY.AVG_RUNNING)
+    data_type: NUMBER
+
+  - name: MAX_CONCURRENCY
+    description: >-
+      Peak concurrent query count. Shows maximum load experienced.
+    synonyms:
+      - peak concurrency
+      - max running
+      - peak load
+    expr: MAX(WAREHOUSE_LOAD_HISTORY.AVG_RUNNING)
+    data_type: NUMBER
+
+  - name: AVG_QUEUE_DEPTH
+    description: >-
+      Average queue depth due to load constraints. Non-zero indicates
+      capacity issues.
+    synonyms:
+      - average queued
+      - mean queue
+      - typical backlog
+    expr: AVG(WAREHOUSE_LOAD_HISTORY.AVG_QUEUED_LOAD)
+    data_type: NUMBER
+
+  - name: MAX_QUEUE_DEPTH
+    description: >-
+      Peak queue depth. Shows worst-case queuing scenario.
+    synonyms:
+      - peak queue
+      - max queued
+      - worst backlog
+    expr: MAX(WAREHOUSE_LOAD_HISTORY.AVG_QUEUED_LOAD)
+    data_type: NUMBER
+
+  - name: AVG_PROVISIONING_QUEUE
+    description: >-
+      Average provisioning queue depth. Indicates cold start impact.
+    synonyms:
+      - average startup queue
+      - mean provisioning wait
+    expr: AVG(WAREHOUSE_LOAD_HISTORY.AVG_QUEUED_PROVISIONING)
+    data_type: NUMBER
+
+  - name: AVG_BLOCKED_COUNT
+    description: >-
+      Average blocked query count. Indicates lock contention severity.
+    synonyms:
+      - average blocked
+      - mean contentions
+    expr: AVG(WAREHOUSE_LOAD_HISTORY.AVG_BLOCKED)
+    data_type: NUMBER
+
+  - name: PERIODS_WITH_QUEUING
+    description: >-
+      Count of measurement periods with any queuing. Indicates
+      how often capacity constraints occur.
+    synonyms:
+      - queuing frequency
+      - constrained periods
+    expr: SUM(CASE WHEN WAREHOUSE_LOAD_HISTORY.AVG_QUEUED_LOAD > 0 THEN 1 ELSE 0 END)
+    data_type: NUMBER
+
+  - name: QUEUING_PERCENTAGE
+    description: >-
+      Percentage of time with active queuing. Key SLA metric.
+    synonyms:
+      - queue frequency percent
+      - constrained time percent
+    expr: 100.0 * SUM(CASE WHEN WAREHOUSE_LOAD_HISTORY.AVG_QUEUED_LOAD > 0 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)
+    data_type: NUMBER
+
+  - name: PERIODS_WITH_BLOCKING
+    description: >-
+      Count of measurement periods with blocked queries.
+    synonyms:
+      - blocking frequency
+      - contention periods
+    expr: SUM(CASE WHEN WAREHOUSE_LOAD_HISTORY.AVG_BLOCKED > 0 THEN 1 ELSE 0 END)
+    data_type: NUMBER
+
+# =============================================================================
+# FILTERS (Named reusable filters)
+# =============================================================================
+filters:
+  - name: EXCLUDE_SYSTEM_WAREHOUSES
+    description: >-
+      Exclude system-managed warehouses that users cannot control.
+    synonyms:
+      - user warehouses only
+      - exclude system
+    expr: WAREHOUSE_LOAD_HISTORY.WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+
+  - name: WITH_QUEUING
+    description: >-
+      Include only periods with active queuing for capacity analysis.
+    synonyms:
+      - queued only
+      - constrained periods
+    expr: WAREHOUSE_LOAD_HISTORY.AVG_QUEUED_LOAD > 0
+
+  - name: WITH_BLOCKING
+    description: >-
+      Include only periods with blocked queries for contention analysis.
+    synonyms:
+      - blocked only
+      - contention periods
+    expr: WAREHOUSE_LOAD_HISTORY.AVG_BLOCKED > 0
+
+  - name: WITH_ACTIVITY
+    description: >-
+      Include only periods with running queries.
+    synonyms:
+      - active periods
+      - with load
+    expr: WAREHOUSE_LOAD_HISTORY.AVG_RUNNING > 0
+
+  - name: HIGH_LOAD
+    description: >-
+      Include only high-load periods (concurrency > 5).
+    synonyms:
+      - busy periods
+      - high concurrency
+    expr: WAREHOUSE_LOAD_HISTORY.AVG_RUNNING > 5
+
+  - name: TODAY
+    description: Filter for load data from today only.
+    synonyms:
+      - today only
+    expr: WAREHOUSE_LOAD_HISTORY.START_TIME >= CURRENT_DATE()
+
+  - name: LAST_7_DAYS
+    description: Filter for load data from the last 7 days.
+    synonyms:
+      - past week
+      - this week
+      - last week
+    expr: WAREHOUSE_LOAD_HISTORY.START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+
+  - name: LAST_30_DAYS
+    description: Filter for load data from the last 30 days.
+    synonyms:
+      - past month
+      - this month
+      - last month
+    expr: WAREHOUSE_LOAD_HISTORY.START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP())
+
+# =============================================================================
+# MODULE CUSTOM INSTRUCTIONS
+# =============================================================================
+module_custom_instructions:
+  sql_generation: |-
+    CRITICAL RULES:
+    1. ALWAYS exclude system-managed warehouses: WHERE WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+    2. AVG_RUNNING shows concurrency (utilization)
+    3. AVG_QUEUED_LOAD shows capacity constraints (undersizing)
+    4. AVG_QUEUED_PROVISIONING shows cold start impact
+    5. AVG_BLOCKED shows lock contention
+
+    SIZING INTERPRETATION:
+    - High AVG_QUEUED_LOAD → warehouse undersized, consider larger size or multi-cluster
+    - High AVG_BLOCKED → lock contention, review transaction patterns
+    - Low AVG_RUNNING with no queuing → warehouse may be oversized
+    - High AVG_QUEUED_PROVISIONING → consider auto-resume or always-on
+
+    COMMON PATTERNS:
+    - "utilization" = AVG(AVG_RUNNING)
+    - "queue times" = AVG(AVG_QUEUED_LOAD)
+    - "capacity issues" = periods with AVG_QUEUED_LOAD > 0
+
+  question_categorization: |-
+    Treat these as UNAMBIGUOUS_SQL:
+    - "warehouse utilization" - AVG(AVG_RUNNING) GROUP BY warehouse
+    - "queue times" - AVG(AVG_QUEUED_LOAD) GROUP BY warehouse
+    - "blocking issues" - AVG(AVG_BLOCKED) GROUP BY warehouse
+
+    Ask for clarification:
+    - "sizing" - need to know which warehouse specifically
+
+# =============================================================================
+# VERIFIED QUERIES (VQRs)
+# =============================================================================
+verified_queries:
+  - name: "Warehouses with queuing"
+    question: "Which warehouses have the most queued queries?"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        AVG(AVG_QUEUED_LOAD) AS avg_queue_depth,
+        MAX(AVG_QUEUED_LOAD) AS max_queue_depth,
+        SUM(CASE WHEN AVG_QUEUED_LOAD > 0 THEN 1 ELSE 0 END) AS periods_with_queuing,
+        COUNT(*) AS total_periods,
+        ROUND(periods_with_queuing * 100.0 / total_periods, 2) AS queuing_pct
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME
+      HAVING avg_queue_depth > 0
+      ORDER BY avg_queue_depth DESC
+
+  - name: "Hourly concurrency pattern"
+    question: "Show warehouse concurrency by hour of day"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        HOUR(START_TIME) AS hour_of_day,
+        AVG(AVG_RUNNING) AS avg_concurrency,
+        AVG(AVG_QUEUED_LOAD) AS avg_queue_depth
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME, hour_of_day
+      ORDER BY WAREHOUSE_NAME, hour_of_day
+
+  - name: "Lock contention analysis"
+    question: "Which warehouses have lock contention issues?"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        AVG(AVG_BLOCKED) AS avg_blocked_queries,
+        MAX(AVG_BLOCKED) AS max_blocked_queries,
+        SUM(CASE WHEN AVG_BLOCKED > 0 THEN 1 ELSE 0 END) AS periods_with_blocking,
+        COUNT(*) AS total_periods
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME
+      HAVING avg_blocked_queries > 0
+      ORDER BY avg_blocked_queries DESC
+
+  - name: "Warehouse utilization summary"
+    question: "Show overall warehouse utilization"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        AVG(AVG_RUNNING) AS avg_concurrency,
+        MAX(AVG_RUNNING) AS peak_concurrency,
+        AVG(AVG_QUEUED_LOAD) AS avg_queue_depth,
+        AVG(AVG_QUEUED_PROVISIONING) AS avg_provisioning_queue,
+        AVG(AVG_BLOCKED) AS avg_blocked
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME
+      ORDER BY avg_concurrency DESC
+
+  - name: "Cold start impact"
+    question: "Which warehouses have provisioning delays?"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        AVG(AVG_QUEUED_PROVISIONING) AS avg_provisioning_queue,
+        MAX(AVG_QUEUED_PROVISIONING) AS max_provisioning_queue,
+        SUM(CASE WHEN AVG_QUEUED_PROVISIONING > 0 THEN 1 ELSE 0 END) AS cold_start_events
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME
+      HAVING cold_start_events > 0
+      ORDER BY cold_start_events DESC
+
+  - name: "Sizing recommendation indicators"
+    question: "Which warehouses may need resizing?"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        AVG(AVG_RUNNING) AS avg_concurrency,
+        AVG(AVG_QUEUED_LOAD) AS avg_queue_depth,
+        CASE
+          WHEN AVG(AVG_QUEUED_LOAD) > 1 THEN 'CONSIDER UPSIZE - High queuing'
+          WHEN AVG(AVG_RUNNING) < 1 AND AVG(AVG_QUEUED_LOAD) = 0 THEN 'CONSIDER DOWNSIZE - Low utilization'
+          ELSE 'APPROPRIATE SIZE'
+        END AS sizing_recommendation
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME
+      ORDER BY avg_queue_depth DESC, avg_concurrency DESC
+
+  - name: "Daily load trend"
+    question: "Show daily warehouse load trend"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        DATE(START_TIME) AS load_date,
+        WAREHOUSE_NAME,
+        AVG(AVG_RUNNING) AS avg_concurrency,
+        AVG(AVG_QUEUED_LOAD) AS avg_queue_depth
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_LOAD_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -14, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY load_date, WAREHOUSE_NAME
+      ORDER BY load_date DESC, WAREHOUSE_NAME

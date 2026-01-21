@@ -2,16 +2,18 @@
 
 ## Overview
 
-Sam-the-Snowman deploys a single Snowflake Assistant that combines domain-specific semantic views, curated orchestration instructions, and reusable tools. This guide documents how the agent is assembled so you can extend or troubleshoot it with confidence.
+Sam-the-Snowman deploys a single Snowflake Intelligence agent that combines **world-class semantic views**, curated orchestration instructions, and reusable tools. This guide documents how the agent is assembled so you can extend or troubleshoot it with confidence.
 
-- **semantic views**: Focused datasets for performance, cost, and warehouse operations
-- **tool orchestration**: Deterministic routing that maps user intent to the right view
-- **supporting tools**: Snowflake documentation search and email delivery
-- **demo warehouse**: Dedicated compute (`SFE_SAM_SNOWMAN_WH`) for every module and interactive workload
+**This project demonstrates production-grade patterns:**
+- **Semantic views**: Full-featured models with relationships, metrics, filters, and time dimensions
+- **Tool orchestration**: Rich routing instructions with multi-tool coordination
+- **Verified queries**: 7+ curated VQRs per view covering common use cases
+- **Automated testing**: SMOKE, FUNCTIONAL, REGRESSION, and PERFORMANCE test categories
+- **Reference files**: YAML semantic models in `/semantic_models/` for learning
 
 `deploy_all.sql` creates/resumes `SFE_SAM_SNOWMAN_WH` (X-Small, auto-suspend 60s) and each SQL module begins with `USE WAREHOUSE SFE_SAM_SNOWMAN_WH;`, ensuring consistent compute whether you run the orchestrator or a standalone module.
 
-Everything described here is provisioned by the modular deployment workflow (`deploy_all.sql`, which calls `sql/01_scaffolding.sql` through `sql/06_validation.sql`).
+Everything described here is provisioned by the modular deployment workflow (`deploy_all.sql`, which calls `sql/01_scaffolding.sql` through `sql/07_testing.sql`).
 
 ---
 
@@ -55,34 +57,51 @@ This pattern is **reusable as a template** for production projects requiring cle
 
 ### Best Practice Implementation
 
-Sam-the-Snowman's semantic views demonstrate **production-grade patterns** that serve as a template for your own projects:
+Sam-the-Snowman's semantic views demonstrate **world-class patterns** that serve as a template for your own projects:
+
+**✓ Table Relationships**: Multi-table queries with proper join definitions
+  - QUERY_HISTORY ↔ QUERY_ATTRIBUTION_HISTORY linked by QUERY_ID
+  - Enables cost-per-query analysis without manual JOINs
+
+**✓ Time Dimensions**: Proper `TIME DIMENSIONS` for date/timestamp columns
+  - Enables date intelligence (TODAY, LAST_7_DAYS, etc.)
+  - Better time-based aggregations and trending
+
+**✓ Pre-defined Metrics**: 10+ metrics per view for common aggregations
+  - AVG_EXECUTION_TIME_MS, P95_EXECUTION_TIME_MS, ERROR_RATE
+  - Eliminates need for users to write complex aggregations
+
+**✓ Named Filters**: Reusable WHERE clauses
+  - EXCLUDE_SYSTEM_WAREHOUSES, FAILED_QUERIES, QUERIES_WITH_SPILLING
+  - Consistent data quality across all queries
+
+**✓ Sample Values**: Representative examples for categorical dimensions
+  - QUERY_TYPE: SELECT, INSERT, UPDATE, DELETE, MERGE
+  - EXECUTION_STATUS: SUCCESS, FAIL, INCIDENT
+  - Helps Cortex Analyst understand valid values
 
 **✓ Expanded Synonyms**: Each fact and dimension includes comprehensive natural language variations
   - Example: `TOTAL_ELAPSED_TIME` includes "duration, total time, wall time, elapsed time, latency, response time"
   - Enables the agent to understand different phrasings of the same concept
-
-**✓ Sample Values in Comments**: Key dimensions include representative examples within comments to improve AI accuracy
-  - Example: `WAREHOUSE_SIZE` comment includes "(X-Small, Small, Medium, Large, X-Large, 2X-Large, etc.)"
-  - Example: `EXECUTION_STATUS` comment includes "(SUCCESS, FAIL, INCIDENT)"
-  - Helps Cortex Analyst understand data patterns and generate better queries
 
 **✓ Rich Contextual Descriptions**: Each fact and dimension comment explains implications and provides guidance
   - Encodes expert knowledge about what metrics mean and when values indicate problems
   - Example: "Memory spillage to remote storage indicating severe memory pressure and performance degradation"
   - Helps both humans and AI understand when action is needed
 
-**✓ Verified Queries**: 3-5 curated examples per view demonstrating common use cases
+**✓ Module Custom Instructions**: Targeted LLM guidance for SQL generation
+  - Specific rules like "ALWAYS exclude system warehouses"
+  - Interpretation guidance like "Local spill = minor, Remote spill = CRITICAL"
+
+**✓ Verified Queries**: 7+ curated examples per view demonstrating common use cases
   - Shows users what questions they can ask
   - Provides templates the agent can adapt for similar queries
   - Validates that the view structure supports real analytical workflows
+  - Includes verification metadata (date, author)
 
 **✓ Strategic Filtering**: Views intentionally exclude irrelevant data
   - System-managed warehouses removed to focus on user-controlled resources
   - Improves query performance and result clarity
-
-**✓ Rich Context in Comments**: Descriptions explain what values mean and their implications
-  - Not just "Queue wait time" but "Queue wait time due to warehouse load. Indicates insufficient concurrency."
-  - Helps both humans and AI understand when action is needed
 
 If you need additional vocabulary or want to expand to new domains, see `docs/08-SEMANTIC-VIEW-EXPANSION.md` for guidance on using Snowflake's AI-assisted generator.
 

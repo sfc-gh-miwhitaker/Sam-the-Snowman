@@ -1,0 +1,424 @@
+# =============================================================================
+# SEMANTIC MODEL: Cost Analysis
+# =============================================================================
+# Best Practice Reference for Sam-the-Snowman
+#
+# This YAML file demonstrates world-class semantic model patterns for
+# warehouse cost tracking and FinOps analysis.
+#
+# Author: SE Community
+# Version: 5.0
+# =============================================================================
+
+name: SV_SAM_COST_ANALYSIS
+description: >-
+  Warehouse cost analysis and credit consumption tracking. Monitor spending
+  by warehouse, identify cost trends, and support FinOps initiatives. Use
+  this model for budgeting, chargeback, and cost optimization.
+
+# =============================================================================
+# TABLES
+# =============================================================================
+tables:
+  - name: WAREHOUSE_METERING_HISTORY
+    description: >-
+      Hourly credit consumption data for all virtual warehouses. Contains
+      compute credits, cloud services credits, and usage timestamps.
+      Primary source for warehouse-level cost analysis.
+    base_table:
+      database: SNOWFLAKE
+      schema: ACCOUNT_USAGE
+      table: WAREHOUSE_METERING_HISTORY
+    primary_key:
+      columns:
+        - WAREHOUSE_ID
+        - START_TIME
+
+# =============================================================================
+# DIMENSIONS
+# =============================================================================
+dimensions:
+  - name: WAREHOUSE_NAME
+    description: >-
+      Virtual warehouse name (e.g., COMPUTE_WH, ANALYTICS_WH, ETL_WH).
+      System-managed warehouses like SYSTEM$STREAMLIT_NOTEBOOK_WH are
+      automatically filtered out as users cannot control them.
+    synonyms:
+      - compute cluster
+      - warehouse
+      - cluster name
+      - virtual warehouse
+      - compute
+    expr: WAREHOUSE_METERING_HISTORY.WAREHOUSE_NAME
+    data_type: TEXT
+    sample_values:
+      - COMPUTE_WH
+      - ANALYTICS_WH
+      - ETL_WH
+      - TRANSFORM_WH
+      - LOADING_WH
+
+  - name: WAREHOUSE_ID
+    description: >-
+      Unique warehouse identifier. Persists across warehouse renames,
+      useful for tracking warehouses through configuration changes.
+    synonyms:
+      - warehouse uuid
+      - warehouse identifier
+    expr: WAREHOUSE_METERING_HISTORY.WAREHOUSE_ID
+    data_type: NUMBER
+    unique: true
+
+# =============================================================================
+# TIME DIMENSIONS
+# =============================================================================
+time_dimensions:
+  - name: START_TIME
+    description: >-
+      Start of the hourly metering period (UTC). Warehouse credits are
+      measured in hourly intervals.
+    synonyms:
+      - period start
+      - metering start
+      - billing start
+      - measurement start
+      - when
+      - date
+      - time
+    expr: WAREHOUSE_METERING_HISTORY.START_TIME
+    data_type: TIMESTAMP_LTZ
+
+  - name: END_TIME
+    description: >-
+      End of the hourly metering period (UTC). Typically 1 hour after
+      START_TIME.
+    synonyms:
+      - period end
+      - metering end
+      - billing end
+      - measurement end
+    expr: WAREHOUSE_METERING_HISTORY.END_TIME
+    data_type: TIMESTAMP_LTZ
+
+# =============================================================================
+# FACTS (Measures)
+# =============================================================================
+facts:
+  - name: CREDITS_USED
+    description: >-
+      Total credits consumed during the metering period (compute + cloud
+      services). Primary metric for warehouse billing and cost tracking.
+      Multiply by your credit price for dollar costs.
+    synonyms:
+      - total cost
+      - spend
+      - warehouse cost
+      - total spend
+      - credits consumed
+      - billing amount
+      - cost
+      - credits
+    expr: WAREHOUSE_METERING_HISTORY.CREDITS_USED
+    data_type: NUMBER
+
+  - name: CREDITS_USED_COMPUTE
+    description: >-
+      Compute credits for query execution. Represents the majority of
+      warehouse costs (typically 90%+). Scales with warehouse size and
+      runtime.
+    synonyms:
+      - compute cost
+      - compute credits
+      - compute spend
+      - execution cost
+      - query cost
+    expr: WAREHOUSE_METERING_HISTORY.CREDITS_USED_COMPUTE
+    data_type: NUMBER
+
+  - name: CREDITS_USED_CLOUD_SERVICES
+    description: >-
+      Cloud services credits for metadata operations, result caching,
+      and infrastructure. Usually 10% of compute or less. High ratios
+      may indicate inefficient small query patterns.
+    synonyms:
+      - services cost
+      - cloud services spend
+      - metadata cost
+      - infrastructure cost
+      - overhead cost
+    expr: WAREHOUSE_METERING_HISTORY.CREDITS_USED_CLOUD_SERVICES
+    data_type: NUMBER
+
+# =============================================================================
+# METRICS (Pre-aggregated calculations)
+# =============================================================================
+metrics:
+  - name: TOTAL_CREDITS
+    description: >-
+      Sum of all credits consumed across selected warehouses and time periods.
+    synonyms:
+      - total spend
+      - total cost
+      - credits total
+      - all credits
+    expr: SUM(WAREHOUSE_METERING_HISTORY.CREDITS_USED)
+    data_type: NUMBER
+
+  - name: TOTAL_COMPUTE_CREDITS
+    description: >-
+      Sum of compute credits consumed.
+    synonyms:
+      - compute total
+      - total compute cost
+    expr: SUM(WAREHOUSE_METERING_HISTORY.CREDITS_USED_COMPUTE)
+    data_type: NUMBER
+
+  - name: TOTAL_CLOUD_SERVICES_CREDITS
+    description: >-
+      Sum of cloud services credits consumed.
+    synonyms:
+      - services total
+      - cloud services total
+    expr: SUM(WAREHOUSE_METERING_HISTORY.CREDITS_USED_CLOUD_SERVICES)
+    data_type: NUMBER
+
+  - name: AVG_HOURLY_CREDITS
+    description: >-
+      Average credits consumed per hour. Useful for baseline
+      cost estimation.
+    synonyms:
+      - average hourly cost
+      - hourly average
+      - typical hourly spend
+    expr: AVG(WAREHOUSE_METERING_HISTORY.CREDITS_USED)
+    data_type: NUMBER
+
+  - name: MAX_HOURLY_CREDITS
+    description: >-
+      Maximum credits consumed in any single hour. Identifies
+      peak usage periods.
+    synonyms:
+      - peak hourly cost
+      - max hourly spend
+    expr: MAX(WAREHOUSE_METERING_HISTORY.CREDITS_USED)
+    data_type: NUMBER
+
+  - name: CLOUD_SERVICES_RATIO
+    description: >-
+      Cloud services credits as percentage of total. High values
+      (>10%) may indicate inefficient query patterns.
+    synonyms:
+      - services percentage
+      - overhead ratio
+    expr: 100.0 * SUM(WAREHOUSE_METERING_HISTORY.CREDITS_USED_CLOUD_SERVICES) / NULLIF(SUM(WAREHOUSE_METERING_HISTORY.CREDITS_USED), 0)
+    data_type: NUMBER
+
+  - name: METERING_PERIODS
+    description: >-
+      Count of hourly metering periods with activity. Indicates
+      warehouse active hours.
+    synonyms:
+      - active hours
+      - usage periods
+    expr: COUNT(*)
+    data_type: NUMBER
+
+  - name: DAILY_CREDITS
+    description: >-
+      Average daily credit consumption. Useful for budgeting.
+    synonyms:
+      - daily spend
+      - per day cost
+    expr: SUM(WAREHOUSE_METERING_HISTORY.CREDITS_USED) / NULLIF(COUNT(DISTINCT DATE(WAREHOUSE_METERING_HISTORY.START_TIME)), 0)
+    data_type: NUMBER
+
+# =============================================================================
+# FILTERS (Named reusable filters)
+# =============================================================================
+filters:
+  - name: EXCLUDE_SYSTEM_WAREHOUSES
+    description: >-
+      Exclude system-managed warehouses that users cannot control.
+    synonyms:
+      - user warehouses only
+      - exclude system
+    expr: WAREHOUSE_METERING_HISTORY.WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+
+  - name: TODAY
+    description: Filter for metering data from today only.
+    synonyms:
+      - today only
+    expr: WAREHOUSE_METERING_HISTORY.START_TIME >= CURRENT_DATE()
+
+  - name: YESTERDAY
+    description: Filter for metering data from yesterday.
+    synonyms:
+      - yesterday only
+    expr: DATE(WAREHOUSE_METERING_HISTORY.START_TIME) = DATEADD(DAY, -1, CURRENT_DATE())
+
+  - name: LAST_7_DAYS
+    description: Filter for metering data from the last 7 days.
+    synonyms:
+      - past week
+      - this week
+      - last week
+    expr: WAREHOUSE_METERING_HISTORY.START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+
+  - name: LAST_30_DAYS
+    description: Filter for metering data from the last 30 days.
+    synonyms:
+      - past month
+      - this month
+      - last month
+    expr: WAREHOUSE_METERING_HISTORY.START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP())
+
+  - name: CURRENT_MONTH
+    description: Filter for the current calendar month.
+    synonyms:
+      - this month
+      - current month
+      - mtd
+    expr: WAREHOUSE_METERING_HISTORY.START_TIME >= DATE_TRUNC('MONTH', CURRENT_DATE())
+
+  - name: LAST_MONTH
+    description: Filter for the previous calendar month.
+    synonyms:
+      - previous month
+      - prior month
+    expr: |-
+      WAREHOUSE_METERING_HISTORY.START_TIME >= DATE_TRUNC('MONTH', DATEADD('MONTH', -1, CURRENT_DATE()))
+      AND WAREHOUSE_METERING_HISTORY.START_TIME < DATE_TRUNC('MONTH', CURRENT_DATE())
+
+  - name: WITH_ACTIVITY
+    description: Filter for periods with actual credit consumption.
+    synonyms:
+      - active periods
+      - with usage
+    expr: WAREHOUSE_METERING_HISTORY.CREDITS_USED > 0
+
+# =============================================================================
+# MODULE CUSTOM INSTRUCTIONS
+# =============================================================================
+module_custom_instructions:
+  sql_generation: |-
+    CRITICAL RULES:
+    1. ALWAYS exclude system-managed warehouses: WHERE WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+    2. Credits are the Snowflake billing unit - multiply by credit price for dollars
+    3. For "most expensive", order by CREDITS_USED DESC
+    4. For "cost trends", group by date/week/month as appropriate
+    5. Always include WAREHOUSE_NAME when showing costs
+
+    COMMON PATTERNS:
+    - "Cost by warehouse" = SUM(CREDITS_USED) GROUP BY WAREHOUSE_NAME
+    - "Daily spend" = SUM(CREDITS_USED) GROUP BY DATE(START_TIME)
+    - "Monthly trend" = SUM(CREDITS_USED) GROUP BY DATE_TRUNC('MONTH', START_TIME)
+
+  question_categorization: |-
+    Treat these as UNAMBIGUOUS_SQL:
+    - "most expensive warehouse" - SUM credits GROUP BY warehouse ORDER BY DESC
+    - "daily spend" - SUM credits GROUP BY date
+    - "monthly cost" - SUM credits GROUP BY month
+    - "cost trend" - time series of credits
+
+    Ask for clarification:
+    - "cost" without context - ask for time period and granularity
+
+# =============================================================================
+# VERIFIED QUERIES (VQRs)
+# =============================================================================
+verified_queries:
+  - name: "Most expensive warehouses last month"
+    question: "What were my most expensive warehouses last month?"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        SUM(CREDITS_USED) AS total_credits,
+        SUM(CREDITS_USED_COMPUTE) AS compute_credits,
+        SUM(CREDITS_USED_CLOUD_SERVICES) AS cloud_services_credits
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
+      WHERE START_TIME >= DATE_TRUNC('MONTH', DATEADD('MONTH', -1, CURRENT_DATE()))
+        AND START_TIME < DATE_TRUNC('MONTH', CURRENT_DATE())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME
+      ORDER BY total_credits DESC
+
+  - name: "Daily spend trend 30 days"
+    question: "Show me daily credit spend for the last 30 days"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        DATE(START_TIME) AS usage_date,
+        SUM(CREDITS_USED) AS daily_credits
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
+      WHERE START_TIME >= DATEADD('DAY', -30, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY usage_date
+      ORDER BY usage_date DESC
+
+  - name: "Cloud services ratio analysis"
+    question: "Which warehouses have high cloud services costs?"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        SUM(CREDITS_USED_COMPUTE) AS compute_credits,
+        SUM(CREDITS_USED_CLOUD_SERVICES) AS services_credits,
+        ROUND(services_credits * 100.0 / NULLIF(compute_credits, 0), 2) AS services_percentage
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
+      WHERE START_TIME >= DATEADD('DAY', -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME
+      HAVING services_percentage > 10
+      ORDER BY services_percentage DESC
+
+  - name: "Hourly cost pattern"
+    question: "What is the hourly cost pattern by warehouse?"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        HOUR(START_TIME) AS hour_of_day,
+        AVG(CREDITS_USED) AS avg_hourly_credits
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
+      WHERE START_TIME >= DATEADD('DAY', -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME, hour_of_day
+      ORDER BY WAREHOUSE_NAME, hour_of_day
+
+  - name: "Weekly cost comparison"
+    question: "Compare this week's costs to last week by warehouse"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        WAREHOUSE_NAME,
+        SUM(CASE WHEN START_TIME >= DATEADD('DAY', -7, CURRENT_TIMESTAMP()) THEN CREDITS_USED ELSE 0 END) AS this_week_credits,
+        SUM(CASE WHEN START_TIME >= DATEADD('DAY', -14, CURRENT_TIMESTAMP()) AND START_TIME < DATEADD('DAY', -7, CURRENT_TIMESTAMP()) THEN CREDITS_USED ELSE 0 END) AS last_week_credits,
+        ROUND((this_week_credits - last_week_credits) * 100.0 / NULLIF(last_week_credits, 0), 2) AS week_over_week_change_pct
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
+      WHERE START_TIME >= DATEADD('DAY', -14, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY WAREHOUSE_NAME
+      ORDER BY this_week_credits DESC
+
+  - name: "Monthly cost summary"
+    question: "Show monthly cost breakdown"
+    verified_at: 2025-01-20
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        DATE_TRUNC('MONTH', START_TIME) AS month,
+        COUNT(DISTINCT WAREHOUSE_NAME) AS active_warehouses,
+        SUM(CREDITS_USED) AS total_credits,
+        SUM(CREDITS_USED_COMPUTE) AS compute_credits,
+        SUM(CREDITS_USED_CLOUD_SERVICES) AS cloud_services_credits
+      FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
+      WHERE START_TIME >= DATEADD('MONTH', -6, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY month
+      ORDER BY month DESC
