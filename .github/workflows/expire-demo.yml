@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: write
-  administration: write
+  issues: write
 
 jobs:
   expire:
@@ -36,10 +36,97 @@ jobs:
             echo "expired=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Archive repository when expired
+      - name: Check if already marked expired
+        id: check
         if: steps.expiry.outputs.expired == 'true'
+        run: |
+          if grep -q "THIS DEMO HAS EXPIRED" README.md 2>/dev/null; then
+            echo "already_marked=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already_marked=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update README with expiration banner
+        if: steps.expiry.outputs.expired == 'true' && steps.check.outputs.already_marked != 'true'
+        run: |
+          set -euo pipefail
+          expires="${{ steps.expiry.outputs.expires }}"
+
+          # Create expiration banner
+          cat > /tmp/expired_banner.md << 'BANNER'
+          > [!CAUTION]
+          > ## THIS DEMO HAS EXPIRED
+          >
+          > This demonstration project expired on **EXPIRES_DATE** and is no longer maintained.
+          >
+          > **Why?** Demo projects use Snowflake syntax and features current at creation time. After 30 days, syntax may be outdated, features may have changed, and the code may no longer represent best practices.
+          >
+          > **What should I do?**
+          > - Do NOT use this code in production
+          > - Check [Snowflake Documentation](https://docs.snowflake.com) for current syntax
+          > - Contact the SE Community for an updated reference implementation
+          >
+          > ---
+
+          BANNER
+
+          # Replace placeholder with actual date
+          sed -i "s/EXPIRES_DATE/$expires/g" /tmp/expired_banner.md
+
+          # Prepend banner to README
+          cat /tmp/expired_banner.md README.md > /tmp/new_readme.md
+          mv /tmp/new_readme.md README.md
+
+      - name: Create expiration issue
+        if: steps.expiry.outputs.expired == 'true' && steps.check.outputs.already_marked != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh api -X PATCH "repos/${{ github.repository }}" -f archived=true -f visibility=private
+          expires="${{ steps.expiry.outputs.expires }}"
+
+          # Check if expiration issue already exists
+          existing=$(gh issue list --label "expired" --state all --json number --jq 'length')
+          if [[ "$existing" -gt 0 ]]; then
+            echo "Expiration issue already exists, skipping creation."
+            exit 0
+          fi
+
+          gh issue create \
+            --title "Demo Expired: $expires" \
+            --label "expired" \
+            --body "## Demo Expiration Notice
+
+          This demonstration project expired on **$expires**.
+
+          ### Why demos expire
+
+          - Snowflake features and syntax evolve rapidly
+          - Code written 30+ days ago may not reflect current best practices
+          - Stale demos can mislead users and cause frustration
+
+          ### Recommended actions
+
+          1. **Do not use this code in production** without verifying against current documentation
+          2. **Check [Snowflake Docs](https://docs.snowflake.com)** for updated syntax
+          3. **Request an updated demo** from the SE Community if needed
+
+          ### For maintainers
+
+          This repository should be manually archived or deleted. The README has been updated with an expiration warning.
+
+          ---
+          *This issue was automatically created by the expiration workflow.*"
+
+      - name: Commit README changes
+        if: steps.expiry.outputs.expired == 'true' && steps.check.outputs.already_marked != 'true'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: mark demo as expired
+
+          Demo expiration date: ${{ steps.expiry.outputs.expires }}
+          Automated by expire-demo workflow."
+          git push
