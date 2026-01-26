@@ -329,7 +329,7 @@ module_custom_instructions:
 verified_queries:
   - name: "Most expensive warehouses last month"
     question: "What were my most expensive warehouses last month?"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -346,7 +346,7 @@ verified_queries:
 
   - name: "Daily spend trend 30 days"
     question: "Show me daily credit spend for the last 30 days"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -360,7 +360,7 @@ verified_queries:
 
   - name: "Cloud services ratio analysis"
     question: "Which warehouses have high cloud services costs?"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -377,7 +377,7 @@ verified_queries:
 
   - name: "Hourly cost pattern"
     question: "What is the hourly cost pattern by warehouse?"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -392,7 +392,7 @@ verified_queries:
 
   - name: "Weekly cost comparison"
     question: "Compare this week's costs to last week by warehouse"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -408,7 +408,7 @@ verified_queries:
 
   - name: "Monthly cost summary"
     question: "Show monthly cost breakdown"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT

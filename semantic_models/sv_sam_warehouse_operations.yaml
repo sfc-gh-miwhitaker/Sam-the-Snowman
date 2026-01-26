@@ -367,7 +367,7 @@ module_custom_instructions:
 verified_queries:
   - name: "Warehouses with queuing"
     question: "Which warehouses have the most queued queries?"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -386,7 +386,7 @@ verified_queries:
 
   - name: "Hourly concurrency pattern"
     question: "Show warehouse concurrency by hour of day"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -402,7 +402,7 @@ verified_queries:
 
   - name: "Lock contention analysis"
     question: "Which warehouses have lock contention issues?"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -420,7 +420,7 @@ verified_queries:
 
   - name: "Warehouse utilization summary"
     question: "Show overall warehouse utilization"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -438,7 +438,7 @@ verified_queries:
 
   - name: "Cold start impact"
     question: "Which warehouses have provisioning delays?"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -455,7 +455,7 @@ verified_queries:
 
   - name: "Sizing recommendation indicators"
     question: "Which warehouses may need resizing?"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
@@ -475,7 +475,7 @@ verified_queries:
 
   - name: "Daily load trend"
     question: "Show daily warehouse load trend"
-    verified_at: 2025-01-20
+    verified_at: 1737400640
     verified_by: SE Community
     sql: |-
       SELECT
