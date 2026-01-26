@@ -36,7 +36,7 @@
  * Author: SE Community
  * Created: 2025-01-20
  * Expires: 2026-02-14
- * Version: 5.0
+ * Version: 6.0
  * License: Apache 2.0
  *
  * Usage:
@@ -508,6 +508,135 @@ BEGIN
             VALUES ('PERFORMANCE', '30-day cost agg < 30s', 'SV_SAM_COST_ANALYSIS', 'FAIL', 0, SQLERRM);
     END;
 
+    -- ========================================================================
+    -- NEW: Tests for User Activity Semantic View
+    -- ========================================================================
+
+    -- Test: User Activity semantic view exists
+    BEGIN
+        start_time := CURRENT_TIMESTAMP();
+        SHOW SEMANTIC VIEWS LIKE 'SV_SAM_USER_ACTIVITY' IN SCHEMA SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;
+        end_time := CURRENT_TIMESTAMP();
+        exec_time_ms := TIMESTAMPDIFF(MILLISECOND, start_time, end_time);
+
+        INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+            (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ERROR_MESSAGE)
+        VALUES ('SMOKE', 'Semantic view exists', 'SV_SAM_USER_ACTIVITY', 'PASS', :exec_time_ms, NULL);
+    EXCEPTION
+        WHEN OTHER THEN
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ERROR_MESSAGE)
+            VALUES ('SMOKE', 'Semantic view exists', 'SV_SAM_USER_ACTIVITY', 'FAIL', 0, SQLERRM);
+    END;
+
+    -- VQR Test: Users by credit consumption
+    BEGIN
+        start_time := CURRENT_TIMESTAMP();
+        SELECT COUNT(*) INTO :row_cnt FROM (
+            SELECT qh.USER_NAME, COUNT(*) AS QUERY_COUNT, SUM(qah.CREDITS_ATTRIBUTED_COMPUTE) AS TOTAL_CREDITS
+            FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY qh
+            LEFT JOIN SNOWFLAKE.ACCOUNT_USAGE.QUERY_ATTRIBUTION_HISTORY qah ON qh.QUERY_ID = qah.QUERY_ID
+            WHERE qh.START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+                AND qh.WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+            GROUP BY qh.USER_NAME
+            ORDER BY TOTAL_CREDITS DESC NULLS LAST
+            LIMIT 10
+        );
+        end_time := CURRENT_TIMESTAMP();
+        exec_time_ms := TIMESTAMPDIFF(MILLISECOND, start_time, end_time);
+
+        INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+            (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ROW_COUNT, ERROR_MESSAGE)
+        VALUES ('FUNCTIONAL', 'VQR: Users by credits', 'SV_SAM_USER_ACTIVITY', 'PASS', :exec_time_ms, :row_cnt, NULL);
+    EXCEPTION
+        WHEN OTHER THEN
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ERROR_MESSAGE)
+            VALUES ('FUNCTIONAL', 'VQR: Users by credits', 'SV_SAM_USER_ACTIVITY', 'FAIL', 0, SQLERRM);
+    END;
+
+    -- ========================================================================
+    -- NEW: Tests for Python Analytics Procedures
+    -- ========================================================================
+
+    -- Test: Cost anomaly detector procedure exists and runs
+    BEGIN
+        start_time := CURRENT_TIMESTAMP();
+        SELECT COUNT(*) INTO :row_cnt FROM TABLE(SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_COST_ANOMALIES(14, 2.0));
+        end_time := CURRENT_TIMESTAMP();
+        exec_time_ms := TIMESTAMPDIFF(MILLISECOND, start_time, end_time);
+
+        INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+            (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ROW_COUNT, ERROR_MESSAGE)
+        VALUES ('FUNCTIONAL', 'Python: Cost anomaly detector', 'SP_SAM_COST_ANOMALIES', 'PASS', :exec_time_ms, :row_cnt, NULL);
+    EXCEPTION
+        WHEN OTHER THEN
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ERROR_MESSAGE)
+            VALUES ('FUNCTIONAL', 'Python: Cost anomaly detector', 'SP_SAM_COST_ANOMALIES', 'FAIL', 0, SQLERRM);
+    END;
+
+    -- Test: Efficiency scorer procedure exists and runs
+    BEGIN
+        start_time := CURRENT_TIMESTAMP();
+        SELECT COUNT(*) INTO :row_cnt FROM TABLE(SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_EFFICIENCY_SCORE(7));
+        end_time := CURRENT_TIMESTAMP();
+        exec_time_ms := TIMESTAMPDIFF(MILLISECOND, start_time, end_time);
+
+        INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+            (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ROW_COUNT, ERROR_MESSAGE)
+        VALUES ('FUNCTIONAL', 'Python: Efficiency scorer', 'SP_SAM_EFFICIENCY_SCORE', 'PASS', :exec_time_ms, :row_cnt, NULL);
+    EXCEPTION
+        WHEN OTHER THEN
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ERROR_MESSAGE)
+            VALUES ('FUNCTIONAL', 'Python: Efficiency scorer', 'SP_SAM_EFFICIENCY_SCORE', 'FAIL', 0, SQLERRM);
+    END;
+
+    -- Test: Trend analyzer procedure exists and runs
+    BEGIN
+        start_time := CURRENT_TIMESTAMP();
+        SELECT COUNT(*) INTO :row_cnt FROM TABLE(SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_TREND_ANALYSIS());
+        end_time := CURRENT_TIMESTAMP();
+        exec_time_ms := TIMESTAMPDIFF(MILLISECOND, start_time, end_time);
+
+        INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+            (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ROW_COUNT, ERROR_MESSAGE)
+        VALUES ('FUNCTIONAL', 'Python: Trend analyzer', 'SP_SAM_TREND_ANALYSIS', 'PASS', :exec_time_ms, :row_cnt, NULL);
+    EXCEPTION
+        WHEN OTHER THEN
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ERROR_MESSAGE)
+            VALUES ('FUNCTIONAL', 'Python: Trend analyzer', 'SP_SAM_TREND_ANALYSIS', 'FAIL', 0, SQLERRM);
+    END;
+
+    -- ========================================================================
+    -- NEW: Performance Tests for Python Procedures
+    -- ========================================================================
+
+    -- Performance Test: Cost anomaly detector under 60 seconds
+    BEGIN
+        start_time := CURRENT_TIMESTAMP();
+        SELECT COUNT(*) INTO :row_cnt FROM TABLE(SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_COST_ANOMALIES(30, 2.0));
+        end_time := CURRENT_TIMESTAMP();
+        exec_time_ms := TIMESTAMPDIFF(MILLISECOND, start_time, end_time);
+
+        IF (exec_time_ms < 60000) THEN
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ROW_COUNT, ERROR_MESSAGE)
+            VALUES ('PERFORMANCE', 'Cost anomaly < 60s', 'SP_SAM_COST_ANOMALIES', 'PASS', :exec_time_ms, :row_cnt, NULL);
+        ELSE
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ROW_COUNT, ERROR_MESSAGE)
+            VALUES ('PERFORMANCE', 'Cost anomaly < 60s', 'SP_SAM_COST_ANOMALIES', 'WARN', :exec_time_ms, :row_cnt, 'Procedure took longer than 60 seconds');
+        END IF;
+    EXCEPTION
+        WHEN OTHER THEN
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ERROR_MESSAGE)
+            VALUES ('PERFORMANCE', 'Cost anomaly < 60s', 'SP_SAM_COST_ANOMALIES', 'FAIL', 0, SQLERRM);
+    END;
+
     -- Return summary
     RETURN TABLE(
         SELECT
@@ -520,7 +649,7 @@ BEGIN
         ORDER BY TEST_ID
     );
 END;
-$$;
+$;
 
 -- ============================================================================
 -- TEST SUMMARY VIEW

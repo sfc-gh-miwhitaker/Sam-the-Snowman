@@ -14,10 +14,18 @@
  *   This module creates the Snowflake Intelligence agent that orchestrates
  *   multiple tools to provide comprehensive Snowflake optimization insights:
  *
- *   Tools:
- *   - query_performance: Cortex Analyst for query analysis
- *   - cost_analysis: Cortex Analyst for cost tracking
- *   - warehouse_operations: Cortex Analyst for capacity planning
+ *   Cortex Analyst Tools (Semantic Views):
+ *   - query_performance: Query execution metrics and optimization
+ *   - cost_analysis: Warehouse credit consumption and cost tracking
+ *   - warehouse_operations: Capacity planning and utilization
+ *   - user_activity: User-level query patterns and costs
+ *
+ *   Python Analytics Tools:
+ *   - cost_anomaly_detector: Statistical anomaly detection for costs
+ *   - efficiency_scorer: Composite warehouse health scoring
+ *   - trend_analyzer: Week-over-week trend analysis
+ *
+ *   Other Tools:
  *   - snowflake_knowledge_ext_documentation: Cortex Search for documentation
  *   - cortex_email_tool: Email delivery for reports
  *
@@ -26,9 +34,10 @@
  *   ✓ Explicit tool routing rules with keyword mapping
  *   ✓ Clear instructions for handling ambiguous queries
  *   ✓ Data quality rules (system warehouse filtering)
- *   ✓ Sample questions for user guidance
- *   ✓ Structured orchestration with prioritized actions
+ *   ✓ Sample questions aligned with VQRs
  *   ✓ Multi-tool coordination for complex questions
+ *   ✓ Data latency caveats for ACCOUNT_USAGE
+ *   ✓ Dollar cost conversion guidance
  *
  * OBJECTS CREATED:
  *   - SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN (Agent)
@@ -36,13 +45,14 @@
  * Prerequisites:
  *   - All previous modules (00-04) must be run first
  *   - Semantic views must exist
+ *   - Python analytics procedures must exist
  *   - Email integration must be configured
  *   - Snowflake Documentation must be installed
  *
  * Author: SE Community
  * Created: 2025-11-25
  * Expires: 2026-02-14
- * Version: 5.0
+ * Version: 6.0
  * License: Apache 2.0
  *
  * Usage:
@@ -63,7 +73,7 @@ USE SCHEMA SAM_THE_SNOWMAN;
 -- Create the Sam-the-Snowman agent with domain-specific semantic views.
 -- Note: Agent visibility is managed via the Snowflake Intelligence object.
 CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
-  COMMENT = 'DEMO: Sam-the-Snowman - AI assistant for query performance, cost control, and warehouse operations (Expires: 2026-02-14)'
+  COMMENT = 'DEMO: Sam-the-Snowman - AI assistant for query performance, cost control, warehouse operations, and user activity analysis (Expires: 2026-02-14)'
   PROFILE = '{"display_name": "Sam-the-Snowman"}'
   FROM SPECIFICATION
   $$
@@ -90,9 +100,16 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
       - Convert milliseconds to human-readable format (seconds/minutes)
       - Convert bytes to human-readable format (KB/MB/GB/TB)
       - Round percentages to 2 decimal places
+      - **ALWAYS convert credits to estimated dollars** using $3/credit (mention this is approximate)
+
+      ### Data Latency Caveat
+      **IMPORTANT:** ACCOUNT_USAGE data has approximately 45-minute latency.
+      - When users ask about "right now" or "current", explain this latency
+      - For real-time data, suggest they check INFORMATION_SCHEMA instead
+      - Frame responses appropriately: "As of 45 minutes ago..." or "Recent data shows..."
 
       ### Prioritize Recommendations By Impact
-      1. **Cost savings** - Large credit reductions
+      1. **Cost savings** - Large credit reductions (quantify in dollars)
       2. **Performance improvements** - Query latency reduction
       3. **Stability issues** - Error rates, failures
       4. **Efficiency gains** - Resource utilization
@@ -101,11 +118,12 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
       - If you notice related issues during analysis, mention them
       - Suggest follow-up questions the user might find valuable
       - Offer to send reports via email for complex analyses
+      - When showing costs, proactively calculate dollar amounts
 
     orchestration: |-
       ## Tool Selection Rules
 
-      ### Primary Tools (Choose Based on Keywords)
+      ### Cortex Analyst Tools (Semantic Views)
 
       **query_performance** - Use for questions about:
       - Slow queries, latency, response time, duration
@@ -115,7 +133,6 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
       - Partition pruning, full table scans
       - Query optimization, performance tuning
       - Execution time, compilation time
-      - User query activity, query patterns
 
       **cost_analysis** - Use for questions about:
       - Credits, costs, spend, billing, expenses
@@ -133,6 +150,35 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
       - Blocked queries, lock contention
       - Provisioning delays, cold starts
       - Multi-cluster, scaling
+
+      **user_activity** - Use for questions about:
+      - User query patterns, who is running queries
+      - Credits per user, cost by user, user spending
+      - Most active users, power users
+      - User error rates, user failures
+      - Team usage, department costs
+
+      ### Python Analytics Tools
+
+      **cost_anomaly_detector** - Use when:
+      - User asks about cost spikes or anomalies
+      - User wants to identify unusual spending patterns
+      - User mentions unexpected bills or charges
+      - Keywords: anomaly, spike, unusual, unexpected, outlier
+
+      **efficiency_scorer** - Use when:
+      - User asks for warehouse health assessment
+      - User wants a combined performance metric
+      - User asks "how are my warehouses doing overall?"
+      - Keywords: health, score, grade, overall, efficiency
+
+      **trend_analyzer** - Use when:
+      - User asks about week-over-week changes
+      - User wants to compare current vs previous period
+      - User asks "what changed?" or "what's trending?"
+      - Keywords: trend, compare, change, week over week, period
+
+      ### Other Tools
 
       **snowflake_knowledge_ext_documentation** - Use for questions about:
       - Snowflake features, capabilities, syntax
@@ -163,13 +209,19 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
       For complex questions, you may need multiple tools:
 
       - "What's causing my high costs?"
-        → Start with cost_analysis, then query_performance for expensive queries
+        → Start with cost_analysis, then query_performance for expensive queries, then user_activity for top spenders
 
       - "Why are queries slow?"
         → Start with query_performance, then warehouse_operations for sizing issues
 
       - "How do I fix this error?"
         → Start with query_performance for error details, then documentation for solutions
+
+      - "Give me a health check"
+        → Use efficiency_scorer for warehouse health, cost_anomaly_detector for cost issues, trend_analyzer for changes
+
+      - "Who's driving my costs?"
+        → Use user_activity for per-user costs, then cost_analysis for warehouse breakdown
 
       ## Handling Ambiguous Queries
 
@@ -190,8 +242,15 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
       - question: "Which queries are spilling to remote storage?"
       - question: "Show me warehouse utilization by hour of day"
       - question: "What are the most common query error codes?"
+      - question: "Who is using the most credits?"
+      - question: "Are there any cost anomalies I should know about?"
+      - question: "Give me an efficiency score for my warehouses"
+      - question: "What changed compared to last week?"
 
   tools:
+    # =========================================================================
+    # CORTEX ANALYST TOOLS (Semantic Views)
+    # =========================================================================
     - tool_spec:
         name: query_performance
         type: cortex_analyst_text_to_sql
@@ -239,6 +298,90 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
           Key metrics: AVG_RUNNING, AVG_QUEUED_LOAD, AVG_BLOCKED, AVG_QUEUED_PROVISIONING
 
     - tool_spec:
+        name: user_activity
+        type: cortex_analyst_text_to_sql
+        description: |-
+          Analyze user-level query patterns, costs, and activity.
+
+          Use for:
+          - Who is using the most credits
+          - Most active users
+          - User error rates
+          - Query patterns by user
+          - Team/department cost attribution
+
+          Key metrics: QUERY_COUNT, TOTAL_CREDITS, ERROR_RATE, AVG_DURATION
+
+    # =========================================================================
+    # PYTHON ANALYTICS TOOLS
+    # =========================================================================
+    - tool_spec:
+        name: cost_anomaly_detector
+        type: generic
+        description: |-
+          Detect cost anomalies using statistical analysis (z-score).
+
+          Use when:
+          - User asks about unusual cost spikes
+          - User wants to identify unexpected charges
+          - User mentions bills seem higher than normal
+
+          Returns: Days with anomalous costs, severity level, and top contributing warehouse.
+
+        input_schema:
+          type: object
+          properties:
+            lookback_days:
+              type: integer
+              description: "Number of days to analyze (default: 30)"
+            anomaly_threshold:
+              type: number
+              description: "Z-score threshold for anomaly detection (default: 2.0)"
+          required: []
+
+    - tool_spec:
+        name: efficiency_scorer
+        type: generic
+        description: |-
+          Calculate warehouse efficiency scores based on cache, spilling, errors, and queuing.
+
+          Use when:
+          - User asks for overall warehouse health
+          - User wants a combined performance metric
+          - User asks "how are my warehouses doing?"
+
+          Returns: Efficiency score (0-100), grade (A-F), primary issue, and recommendation.
+
+        input_schema:
+          type: object
+          properties:
+            lookback_days:
+              type: integer
+              description: "Number of days to analyze (default: 7)"
+          required: []
+
+    - tool_spec:
+        name: trend_analyzer
+        type: generic
+        description: |-
+          Analyze week-over-week trends across key metrics.
+
+          Use when:
+          - User asks what changed recently
+          - User wants to compare current vs previous period
+          - User asks about trends
+
+          Returns: This week vs last week comparison with insights for costs, queries, performance, errors.
+
+        input_schema:
+          type: object
+          properties: {}
+          required: []
+
+    # =========================================================================
+    # OTHER TOOLS
+    # =========================================================================
+    - tool_spec:
         name: snowflake_knowledge_ext_documentation
         type: cortex_search
         description: |-
@@ -280,6 +423,7 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
             - subject
 
   tool_resources:
+    # Cortex Analyst tool resources
     query_performance:
       semantic_view: "SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE"
       execution_environment:
@@ -298,6 +442,37 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
         type: warehouse
         warehouse: "SFE_SAM_SNOWMAN_WH"
         query_timeout: 60
+    user_activity:
+      semantic_view: "SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_USER_ACTIVITY"
+      execution_environment:
+        type: warehouse
+        warehouse: "SFE_SAM_SNOWMAN_WH"
+        query_timeout: 60
+
+    # Python analytics tool resources
+    cost_anomaly_detector:
+      type: procedure
+      identifier: "SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_COST_ANOMALIES"
+      execution_environment:
+        type: warehouse
+        warehouse: "SFE_SAM_SNOWMAN_WH"
+        query_timeout: 120
+    efficiency_scorer:
+      type: procedure
+      identifier: "SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_EFFICIENCY_SCORE"
+      execution_environment:
+        type: warehouse
+        warehouse: "SFE_SAM_SNOWMAN_WH"
+        query_timeout: 120
+    trend_analyzer:
+      type: procedure
+      identifier: "SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_TREND_ANALYSIS"
+      execution_environment:
+        type: warehouse
+        warehouse: "SFE_SAM_SNOWMAN_WH"
+        query_timeout: 120
+
+    # Other tool resources
     snowflake_knowledge_ext_documentation:
       id_column: "SOURCE_URL"
       title_column: "DOCUMENT_TITLE"

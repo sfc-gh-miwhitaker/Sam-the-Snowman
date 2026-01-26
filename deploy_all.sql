@@ -82,7 +82,7 @@
  * Author: SE Community
  * Created: 2025-11-25
  * Expires: 2026-02-14
- * Version: 4.0
+ * Version: 6.0
  * License: Apache 2.0
  ******************************************************************************/
 
@@ -197,6 +197,14 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/br
 -- Deploys analytical views for query performance, cost, and warehouse operations
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
 
+-- Module 3b: User Activity Semantic View
+-- Deploys user-centric analytics for credit attribution and activity patterns
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03b_semantic_view_user_activity.sql';
+
+-- Module 3c: Python Analytics Tools
+-- Deploys advanced analytics procedures (anomaly detection, efficiency scoring, trends)
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03c_python_analytics_tool.sql';
+
 -- Module 4: Marketplace Documentation
 -- Installs Snowflake Documentation database for Cortex Search integration
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/04_marketplace.sql';
@@ -209,6 +217,14 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/br
 -- Tip: Run this module manually after deployment for detailed SHOW output:
 -- EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/06_validation.sql';
 
+-- Module 7: Testing Framework
+-- Deploys automated testing for semantic views and Python procedures
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/07_testing.sql';
+
+-- Module 8: Sam's Analytics Dashboard
+-- Deploys Streamlit in Snowflake app for visual analytics companion
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/08_dashboard.sql';
+
 -- ============================================================================
 -- DEPLOYMENT COMPLETE
 -- ============================================================================
@@ -216,6 +232,7 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/br
 SELECT
   'DEPLOYMENT COMPLETE' AS status,
   CURRENT_TIMESTAMP() AS completed_at,
-  'AI & ML > Agents > Sam-the-Snowman' AS next_steps,
+  'AI & ML > Agents > Sam-the-Snowman' AS agent_location,
+  'Projects > Streamlit > SAMS_DASHBOARD' AS dashboard_location,
   'Example question: What were my top 10 slowest queries today?' AS example_question,
-  'Optional verification: run sql/06_validation.sql from the Git repo stage' AS verification_note;
+  'Run tests: CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS()' AS test_command;

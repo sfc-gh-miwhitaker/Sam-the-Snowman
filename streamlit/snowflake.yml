@@ -1,0 +1,18 @@
+# Sam's Analytics Dashboard - SiS Deployment Manifest
+# This file configures deployment to Streamlit in Snowflake
+#
+# Deploy with: snow streamlit deploy --replace
+# Or via deploy_all.sql (uses Git repository stage)
+
+definition_version: 2
+entities:
+  sams_dashboard:
+    type: streamlit
+    identifier:
+      name: SAMS_DASHBOARD
+      database: SNOWFLAKE_EXAMPLE
+      schema: SAM_THE_SNOWMAN
+    query_warehouse: SFE_SAM_SNOWMAN_WH
+    main_file: streamlit_app.py
+    artifacts:
+      - streamlit_app.py
