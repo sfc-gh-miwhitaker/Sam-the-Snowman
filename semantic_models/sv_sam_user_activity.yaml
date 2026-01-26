@@ -1,0 +1,617 @@
+# =============================================================================
+# SEMANTIC MODEL: User Activity
+# =============================================================================
+# Best Practice Reference for Sam-the-Snowman
+#
+# This YAML file demonstrates world-class semantic model patterns for
+# user-centric analytics - answering questions like "Who's using the most
+# credits?" and "Which users are most active?"
+#
+# Author: SE Community
+# Version: 6.1
+# =============================================================================
+
+name: SV_SAM_USER_ACTIVITY
+description: >-
+  User activity analysis for Snowflake workloads. Track query patterns,
+  credit consumption, and error rates by user. Use this model for user
+  behavior analysis, chargeback reporting, and identifying power users
+  or problematic patterns.
+
+# =============================================================================
+# TABLES
+# =============================================================================
+tables:
+  - name: QUERY_HISTORY
+    description: >-
+      Historical record of all queries executed in the Snowflake account.
+      Used for user activity analysis with approximately 45-minute latency
+      from ACCOUNT_USAGE.
+    base_table:
+      database: SNOWFLAKE
+      schema: ACCOUNT_USAGE
+      table: QUERY_HISTORY
+    primary_key:
+      columns:
+        - QUERY_ID
+
+  - name: QUERY_ATTRIBUTION_HISTORY
+    description: >-
+      Credit attribution data linking queries to their compute costs.
+      Enables cost-per-user analysis and chargeback reporting.
+    base_table:
+      database: SNOWFLAKE
+      schema: ACCOUNT_USAGE
+      table: QUERY_ATTRIBUTION_HISTORY
+    primary_key:
+      columns:
+        - QUERY_ID
+
+# =============================================================================
+# RELATIONSHIPS
+# =============================================================================
+relationships:
+  - name: query_to_attribution
+    left_table: QUERY_HISTORY
+    right_table: QUERY_ATTRIBUTION_HISTORY
+    relationship_columns:
+      - left_column: QUERY_ID
+        right_column: QUERY_ID
+    join_type: left_outer
+    # Note: left_outer ensures queries without attribution data are still included
+
+# =============================================================================
+# DIMENSIONS
+# =============================================================================
+dimensions:
+  - name: QUERY_ID
+    description: >-
+      Unique identifier for each query execution (UUID format).
+    synonyms:
+      - query uuid
+      - query identifier
+      - execution id
+    expr: QUERY_HISTORY.QUERY_ID
+    data_type: TEXT
+    unique: true
+
+  - name: USER_NAME
+    description: >-
+      User who executed the query. Primary dimension for user activity
+      analysis. Use for per-user metrics, chargeback, and behavior tracking.
+    synonyms:
+      - username
+      - user
+      - who
+      - person
+      - account
+      - executor
+      - analyst
+    expr: QUERY_HISTORY.USER_NAME
+    data_type: TEXT
+
+  - name: ROLE_NAME
+    description: >-
+      Role used during query execution. Useful for understanding
+      permission patterns and role-based cost attribution.
+    synonyms:
+      - role
+      - active role
+      - execution role
+      - security role
+    expr: QUERY_HISTORY.ROLE_NAME
+    data_type: TEXT
+
+  - name: WAREHOUSE_NAME
+    description: >-
+      Warehouse that executed the query. Combine with user analysis
+      to understand warehouse preferences by team or individual.
+    synonyms:
+      - warehouse
+      - compute
+      - cluster
+      - virtual warehouse
+    expr: QUERY_HISTORY.WAREHOUSE_NAME
+    data_type: TEXT
+    sample_values:
+      - COMPUTE_WH
+      - ANALYTICS_WH
+      - ETL_WH
+      - TRANSFORM_WH
+      - LOADING_WH
+
+  - name: DATABASE_NAME
+    description: >-
+      Primary database accessed by the query. Useful for understanding
+      data access patterns by user.
+    synonyms:
+      - database
+      - db
+      - data source
+    expr: QUERY_HISTORY.DATABASE_NAME
+    data_type: TEXT
+
+  - name: QUERY_TYPE
+    description: >-
+      Type of SQL statement executed. Use to categorize user activity
+      by operation type (reads vs writes).
+    synonyms:
+      - statement type
+      - operation type
+      - sql type
+      - command type
+    expr: QUERY_HISTORY.QUERY_TYPE
+    data_type: TEXT
+    sample_values:
+      - SELECT
+      - INSERT
+      - UPDATE
+      - DELETE
+      - CREATE_TABLE
+      - MERGE
+      - COPY
+
+  - name: EXECUTION_STATUS
+    description: >-
+      Query execution outcome. Use to track error rates by user.
+    synonyms:
+      - status
+      - result
+      - outcome
+      - success status
+    expr: QUERY_HISTORY.EXECUTION_STATUS
+    data_type: TEXT
+    sample_values:
+      - SUCCESS
+      - FAIL
+      - INCIDENT
+
+# =============================================================================
+# TIME DIMENSIONS
+# =============================================================================
+time_dimensions:
+  - name: START_TIME
+    description: >-
+      Timestamp when query execution began (UTC). Primary time dimension
+      for user activity trending and historical analysis.
+    synonyms:
+      - query time
+      - when
+      - timestamp
+      - date
+      - execution start
+      - begin time
+    expr: QUERY_HISTORY.START_TIME
+    data_type: TIMESTAMP_LTZ
+
+  - name: END_TIME
+    description: >-
+      Timestamp when query execution completed (UTC).
+    synonyms:
+      - completion time
+      - finished
+      - end timestamp
+    expr: QUERY_HISTORY.END_TIME
+    data_type: TIMESTAMP_LTZ
+
+# =============================================================================
+# FACTS (Measures)
+# =============================================================================
+facts:
+  - name: EXECUTION_TIME
+    description: >-
+      Query execution time in milliseconds. Excludes queuing time.
+    synonyms:
+      - runtime
+      - processing time
+      - query time
+      - run time
+    expr: QUERY_HISTORY.EXECUTION_TIME
+    data_type: NUMBER
+
+  - name: TOTAL_ELAPSED_TIME
+    description: >-
+      Total query duration including compilation, queuing, and execution
+      (milliseconds). This is the end-user experience.
+    synonyms:
+      - duration
+      - total time
+      - latency
+      - response time
+      - wall time
+    expr: QUERY_HISTORY.TOTAL_ELAPSED_TIME
+    data_type: NUMBER
+
+  - name: BYTES_SCANNED
+    description: >-
+      Total bytes scanned by the query. Use to identify data-heavy users.
+    synonyms:
+      - data scanned
+      - bytes read
+      - data processed
+      - scan volume
+    expr: QUERY_HISTORY.BYTES_SCANNED
+    data_type: NUMBER
+
+  - name: BYTES_SPILLED_TO_REMOTE_STORAGE
+    description: >-
+      Bytes spilled to remote storage indicating severe memory pressure.
+      Non-zero values require attention.
+    synonyms:
+      - remote spill
+      - memory overflow
+      - severe spill
+    expr: QUERY_HISTORY.BYTES_SPILLED_TO_REMOTE_STORAGE
+    data_type: NUMBER
+
+  - name: CREDITS_ATTRIBUTED_COMPUTE
+    description: >-
+      Compute credits consumed by this query. Primary metric for
+      cost-per-user and chargeback analysis.
+    synonyms:
+      - query cost
+      - credits used
+      - compute cost
+      - spend
+      - credits
+    expr: QUERY_ATTRIBUTION_HISTORY.CREDITS_ATTRIBUTED_COMPUTE
+    data_type: NUMBER
+
+# =============================================================================
+# METRICS
+# =============================================================================
+metrics:
+  - name: QUERY_COUNT
+    description: >-
+      Total count of queries executed.
+    synonyms:
+      - total queries
+      - number of queries
+      - query volume
+      - executions
+    expr: COUNT(QUERY_HISTORY.QUERY_ID)
+    default_aggregation: sum
+
+  - name: UNIQUE_USERS
+    description: >-
+      Number of unique users who executed queries.
+    synonyms:
+      - user count
+      - distinct users
+      - active users
+    expr: COUNT(DISTINCT QUERY_HISTORY.USER_NAME)
+    default_aggregation: sum
+
+  - name: ACTIVE_DAYS
+    description: >-
+      Number of distinct days with query activity.
+    synonyms:
+      - days active
+      - distinct days
+    expr: COUNT(DISTINCT DATE(QUERY_HISTORY.START_TIME))
+    default_aggregation: sum
+
+  - name: AVG_EXECUTION_TIME_MS
+    description: >-
+      Average query execution time in milliseconds.
+    synonyms:
+      - average runtime
+      - mean execution time
+    expr: AVG(QUERY_HISTORY.EXECUTION_TIME)
+    default_aggregation: avg
+
+  - name: AVG_DURATION_MS
+    description: >-
+      Average total query duration in milliseconds.
+    synonyms:
+      - average duration
+      - mean latency
+    expr: AVG(QUERY_HISTORY.TOTAL_ELAPSED_TIME)
+    default_aggregation: avg
+
+  - name: P95_DURATION_MS
+    description: >-
+      95th percentile query duration - excludes outliers.
+    synonyms:
+      - 95th percentile
+      - p95 latency
+    expr: APPROX_PERCENTILE(QUERY_HISTORY.TOTAL_ELAPSED_TIME, 0.95)
+    default_aggregation: avg
+
+  - name: TOTAL_BYTES_SCANNED
+    description: >-
+      Total bytes scanned across all queries.
+    synonyms:
+      - data volume
+      - bytes processed
+    expr: SUM(QUERY_HISTORY.BYTES_SCANNED)
+    default_aggregation: sum
+
+  - name: TOTAL_TB_SCANNED
+    description: >-
+      Total terabytes scanned across all queries.
+    synonyms:
+      - terabytes scanned
+      - TB processed
+    expr: SUM(QUERY_HISTORY.BYTES_SCANNED) / (1024.0*1024*1024*1024)
+    default_aggregation: sum
+
+  - name: FAILED_QUERY_COUNT
+    description: >-
+      Number of queries that failed.
+    synonyms:
+      - errors
+      - failures
+      - failed queries
+    expr: SUM(CASE WHEN QUERY_HISTORY.EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END)
+    default_aggregation: sum
+
+  - name: ERROR_RATE
+    description: >-
+      Percentage of queries that failed.
+    synonyms:
+      - failure rate
+      - error percentage
+    expr: 100.0 * SUM(CASE WHEN QUERY_HISTORY.EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)
+    default_aggregation: avg
+
+  - name: TOTAL_CREDITS
+    description: >-
+      Total compute credits consumed.
+    synonyms:
+      - credit consumption
+      - total cost
+      - compute credits
+      - spend
+    expr: SUM(QUERY_ATTRIBUTION_HISTORY.CREDITS_ATTRIBUTED_COMPUTE)
+    default_aggregation: sum
+
+  - name: AVG_CREDITS_PER_QUERY
+    description: >-
+      Average credits consumed per query.
+    synonyms:
+      - cost per query
+      - average credits
+    expr: AVG(QUERY_ATTRIBUTION_HISTORY.CREDITS_ATTRIBUTED_COMPUTE)
+    default_aggregation: avg
+
+# =============================================================================
+# FILTERS (Named reusable filters)
+# =============================================================================
+filters:
+  - name: EXCLUDE_SYSTEM_WAREHOUSES
+    description: >-
+      Exclude system-managed warehouses that users cannot control.
+      Always apply this filter for user-facing analytics.
+    synonyms:
+      - user warehouses only
+      - exclude system
+    expr: QUERY_HISTORY.WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+
+  - name: SUCCESSFUL_QUERIES
+    description: >-
+      Include only successful queries.
+    synonyms:
+      - successful only
+      - completed
+    expr: QUERY_HISTORY.EXECUTION_STATUS = 'SUCCESS'
+
+  - name: FAILED_QUERIES
+    description: >-
+      Include only failed queries for error analysis.
+    synonyms:
+      - errors only
+      - failures
+    expr: QUERY_HISTORY.EXECUTION_STATUS = 'FAIL'
+
+  - name: SELECT_QUERIES
+    description: >-
+      Include only SELECT queries for read workload analysis.
+    synonyms:
+      - reads only
+    expr: QUERY_HISTORY.QUERY_TYPE = 'SELECT'
+
+  - name: DML_QUERIES
+    description: >-
+      Include INSERT, UPDATE, DELETE, MERGE for write workload analysis.
+    synonyms:
+      - writes only
+      - modifications
+    expr: QUERY_HISTORY.QUERY_TYPE IN ('INSERT', 'UPDATE', 'DELETE', 'MERGE')
+
+  - name: TODAY
+    description: Filter for queries from today only.
+    synonyms:
+      - today only
+    expr: QUERY_HISTORY.START_TIME >= CURRENT_DATE()
+
+  - name: LAST_7_DAYS
+    description: Filter for queries from the last 7 days.
+    synonyms:
+      - past week
+      - this week
+    expr: QUERY_HISTORY.START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+
+  - name: LAST_30_DAYS
+    description: Filter for queries from the last 30 days.
+    synonyms:
+      - past month
+      - this month
+    expr: QUERY_HISTORY.START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP())
+
+  - name: HIGH_ACTIVITY_USERS
+    description: >-
+      Users with more than 100 queries in 7 days.
+    synonyms:
+      - power users
+      - heavy users
+    expr: >-
+      QUERY_HISTORY.USER_NAME IN (
+        SELECT USER_NAME FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+        WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        GROUP BY USER_NAME HAVING COUNT(*) > 100
+      )
+
+# =============================================================================
+# VERIFIED QUERIES (VQRs)
+# =============================================================================
+verified_queries:
+  - name: "Users by credit consumption"
+    question: "Who is using the most credits?"
+    verified_at: 1737400640
+    verified_by: SE Community
+    use_as_onboarding_question: true
+    sql: |-
+      SELECT
+        __QUERY_HISTORY.USER_NAME,
+        COUNT(*) AS QUERY_COUNT,
+        SUM(__QUERY_ATTRIBUTION_HISTORY.CREDITS_ATTRIBUTED_COMPUTE) AS TOTAL_CREDITS,
+        ROUND(SUM(__QUERY_ATTRIBUTION_HISTORY.CREDITS_ATTRIBUTED_COMPUTE) * 3, 2) AS ESTIMATED_COST_USD,
+        AVG(__QUERY_ATTRIBUTION_HISTORY.CREDITS_ATTRIBUTED_COMPUTE) AS AVG_CREDITS_PER_QUERY,
+        SUM(__QUERY_HISTORY.BYTES_SCANNED) / (1024*1024*1024*1024) AS TOTAL_TB_SCANNED
+      FROM __QUERY_HISTORY
+      LEFT JOIN __QUERY_ATTRIBUTION_HISTORY
+        ON __QUERY_HISTORY.QUERY_ID = __QUERY_ATTRIBUTION_HISTORY.QUERY_ID
+      WHERE __QUERY_HISTORY.START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP())
+        AND __QUERY_HISTORY.WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY __QUERY_HISTORY.USER_NAME
+      ORDER BY TOTAL_CREDITS DESC NULLS LAST
+      LIMIT 20
+
+  - name: "Most active users"
+    question: "Who are the most active users?"
+    verified_at: 1737400640
+    verified_by: SE Community
+    use_as_onboarding_question: true
+    sql: |-
+      SELECT
+        USER_NAME,
+        COUNT(*) AS QUERY_COUNT,
+        COUNT(DISTINCT DATE(START_TIME)) AS ACTIVE_DAYS,
+        AVG(TOTAL_ELAPSED_TIME) / 1000 AS AVG_DURATION_SECONDS,
+        SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) AS FAILED_QUERIES,
+        ROUND(SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS ERROR_RATE_PCT
+      FROM __QUERY_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY USER_NAME
+      ORDER BY QUERY_COUNT DESC
+      LIMIT 20
+
+  - name: "Users with high error rates"
+    question: "Which users have high error rates?"
+    verified_at: 1737400640
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        USER_NAME,
+        COUNT(*) AS TOTAL_QUERIES,
+        SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) AS FAILED_QUERIES,
+        ROUND(SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS ERROR_RATE_PCT
+      FROM __QUERY_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY USER_NAME
+      HAVING TOTAL_QUERIES >= 10 AND ERROR_RATE_PCT > 5
+      ORDER BY ERROR_RATE_PCT DESC
+
+  - name: "User activity trend"
+    question: "Show user activity trend over time"
+    verified_at: 1737400640
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        DATE(START_TIME) AS ACTIVITY_DATE,
+        COUNT(DISTINCT USER_NAME) AS ACTIVE_USERS,
+        COUNT(*) AS TOTAL_QUERIES,
+        SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) AS FAILED_QUERIES
+      FROM __QUERY_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY ACTIVITY_DATE
+      ORDER BY ACTIVITY_DATE DESC
+
+  - name: "User query patterns"
+    question: "What types of queries do users run?"
+    verified_at: 1737400640
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        USER_NAME,
+        QUERY_TYPE,
+        COUNT(*) AS QUERY_COUNT,
+        AVG(TOTAL_ELAPSED_TIME) / 1000 AS AVG_DURATION_SECONDS
+      FROM __QUERY_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY USER_NAME, QUERY_TYPE
+      ORDER BY USER_NAME, QUERY_COUNT DESC
+
+  - name: "User warehouse usage"
+    question: "Which warehouses do users prefer?"
+    verified_at: 1737400640
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        USER_NAME,
+        WAREHOUSE_NAME,
+        COUNT(*) AS QUERY_COUNT,
+        AVG(TOTAL_ELAPSED_TIME) / 1000 AS AVG_DURATION_SECONDS
+      FROM __QUERY_HISTORY
+      WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+      GROUP BY USER_NAME, WAREHOUSE_NAME
+      ORDER BY USER_NAME, QUERY_COUNT DESC
+
+  - name: "Users with expensive queries"
+    question: "Which users run expensive queries?"
+    verified_at: 1737400640
+    verified_by: SE Community
+    sql: |-
+      SELECT
+        __QUERY_HISTORY.USER_NAME,
+        COUNT(*) AS EXPENSIVE_QUERY_COUNT,
+        SUM(__QUERY_ATTRIBUTION_HISTORY.CREDITS_ATTRIBUTED_COMPUTE) AS TOTAL_CREDITS_FROM_EXPENSIVE,
+        AVG(__QUERY_HISTORY.TOTAL_ELAPSED_TIME) / 1000 AS AVG_DURATION_SECONDS
+      FROM __QUERY_HISTORY
+      LEFT JOIN __QUERY_ATTRIBUTION_HISTORY
+        ON __QUERY_HISTORY.QUERY_ID = __QUERY_ATTRIBUTION_HISTORY.QUERY_ID
+      WHERE __QUERY_HISTORY.START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        AND __QUERY_HISTORY.WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
+        AND __QUERY_ATTRIBUTION_HISTORY.CREDITS_ATTRIBUTED_COMPUTE > 0.1
+      GROUP BY __QUERY_HISTORY.USER_NAME
+      ORDER BY TOTAL_CREDITS_FROM_EXPENSIVE DESC NULLS LAST
+      LIMIT 20
+
+# =============================================================================
+# CUSTOM INSTRUCTIONS
+# =============================================================================
+custom_instructions: |-
+  # User Activity Analysis Guidelines
+
+  ## Default Behaviors
+  - Always exclude system-managed warehouses (SYSTEM$*) from user analysis
+  - Default time range is last 7 days unless specified otherwise
+  - When asked about "top users", default to top 10 by query count
+  - When asked about "credit usage", show estimated USD cost (credits * $3)
+
+  ## User Identification
+  - USER_NAME is the primary user identifier
+  - ROLE_NAME indicates the security context, not the person
+  - Multiple users may use the same role
+
+  ## Cost Attribution
+  - CREDITS_ATTRIBUTED_COMPUTE provides query-level cost attribution
+  - Some queries may have NULL cost attribution (system queries, etc.)
+  - Use LEFT JOIN to include queries without attribution data
+
+  ## Common Questions Mapping
+  - "Who is spending the most?" -> Users by credit consumption
+  - "Who is most active?" -> Most active users
+  - "Who has errors?" -> Users with high error rates
+  - "Power users" -> Users with >100 queries in 7 days
+
+  ## Clarification Prompts
+  Ask for clarification when user says:
+  - "user activity" - do they mean query count, credits, or both?
+  - "top users" - by what metric? (queries, credits, data scanned)

@@ -82,7 +82,7 @@
  * Author: SE Community
  * Created: 2025-11-25
  * Expires: 2026-02-14
- * Version: 6.0
+ * Version: 7.0
  * License: Apache 2.0
  ******************************************************************************/
 
@@ -193,13 +193,10 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/br
 -- Sets up notification integration and email delivery stored procedure
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/02_email_integration.sql';
 
--- Module 3: Semantic Views
--- Deploys analytical views for query performance, cost, and warehouse operations
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_semantic_views.sql';
-
--- Module 3b: User Activity Semantic View
--- Deploys user-centric analytics for credit attribution and activity patterns
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03b_semantic_view_user_activity.sql';
+-- Module 3: Semantic Models (YAML-based deployment)
+-- Deploys semantic views from YAML files with full feature support:
+-- TIME_DIMENSIONS, FILTERS, VERIFIED_QUERIES, sample_values, custom_instructions
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_deploy_semantic_models.sql';
 
 -- Module 3c: Python Analytics Tools
 -- Deploys advanced analytics procedures (anomaly detection, efficiency scoring, trends)
