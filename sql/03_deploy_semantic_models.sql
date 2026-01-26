@@ -53,28 +53,10 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 -- Each semantic model is deployed using SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML
 -- which provides full feature support including TIME_DIMENSIONS, FILTERS,
 -- VERIFIED_QUERIES, and sample_values.
-
--- ----------------------------------------------------------------------------
--- 1. SV_SAM_QUERY_PERFORMANCE
--- ----------------------------------------------------------------------------
--- Purpose: Query execution metrics, errors, and optimization insights
-DECLARE
-    yaml_content VARCHAR;
-BEGIN
-    -- Read YAML from Git repository stage
-    SELECT GET_PRESIGNED_URL(
-        '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/semantic_models/',
-        'sv_sam_query_performance.yaml'
-    ) INTO yaml_content;
-
-    -- Note: We cannot directly read file content from stage in a CALL
-    -- Instead, we embed a placeholder that will be replaced
-    NULL;
-END;
-
--- Direct approach: Read and deploy each YAML file
+--
 -- Since SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML requires the YAML as a string,
--- we use a Python stored procedure to read files and call the function.
+-- we use a Python stored procedure to read files from the Git stage and call
+-- the system function.
 
 -- Create helper procedure for YAML deployment
 CREATE OR REPLACE PROCEDURE SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_DEPLOY_SEMANTIC_MODEL_FROM_STAGE(
@@ -109,9 +91,6 @@ def deploy_semantic_model(session: snowpark.Session, stage_path: str, target_sch
         # Read the YAML file from the stage
         with SnowflakeFile.open(stage_path, 'r') as f:
             yaml_content = f.read()
-
-        # Escape single quotes in the YAML content for SQL
-        yaml_escaped = yaml_content.replace("'", "''")
 
         # Call SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML
         # Using dollar-quoted string to handle complex YAML content
