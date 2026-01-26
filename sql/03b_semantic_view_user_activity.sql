@@ -31,7 +31,7 @@
  * Author: SE Community
  * Created: 2025-01-26
  * Expires: 2026-02-14
- * Version: 6.0
+ * Version: 6.1
  * License: Apache 2.0
  *
  * Usage:
@@ -54,9 +54,7 @@ USE SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS;
 -- ✓ Table relationships for cost-per-user analysis
 -- ✓ Pre-defined metrics for user activity
 -- ✓ Comprehensive synonyms for user-related queries
--- ✓ TIME DIMENSIONS for temporal analysis
--- ✓ Named FILTERS for activity-based segmentation
--- ✓ VERIFIED_QUERIES for common user questions
+-- ✓ Rich contextual descriptions
 
 CREATE OR REPLACE SEMANTIC VIEW SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_USER_ACTIVITY
 TABLES (
@@ -69,10 +67,6 @@ TABLES (
 )
 RELATIONSHIPS (
     qh(QUERY_ID) REFERENCES qah
-)
-TIME DIMENSIONS (
-    qh.START_TIME,
-    qh.END_TIME
 )
 FACTS (
     -- Timing Metrics
@@ -108,202 +102,69 @@ DIMENSIONS (
         COMMENT = 'Role used during query execution.',
     qh.warehouse_name AS WAREHOUSE_NAME
         WITH SYNONYMS = ('warehouse', 'compute', 'cluster')
-        WITH SAMPLE_VALUES = ('COMPUTE_WH', 'ANALYTICS_WH', 'ETL_WH', 'TRANSFORM_WH')
-        COMMENT = 'Warehouse that executed the query.',
+        COMMENT = 'Warehouse that executed the query. Example values: COMPUTE_WH, ANALYTICS_WH, ETL_WH.',
     qh.database_name AS DATABASE_NAME
         WITH SYNONYMS = ('database', 'db')
         COMMENT = 'Primary database accessed.',
     qh.query_type AS QUERY_TYPE
         WITH SYNONYMS = ('statement type', 'operation type')
-        WITH SAMPLE_VALUES = ('SELECT', 'INSERT', 'UPDATE', 'DELETE', 'CREATE_TABLE', 'MERGE')
-        COMMENT = 'Type of SQL statement executed.',
+        COMMENT = 'Type of SQL statement executed. Example values: SELECT, INSERT, UPDATE, DELETE, CREATE_TABLE, MERGE.',
     qh.execution_status AS EXECUTION_STATUS
         WITH SYNONYMS = ('status', 'result', 'outcome')
-        WITH SAMPLE_VALUES = ('SUCCESS', 'FAIL', 'INCIDENT')
-        COMMENT = 'Query execution outcome.',
+        COMMENT = 'Query execution outcome. Values: SUCCESS, FAIL, INCIDENT.',
     qh.start_time AS START_TIME
-        WITH SYNONYMS = ('query time', 'when', 'timestamp')
-        COMMENT = 'Query start timestamp (UTC).',
+        WITH SYNONYMS = ('query time', 'when', 'timestamp', 'date')
+        COMMENT = 'Query start timestamp (UTC). Use for time-based filtering.',
     qh.end_time AS END_TIME
         WITH SYNONYMS = ('completion time', 'finished')
         COMMENT = 'Query completion timestamp (UTC).'
 )
 METRICS (
     -- Activity Metrics
-    qh.query_count AS COUNT(qh.query_id),
-    qh.unique_users AS COUNT(DISTINCT qh.user_name),
-    qh.active_days AS COUNT(DISTINCT DATE(qh.start_time)),
+    qh.query_count AS COUNT(qh.query_id)
+        WITH SYNONYMS = ('total queries', 'number of queries', 'query volume')
+        COMMENT = 'Total count of queries executed.',
+    qh.unique_users AS COUNT(DISTINCT qh.user_name)
+        WITH SYNONYMS = ('user count', 'distinct users', 'active users')
+        COMMENT = 'Number of unique users who executed queries.',
+    qh.active_days AS COUNT(DISTINCT DATE(qh.start_time))
+        WITH SYNONYMS = ('days active', 'distinct days')
+        COMMENT = 'Number of distinct days with query activity.',
 
     -- Performance Metrics
-    qh.avg_execution_time_ms AS AVG(qh.execution_time),
-    qh.avg_duration_ms AS AVG(qh.total_elapsed_time),
-    qh.p95_duration_ms AS APPROX_PERCENTILE(qh.total_elapsed_time, 0.95),
+    qh.avg_execution_time_ms AS AVG(qh.execution_time)
+        WITH SYNONYMS = ('average runtime', 'mean execution time')
+        COMMENT = 'Average query execution time in milliseconds.',
+    qh.avg_duration_ms AS AVG(qh.total_elapsed_time)
+        WITH SYNONYMS = ('average duration', 'mean latency')
+        COMMENT = 'Average total query duration in milliseconds.',
+    qh.p95_duration_ms AS APPROX_PERCENTILE(qh.total_elapsed_time, 0.95)
+        WITH SYNONYMS = ('95th percentile', 'p95 latency')
+        COMMENT = '95th percentile query duration - excludes outliers.',
 
     -- Data Metrics
-    qh.total_bytes_scanned AS SUM(qh.bytes_scanned),
-    qh.total_tb_scanned AS (SUM(qh.bytes_scanned) / (1024.0*1024*1024*1024)),
+    qh.total_bytes_scanned AS SUM(qh.bytes_scanned)
+        WITH SYNONYMS = ('data volume', 'bytes processed')
+        COMMENT = 'Total bytes scanned across all queries.',
+    qh.total_tb_scanned AS (SUM(qh.bytes_scanned) / (1024.0*1024*1024*1024))
+        WITH SYNONYMS = ('terabytes scanned', 'TB processed')
+        COMMENT = 'Total terabytes scanned across all queries.',
 
     -- Quality Metrics
-    qh.failed_query_count AS SUM(CASE WHEN qh.execution_status = 'FAIL' THEN 1 ELSE 0 END),
-    qh.error_rate AS (100.0 * SUM(CASE WHEN qh.execution_status = 'FAIL' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)),
+    qh.failed_query_count AS SUM(CASE WHEN qh.execution_status = 'FAIL' THEN 1 ELSE 0 END)
+        WITH SYNONYMS = ('errors', 'failures', 'failed queries')
+        COMMENT = 'Number of queries that failed.',
+    qh.error_rate AS (100.0 * SUM(CASE WHEN qh.execution_status = 'FAIL' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0))
+        WITH SYNONYMS = ('failure rate', 'error percentage')
+        COMMENT = 'Percentage of queries that failed.',
 
     -- Cost Metrics
-    qah.total_credits AS SUM(qah.credits_attributed_compute),
+    qah.total_credits AS SUM(qah.credits_attributed_compute)
+        WITH SYNONYMS = ('credit consumption', 'total cost', 'compute credits')
+        COMMENT = 'Total compute credits consumed.',
     qah.avg_credits_per_query AS AVG(qah.credits_attributed_compute)
-)
-FILTERS (
-    -- System exclusion
-    EXCLUDE_SYSTEM_WAREHOUSES AS (qh.WAREHOUSE_NAME NOT LIKE 'SYSTEM$%')
-        WITH SYNONYMS = ('user warehouses only', 'exclude system')
-        COMMENT = 'Exclude system-managed warehouses.',
-
-    -- Status filters
-    SUCCESSFUL_QUERIES AS (qh.EXECUTION_STATUS = 'SUCCESS')
-        WITH SYNONYMS = ('successful only', 'completed')
-        COMMENT = 'Include only successful queries.',
-    FAILED_QUERIES AS (qh.EXECUTION_STATUS = 'FAIL')
-        WITH SYNONYMS = ('errors only', 'failures')
-        COMMENT = 'Include only failed queries.',
-
-    -- Activity filters
-    HIGH_ACTIVITY_USERS AS (qh.USER_NAME IN (
-        SELECT USER_NAME FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
-        WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
-        GROUP BY USER_NAME HAVING COUNT(*) > 100
-    ))
-        WITH SYNONYMS = ('power users', 'heavy users')
-        COMMENT = 'Users with more than 100 queries in 7 days.',
-
-    -- Query type filters
-    SELECT_QUERIES AS (qh.QUERY_TYPE = 'SELECT')
-        WITH SYNONYMS = ('reads only')
-        COMMENT = 'Include only SELECT queries.',
-    DML_QUERIES AS (qh.QUERY_TYPE IN ('INSERT', 'UPDATE', 'DELETE', 'MERGE'))
-        WITH SYNONYMS = ('writes only', 'modifications')
-        COMMENT = 'Include only DML queries.',
-
-    -- Time filters
-    TODAY AS (qh.START_TIME >= CURRENT_DATE())
-        WITH SYNONYMS = ('today only')
-        COMMENT = 'Filter for queries from today.',
-    LAST_7_DAYS AS (qh.START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP()))
-        WITH SYNONYMS = ('past week', 'this week')
-        COMMENT = 'Filter for queries from the last 7 days.',
-    LAST_30_DAYS AS (qh.START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP()))
-        WITH SYNONYMS = ('past month', 'this month')
-        COMMENT = 'Filter for queries from the last 30 days.'
-)
-VERIFIED_QUERIES (
-    -- VQR 1: Primary question - Who's using the most credits?
-    'Users by credit consumption' AS (
-        SELECT
-            qh.USER_NAME,
-            COUNT(*) AS QUERY_COUNT,
-            SUM(qah.CREDITS_ATTRIBUTED_COMPUTE) AS TOTAL_CREDITS,
-            ROUND(SUM(qah.CREDITS_ATTRIBUTED_COMPUTE) * 3, 2) AS ESTIMATED_COST_USD,
-            AVG(qah.CREDITS_ATTRIBUTED_COMPUTE) AS AVG_CREDITS_PER_QUERY,
-            SUM(qh.BYTES_SCANNED) / (1024*1024*1024*1024) AS TOTAL_TB_SCANNED
-        FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY qh
-        LEFT JOIN SNOWFLAKE.ACCOUNT_USAGE.QUERY_ATTRIBUTION_HISTORY qah
-            ON qh.QUERY_ID = qah.QUERY_ID
-        WHERE qh.START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP())
-            AND qh.WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
-        GROUP BY qh.USER_NAME
-        ORDER BY TOTAL_CREDITS DESC NULLS LAST
-        LIMIT 20
-    ) WITH QUESTION = 'Who is using the most credits?',
-
-    -- VQR 2: Most active users
-    'Most active users' AS (
-        SELECT
-            USER_NAME,
-            COUNT(*) AS QUERY_COUNT,
-            COUNT(DISTINCT DATE(START_TIME)) AS ACTIVE_DAYS,
-            AVG(TOTAL_ELAPSED_TIME) / 1000 AS AVG_DURATION_SECONDS,
-            SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) AS FAILED_QUERIES,
-            ROUND(SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS ERROR_RATE_PCT
-        FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
-        WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
-            AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
-        GROUP BY USER_NAME
-        ORDER BY QUERY_COUNT DESC
-        LIMIT 20
-    ) WITH QUESTION = 'Who are the most active users?',
-
-    -- VQR 3: Users with high error rates
-    'Users with high error rates' AS (
-        SELECT
-            USER_NAME,
-            COUNT(*) AS TOTAL_QUERIES,
-            SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) AS FAILED_QUERIES,
-            ROUND(SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS ERROR_RATE_PCT
-        FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
-        WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
-            AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
-        GROUP BY USER_NAME
-        HAVING TOTAL_QUERIES >= 10 AND ERROR_RATE_PCT > 5
-        ORDER BY ERROR_RATE_PCT DESC
-    ) WITH QUESTION = 'Which users have high error rates?',
-
-    -- VQR 4: User activity by day
-    'User activity trend' AS (
-        SELECT
-            DATE(START_TIME) AS ACTIVITY_DATE,
-            COUNT(DISTINCT USER_NAME) AS ACTIVE_USERS,
-            COUNT(*) AS TOTAL_QUERIES,
-            SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) AS FAILED_QUERIES
-        FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
-        WHERE START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP())
-            AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
-        GROUP BY ACTIVITY_DATE
-        ORDER BY ACTIVITY_DATE DESC
-    ) WITH QUESTION = 'Show user activity trend over time',
-
-    -- VQR 5: User query patterns by type
-    'User query patterns' AS (
-        SELECT
-            USER_NAME,
-            QUERY_TYPE,
-            COUNT(*) AS QUERY_COUNT,
-            AVG(TOTAL_ELAPSED_TIME) / 1000 AS AVG_DURATION_SECONDS
-        FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
-        WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
-            AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
-        GROUP BY USER_NAME, QUERY_TYPE
-        ORDER BY USER_NAME, QUERY_COUNT DESC
-    ) WITH QUESTION = 'What types of queries do users run?',
-
-    -- VQR 6: User warehouse preferences
-    'User warehouse usage' AS (
-        SELECT
-            USER_NAME,
-            WAREHOUSE_NAME,
-            COUNT(*) AS QUERY_COUNT,
-            AVG(TOTAL_ELAPSED_TIME) / 1000 AS AVG_DURATION_SECONDS
-        FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
-        WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
-            AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
-        GROUP BY USER_NAME, WAREHOUSE_NAME
-        ORDER BY USER_NAME, QUERY_COUNT DESC
-    ) WITH QUESTION = 'Which warehouses do users prefer?',
-
-    -- VQR 7: Users with expensive queries
-    'Users with expensive queries' AS (
-        SELECT
-            qh.USER_NAME,
-            COUNT(*) AS EXPENSIVE_QUERY_COUNT,
-            SUM(qah.CREDITS_ATTRIBUTED_COMPUTE) AS TOTAL_CREDITS_FROM_EXPENSIVE,
-            AVG(qh.TOTAL_ELAPSED_TIME) / 1000 AS AVG_DURATION_SECONDS
-        FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY qh
-        LEFT JOIN SNOWFLAKE.ACCOUNT_USAGE.QUERY_ATTRIBUTION_HISTORY qah
-            ON qh.QUERY_ID = qah.QUERY_ID
-        WHERE qh.START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
-            AND qh.WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
-            AND qah.CREDITS_ATTRIBUTED_COMPUTE > 0.1
-        GROUP BY qh.USER_NAME
-        ORDER BY TOTAL_CREDITS_FROM_EXPENSIVE DESC NULLS LAST
-        LIMIT 20
-    ) WITH QUESTION = 'Which users run expensive queries?'
+        WITH SYNONYMS = ('cost per query', 'average credits')
+        COMMENT = 'Average credits consumed per query.'
 )
 COMMENT = 'DEMO: Sam-the-Snowman - User activity analysis. Track query patterns, credit consumption, and error rates by user. Excludes system-managed warehouses. (Expires: 2026-02-14)';
 
