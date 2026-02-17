@@ -5,13 +5,13 @@
 
 # Sam-the-Snowman
 
-> **DEMONSTRATION PROJECT - EXPIRES: 2026-02-14**
-> This demo uses Snowflake features current as of January 2025.
+> **DEMONSTRATION PROJECT - EXPIRES: 2026-03-19**
+> This demo uses Snowflake features current as of February 2026.
 > After expiration, this repository will be archived and made private.
 
 **Author:** SE Community
 **Purpose:** World-class reference implementation for Snowflake Intelligence agent with semantic views
-**Created:** 2025-11-25 | **Expires:** 2026-02-14 | **Version:** 5.0 | **Status:** ACTIVE
+**Created:** 2025-11-25 | **Expires:** 2026-03-19 | **Version:** 8.0 | **Status:** ACTIVE
 
 ---
 
@@ -51,6 +51,7 @@ Sam-the-Snowman is not just a demo - it's a **world-class teaching example** of 
 - **Performance diagnostics** - spotlight slow or error-prone queries and suggest fixes
 - **Cost insight** - track warehouse credit consumption and identify expensive workloads
 - **Warehouse sizing** - highlight queues, concurrency, and right-sizing opportunities
+- **Auto-generated charts** - visualize data with inline Vega-Lite charts via `data_to_chart`
 - **Documentation lookup** - search official Snowflake guidance with Cortex Search
 - **Email delivery** - send HTML summaries to stakeholders directly from Snowflake
 - **Automated testing** - run tests to validate deployment and catch regressions
@@ -82,16 +83,23 @@ Sam-the-Snowman/
 ├── semantic_models/                    ← YAML reference files (best practice examples)
 │   ├── sv_sam_query_performance.yaml   ← Complete semantic model with all features
 │   ├── sv_sam_cost_analysis.yaml       ← Cost tracking semantic model
-│   └── sv_sam_warehouse_operations.yaml← Capacity planning semantic model
+│   ├── sv_sam_warehouse_operations.yaml← Capacity planning semantic model
+│   └── sv_sam_user_activity.yaml       ← User-centric analytics semantic model
+│
+├── streamlit/
+│   ├── streamlit_app.py                ← Sam's Analytics Dashboard (SiS app)
+│   └── snowflake.yml                   ← Streamlit configuration
 │
 ├── sql/
 │   ├── 01_scaffolding.sql              ← Database, schema, grants
 │   ├── 02_email_integration.sql        ← Email notification setup
-│   ├── 03_semantic_views.sql           ← Semantic views (SQL DDL)
+│   ├── 03_deploy_semantic_models.sql   ← Semantic views (YAML-based deployment)
+│   ├── 03c_python_analytics_tool.sql   ← Python analytics procedures
 │   ├── 04_marketplace.sql              ← Snowflake Documentation install
-│   ├── 05_agent.sql                    ← Agent with enhanced routing
+│   ├── 05_agent.sql                    ← Agent with enhanced routing + chart tool
 │   ├── 06_validation.sql               ← Deployment verification
 │   ├── 07_testing.sql                  ← Automated test framework
+│   ├── 08_dashboard.sql                ← Streamlit dashboard deployment
 │   └── 99_cleanup/teardown_all.sql     ← Clean removal
 │
 ├── docs/                               ← Detailed guides (01-08)
@@ -187,7 +195,7 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/br
 
 ## Expiration & Archival
 
-**This demo expires on 2026-02-14.** Fork before expiration to keep your copy.
+**This demo expires on 2026-03-19.** Fork before expiration to keep your copy.
 
 ---
 
@@ -197,4 +205,4 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/br
 - Run tests before submitting PRs: `CALL SP_RUN_TESTS()`
 - Follow existing patterns for semantic views and VQRs
 
-**Author:** SE Community | **License:** Apache 2.0 | **Version:** 5.0
+**Author:** SE Community | **License:** Apache 2.0 | **Version:** 8.0

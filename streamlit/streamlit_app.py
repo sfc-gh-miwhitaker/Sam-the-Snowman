@@ -8,7 +8,7 @@ Displays:
 - Cost anomaly detection with severity highlighting
 - Interactive time-series visualizations
 
-DEMO: Not for production use (Expires: 2026-02-14)
+DEMO: Not for production use (Expires: 2026-03-19)
 """
 
 import streamlit as st

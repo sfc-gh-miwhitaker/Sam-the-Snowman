@@ -31,7 +31,7 @@
  *
  * Author: SE Community
  * Created: 2025-01-26
- * Expires: 2026-02-14
+ * Expires: 2026-03-19
  * Version: 6.0
  * License: Apache 2.0
  *
@@ -66,10 +66,10 @@ RETURNS TABLE(
     TOP_WAREHOUSE_CREDITS FLOAT
 )
 LANGUAGE PYTHON
-RUNTIME_VERSION = '3.11'
+RUNTIME_VERSION = '3.12'
 PACKAGES = ('snowflake-snowpark-python', 'pandas')
 HANDLER = 'detect_cost_anomalies'
-COMMENT = 'DEMO: Sam-the-Snowman - Detect cost anomalies using statistical analysis (Expires: 2026-02-14)'
+COMMENT = 'DEMO: Sam-the-Snowman - Detect cost anomalies using statistical analysis (Expires: 2026-03-19)'
 AS
 $$
 import pandas as pd
@@ -99,20 +99,16 @@ def detect_cost_anomalies(session: Session, lookback_days: int, anomaly_threshol
             AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
         GROUP BY usage_date
     ),
-    warehouse_costs AS (
+    top_warehouses AS (
         SELECT
             DATE(START_TIME) AS usage_date,
-            WAREHOUSE_NAME,
-            SUM(CREDITS_USED) AS warehouse_credits,
-            ROW_NUMBER() OVER (PARTITION BY DATE(START_TIME) ORDER BY SUM(CREDITS_USED) DESC) AS rn
+            WAREHOUSE_NAME AS top_warehouse,
+            SUM(CREDITS_USED) AS top_warehouse_credits
         FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
         WHERE START_TIME >= DATEADD(DAY, -{lookback_days}, CURRENT_TIMESTAMP())
             AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
         GROUP BY DATE(START_TIME), WAREHOUSE_NAME
-    ),
-    top_warehouses AS (
-        SELECT usage_date, WAREHOUSE_NAME AS top_warehouse, warehouse_credits AS top_warehouse_credits
-        FROM warehouse_costs WHERE rn = 1
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY DATE(START_TIME) ORDER BY SUM(CREDITS_USED) DESC) = 1
     )
     SELECT
         dc.usage_date,
@@ -170,12 +166,6 @@ def detect_cost_anomalies(session: Session, lookback_days: int, anomaly_threshol
     anomalies['Z_SCORE'] = anomalies['Z_SCORE'].round(2)
     anomalies['TOP_WAREHOUSE_CREDITS'] = anomalies['TOP_WAREHOUSE_CREDITS'].round(4)
 
-    # Rename columns to match return schema
-    anomalies = anomalies.rename(columns={
-        'TOP_WAREHOUSE': 'TOP_WAREHOUSE',
-        'TOP_WAREHOUSE_CREDITS': 'TOP_WAREHOUSE_CREDITS'
-    })
-
     result_cols = ['USAGE_DATE', 'DAILY_CREDITS', 'BASELINE_AVG', 'BASELINE_STDDEV',
                    'Z_SCORE', 'ANOMALY_SEVERITY', 'PERCENT_ABOVE_BASELINE',
                    'TOP_WAREHOUSE', 'TOP_WAREHOUSE_CREDITS']
@@ -206,10 +196,10 @@ RETURNS TABLE(
     RECOMMENDATION VARCHAR
 )
 LANGUAGE PYTHON
-RUNTIME_VERSION = '3.11'
+RUNTIME_VERSION = '3.12'
 PACKAGES = ('snowflake-snowpark-python', 'pandas')
 HANDLER = 'calculate_efficiency_score'
-COMMENT = 'DEMO: Sam-the-Snowman - Calculate warehouse efficiency scores (Expires: 2026-02-14)'
+COMMENT = 'DEMO: Sam-the-Snowman - Calculate warehouse efficiency scores (Expires: 2026-03-19)'
 AS
 $$
 import pandas as pd
@@ -340,10 +330,10 @@ RETURNS TABLE(
     INSIGHT VARCHAR
 )
 LANGUAGE PYTHON
-RUNTIME_VERSION = '3.11'
+RUNTIME_VERSION = '3.12'
 PACKAGES = ('snowflake-snowpark-python', 'pandas')
 HANDLER = 'analyze_trends'
-COMMENT = 'DEMO: Sam-the-Snowman - Week-over-week trend analysis with insights (Expires: 2026-02-14)'
+COMMENT = 'DEMO: Sam-the-Snowman - Week-over-week trend analysis with insights (Expires: 2026-03-19)'
 AS
 $$
 import pandas as pd

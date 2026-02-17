@@ -40,7 +40,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-02-14
+ * Expires: 2026-03-19
  * Version: 6.0
  * License: Apache 2.0
  *

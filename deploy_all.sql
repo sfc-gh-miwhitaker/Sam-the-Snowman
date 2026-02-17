@@ -4,9 +4,10 @@
  *
  * WARNING: NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
- * EXPIRATION: 2026-02-14
+ * EXPIRATION: 2026-03-19
  * This demo expires 30 days after creation. Deployment will be blocked after
  * the expiration date. Fork and customize for production use.
+ * Last updated: 2026-02-17 (updatetheworld audit)
  *
  * PURPOSE:
  *   Single-script deployment of Sam-the-Snowman Cortex AI Agent.
@@ -81,8 +82,8 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-02-14
- * Version: 7.0
+ * Expires: 2026-03-19
+ * Version: 8.0
  * License: Apache 2.0
  ******************************************************************************/
 
@@ -94,7 +95,7 @@
 DECLARE
   demo_expired EXCEPTION (-20001, 'DEMO EXPIRED: Do not deploy. Fork the repository and update the expiration date in deploy_all.sql.');
 BEGIN
-  IF (CURRENT_DATE() > '2026-02-14'::DATE) THEN
+  IF (CURRENT_DATE() > '2026-03-19'::DATE) THEN
     RAISE demo_expired;
   END IF;
 END;
@@ -120,16 +121,16 @@ USE ROLE SYSADMIN;
 
 -- Create shared demo database and deployment schema (reusable across demo assets)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database (Expires: 2026-02-14)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database (Expires: 2026-03-19)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.GIT_REPOS
-    COMMENT = 'DEMO: Shared Git repository clones for demo deployments (Expires: 2026-02-14)';
+    COMMENT = 'DEMO: Shared Git repository clones for demo deployments (Expires: 2026-03-19)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN
-    COMMENT = 'DEMO: Sam-the-Snowman - Project schema (Expires: 2026-02-14)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Project schema (Expires: 2026-03-19)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS
-    COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2026-02-14)';
+    COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2026-03-19)';
 
 -- Elevate privilege for account-level objects (warehouse, integrations)
 USE ROLE ACCOUNTADMIN;
@@ -137,13 +138,10 @@ USE ROLE ACCOUNTADMIN;
 -- Create dedicated demo warehouse (idempotent)
 CREATE OR REPLACE WAREHOUSE SFE_SAM_SNOWMAN_WH
     WAREHOUSE_SIZE = 'XSMALL'
-    MIN_CLUSTER_COUNT = 1
-    MAX_CLUSTER_COUNT = 1
     AUTO_SUSPEND = 60
     AUTO_RESUME = TRUE
     INITIALLY_SUSPENDED = TRUE
-    SCALING_POLICY = 'ECONOMY'
-    COMMENT = 'DEMO: Sam-the-Snowman - Dedicated warehouse for deployment and runtime (Expires: 2026-02-14)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Dedicated warehouse for deployment and runtime (Expires: 2026-03-19)';
 
 GRANT USAGE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE SYSADMIN;
 GRANT OPERATE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE SYSADMIN;
@@ -153,7 +151,7 @@ CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
     API_PROVIDER = git_https_api
     ENABLED = TRUE
     API_ALLOWED_PREFIXES = ('https://github.com/')
-    COMMENT = 'DEMO: GitHub integration for Git-based deployments (Expires: 2026-02-14)';
+    COMMENT = 'DEMO: GitHub integration for Git-based deployments (Expires: 2026-03-19)';
 
 -- Grant usage to deployment role
 GRANT USAGE ON INTEGRATION SFE_GITHUB_API_INTEGRATION TO ROLE SYSADMIN;
@@ -171,7 +169,7 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 CREATE OR REPLACE GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO
     API_INTEGRATION = SFE_GITHUB_API_INTEGRATION
     ORIGIN = 'https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git'
-    COMMENT = 'DEMO: Sam-the-Snowman - Git repository for modular SQL execution (Expires: 2026-02-14)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Git repository for modular SQL execution (Expires: 2026-03-19)';
 
 -- Fetch the latest commit from the main branch
 ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO FETCH;

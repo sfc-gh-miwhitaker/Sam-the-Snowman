@@ -41,7 +41,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-02-14
+ * Expires: 2026-03-19
  * Version: 5.2
  * License: Apache 2.0
  *
@@ -201,7 +201,7 @@ METRICS (
     -- Cost Metrics
     qah.total_credits_used AS SUM(qah.credits_attributed_compute)
 )
-COMMENT = 'DEMO: Sam-the-Snowman - Query performance analytics. Analyze execution times, identify slow queries, detect memory spilling, evaluate cache efficiency, and track errors. Excludes system-managed warehouses. (Expires: 2026-02-14)';
+COMMENT = 'DEMO: Sam-the-Snowman - Query performance analytics. Analyze execution times, identify slow queries, detect memory spilling, evaluate cache efficiency, and track errors. Excludes system-managed warehouses. (Expires: 2026-03-19)';
 
 
 -- ============================================================================
@@ -258,7 +258,7 @@ METRICS (
     wmh.metering_periods AS COUNT(*),
     wmh.daily_credits AS (SUM(wmh.credits_used) / NULLIF(COUNT(DISTINCT DATE(wmh.start_time)), 0))
 )
-COMMENT = 'DEMO: Sam-the-Snowman - Warehouse cost analysis. Track spending by warehouse, identify cost trends, support FinOps. Excludes system-managed warehouses. (Expires: 2026-02-14)';
+COMMENT = 'DEMO: Sam-the-Snowman - Warehouse cost analysis. Track spending by warehouse, identify cost trends, support FinOps. Excludes system-managed warehouses. (Expires: 2026-03-19)';
 
 
 -- ============================================================================
@@ -320,7 +320,7 @@ METRICS (
     wlh.queuing_percentage AS (100.0 * SUM(CASE WHEN wlh.avg_queued_load > 0 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)),
     wlh.periods_with_blocking AS SUM(CASE WHEN wlh.avg_blocked > 0 THEN 1 ELSE 0 END)
 )
-COMMENT = 'DEMO: Sam-the-Snowman - Warehouse utilization and capacity planning. Monitor concurrency, queue depth, and sizing opportunities. Excludes system-managed warehouses. (Expires: 2026-02-14)';
+COMMENT = 'DEMO: Sam-the-Snowman - Warehouse utilization and capacity planning. Monitor concurrency, queue depth, and sizing opportunities. Excludes system-managed warehouses. (Expires: 2026-03-19)';
 
 
 -- Semantic views complete

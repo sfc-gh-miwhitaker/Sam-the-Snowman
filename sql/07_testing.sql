@@ -35,7 +35,7 @@
  *
  * Author: SE Community
  * Created: 2025-01-20
- * Expires: 2026-02-14
+ * Expires: 2026-03-19
  * Version: 6.0
  * License: Apache 2.0
  *
@@ -65,7 +65,7 @@ CREATE OR REPLACE TRANSIENT TABLE SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
     ERROR_MESSAGE VARCHAR(5000),
     TESTED_AT TIMESTAMP_LTZ DEFAULT CURRENT_TIMESTAMP()
 )
-COMMENT = 'DEMO: Sam-the-Snowman - Test execution results (Expires: 2026-02-14)';
+COMMENT = 'DEMO: Sam-the-Snowman - Test execution results (Expires: 2026-03-19)';
 
 
 -- ============================================================================
@@ -76,7 +76,7 @@ COMMENT = 'DEMO: Sam-the-Snowman - Test execution results (Expires: 2026-02-14)'
 CREATE OR REPLACE PROCEDURE SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS()
 RETURNS TABLE(TEST_CATEGORY VARCHAR, TEST_NAME VARCHAR, STATUS VARCHAR, EXECUTION_TIME_MS NUMBER, ERROR_MESSAGE VARCHAR)
 LANGUAGE SQL
-COMMENT = 'DEMO: Sam-the-Snowman - Execute all tests and return results (Expires: 2026-02-14)'
+COMMENT = 'DEMO: Sam-the-Snowman - Execute all tests and return results (Expires: 2026-03-19)'
 AS
 $$
 DECLARE
@@ -670,7 +670,7 @@ GROUP BY TEST_CATEGORY
 ORDER BY TEST_CATEGORY;
 
 COMMENT ON VIEW SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.V_TEST_SUMMARY IS
-    'DEMO: Sam-the-Snowman - Test summary by category (Expires: 2026-02-14)';
+    'DEMO: Sam-the-Snowman - Test summary by category (Expires: 2026-03-19)';
 
 -- ============================================================================
 -- USAGE INSTRUCTIONS

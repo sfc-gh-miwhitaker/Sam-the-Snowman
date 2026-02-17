@@ -51,7 +51,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-02-14
+ * Expires: 2026-03-19
  * Version: 6.0
  * License: Apache 2.0
  *
@@ -73,12 +73,20 @@ USE SCHEMA SAM_THE_SNOWMAN;
 -- Create the Sam-the-Snowman agent with domain-specific semantic views.
 -- Note: Agent visibility is managed via the Snowflake Intelligence object.
 CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
-  COMMENT = 'DEMO: Sam-the-Snowman - AI assistant for query performance, cost control, warehouse operations, and user activity analysis (Expires: 2026-02-14)'
+  COMMENT = 'DEMO: Sam-the-Snowman - AI assistant for query performance, cost control, warehouse operations, and user activity analysis (Expires: 2026-03-19)'
   PROFILE = '{"display_name": "Sam-the-Snowman"}'
   FROM SPECIFICATION
   $$
+  # STANDARD: Always use 'auto' for orchestration model selection.
+  # This ensures maximum portability across regions and accounts, and
+  # automatically picks the best available model. Do NOT pin a specific model.
   models:
     orchestration: auto
+
+  orchestration:
+    budget:
+      seconds: 60
+      tokens: 32000
 
   instructions:
     response: |-
@@ -377,6 +385,20 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
           type: object
           properties: {}
           required: []
+
+    # =========================================================================
+    # VISUALIZATION TOOLS
+    # =========================================================================
+    - tool_spec:
+        name: data_to_chart
+        type: data_to_chart
+        description: |-
+          Generate visualizations and charts from data.
+
+          Use when:
+          - Query results would benefit from visual representation
+          - User asks for charts, graphs, or visualizations
+          - Showing trends, comparisons, or distributions
 
     # =========================================================================
     # OTHER TOOLS

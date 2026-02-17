@@ -27,7 +27,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-02-14
+ * Expires: 2026-03-19
  * Version: 4.0
  * License: Apache 2.0
  *
@@ -72,7 +72,7 @@ CREATE OR REPLACE NOTIFICATION INTEGRATION SFE_EMAIL_INTEGRATION
     TYPE = EMAIL
     ENABLED = TRUE
     DEFAULT_SUBJECT = 'Sam-the-Snowman'
-    COMMENT = 'DEMO: Sam-the-Snowman - Email notification integration for delivering agent output (Expires: 2026-02-14).';
+    COMMENT = 'DEMO: Sam-the-Snowman - Email notification integration for delivering agent output (Expires: 2026-03-19).';
 
 -- Grant usage on notification integration to the specified role
 GRANT USAGE ON INTEGRATION SFE_EMAIL_INTEGRATION TO ROLE SYSADMIN;
@@ -95,7 +95,7 @@ LANGUAGE PYTHON
 RUNTIME_VERSION = '3.12'
 PACKAGES = ('snowflake-snowpark-python')
 HANDLER = 'send_email'
-COMMENT = 'DEMO: Sam-the-Snowman - Sends HTML email using SYSTEM$SEND_EMAIL with proper SQL injection protection (Expires: 2026-02-14)'
+COMMENT = 'DEMO: Sam-the-Snowman - Sends HTML email using SYSTEM$SEND_EMAIL with proper SQL injection protection (Expires: 2026-03-19)'
 AS
 $$
 import snowflake.snowpark as snowpark

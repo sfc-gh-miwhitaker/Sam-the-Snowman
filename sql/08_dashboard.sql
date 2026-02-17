@@ -25,7 +25,7 @@
  *
  * Author: SE Community
  * Created: 2025-01-26
- * Expires: 2026-02-14
+ * Expires: 2026-03-19
  * Version: 6.0
  * License: Apache 2.0
  *
@@ -47,7 +47,7 @@ CREATE OR REPLACE STREAMLIT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAMS_DASHBOARD
     MAIN_FILE = 'streamlit_app.py'
     QUERY_WAREHOUSE = SFE_SAM_SNOWMAN_WH
     TITLE = 'Sam''s Analytics Dashboard'
-    COMMENT = 'DEMO: Sam-the-Snowman - Visual analytics companion dashboard (Expires: 2026-02-14)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Visual analytics companion dashboard (Expires: 2026-03-19)';
 
 -- Grant access to SYSADMIN (dashboard users will need this role or equivalent)
 GRANT USAGE ON STREAMLIT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAMS_DASHBOARD TO ROLE SYSADMIN;
