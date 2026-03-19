@@ -35,14 +35,15 @@ cd Sam-the-Snowman && cortex
 ## First Time Here?
 
 1. **Deploy** -- Copy `deploy_all.sql` into Snowsight, click "Run All" (~3-5 min)
-2. **Use** -- Navigate to AI & ML > Agents > Sam-the-Snowman
-3. **Try these questions:**
+2. **Enable web search** -- Snowsight > AI & ML > Agents > Settings > Web search toggle (one-time per account)
+3. **Use** -- Navigate to AI & ML > Agents > Sam-the-Snowman
+4. **Try these questions:**
    - "What are my top 10 slowest queries today?"
    - "Which warehouses are costing me the most?"
    - "Are there any cost anomalies I should know about?"
    - "Give me an efficiency score for my warehouses"
-4. **Test** -- `CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS();`
-5. **Cleanup** -- Run `sql/99_cleanup/teardown_all.sql` when done
+5. **Test** -- `CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS();`
+6. **Cleanup** -- Run `sql/99_cleanup/teardown_all.sql` when done
 
 **Estimated cost:** ~0.10 credits (~$0.20) + <1 GB storage
 

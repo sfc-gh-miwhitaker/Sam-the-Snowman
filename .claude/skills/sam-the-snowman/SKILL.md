@@ -12,7 +12,7 @@ Reference implementation of a Snowflake Intelligence agent demonstrating Cortex 
 
 ```
 deploy_all.sql (orchestrator)
-  ├── 01 Scaffolding ──── DB, schema, warehouse, SI object, web search
+  ├── 01 Scaffolding ──── DB, schema, warehouse, SI object, web search (UI prerequisite)
   ├── 02 Email ────────── Notification integration + SP
   ├── 03 Semantic Models ─ YAML → CREATE SEMANTIC VIEW (4 views)
   ├── 03c Python Tools ── Snowpark procedures (3 analytics tools)
@@ -67,6 +67,7 @@ deploy_all.sql (orchestrator)
 - `tool_resources` keys must exactly match `tool_spec` names
 - Semantic views MUST be in `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS` (shared schema, not project schema)
 - `web_search` tool has no `tool_resources` entry -- it's a built-in type
+- `web_search` requires one-time account-level enablement via Snowsight UI (AI & ML > Agents > Settings > Web search toggle); no SQL parameter exists -- 01_scaffolding.sql attempts it defensively via EXECUTE IMMEDIATE
 - ACCOUNT_USAGE has ~45min latency -- agent instructions must mention this
 - System warehouses (`SYSTEM$%`) must be excluded from all analytics queries
 - `columns_and_descriptions` in Cortex Search is YAML, not JSON -- nested under the tool_resource

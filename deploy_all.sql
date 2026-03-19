@@ -54,6 +54,7 @@
  * PREREQUISITES:
  *   - ACCOUNTADMIN role access
  *   - Network access to GitHub
+ *   - Web search enabled (one-time): Snowsight → AI & ML → Agents → Settings → Web search toggle
  *   - Email integration configured (optional, for notifications)
  *
  * SAFE TO RE-RUN:

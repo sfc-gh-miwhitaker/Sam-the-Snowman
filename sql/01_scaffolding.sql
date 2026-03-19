@@ -101,8 +101,12 @@ GRANT MODIFY ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO 
 -- ============================================================================
 -- Required for the web_search tool type. Uses Brave Search API with zero
 -- data retention (ZDR) — no search queries are stored by Brave.
+-- EXECUTE IMMEDIATE pushes compilation to runtime so the exception handler
+-- can catch the error if the parameter does not exist in the account.
+-- If the parameter is unavailable, enable web search manually:
+--   Snowsight → AI & ML → Agents → Settings → Web search toggle
 BEGIN
-  ALTER ACCOUNT SET CORTEX_ENABLED_WEB_SEARCH = TRUE;
+  EXECUTE IMMEDIATE 'ALTER ACCOUNT SET CORTEX_ENABLED_WEB_SEARCH = TRUE';
 EXCEPTION
   WHEN OTHER THEN NULL;
 END;
