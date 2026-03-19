@@ -22,6 +22,7 @@ Snowflake Intelligence agent demonstrating Cortex Analyst, Cortex Search, web se
 - Deploy: One-command deployment via deploy_all.sql
 - Agent model: Always `auto` -- never pin a specific model
 - Expiration SSOT: `deploy_all.sql` header, then `tools/sync-expiration.sh`
+- To extend: edit the date in `deploy_all.sql`, then `bash tools/sync-expiration.sh --apply --date YYYY-MM-DD`
 
 ## When Helping with This Project
 - Follow SFE naming conventions (SFE_ prefix for account-level objects)

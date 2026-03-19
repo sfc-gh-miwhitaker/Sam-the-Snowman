@@ -30,6 +30,7 @@ This project is designed for AI-pair development.
 - **AGENTS.md** -- Project instructions for Cortex Code and compatible AI tools
 - **.claude/skills/** -- Project-specific AI skill teaching the AI this project's patterns
 - **Cortex Code in Snowsight** -- Open in a Workspace for AI-assisted development
+- **Cortex Code CLI** -- `cortex -w /path/to/Sam-the-Snowman`
 - **Cursor** -- Open locally for AI-pair coding
 
 > New to AI-pair development? See [Cortex Code docs](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code)
@@ -49,32 +50,51 @@ This project is designed for AI-pair development.
 | **Automated Testing** | SMOKE, FUNCTIONAL, REGRESSION, PERFORMANCE tests with stored procedure |
 | **REST API** | `sam_agent_run.sh` with `:run` and `:feedback` endpoints |
 
-## Repository Layout
+## Architecture
 
-```
-Sam-the-Snowman/
-├── deploy_all.sql                      ← Single-script deployment (SSOT for expiration)
-├── AGENTS.md                           ← AI-pair development instructions
-├── sql/
-│   ├── 01_scaffolding.sql              ← Database, schema, grants, web search enablement
-│   ├── 02_email_integration.sql        ← Email notification setup
-│   ├── 03_deploy_semantic_models.sql   ← Semantic views (YAML-based)
-│   ├── 03c_python_analytics_tool.sql   ← Anomaly detection, efficiency, trends
-│   ├── 04_marketplace.sql              ← Snowflake Documentation (CKE)
-│   ├── 05_agent.sql                    ← Agent with 11 tools
-│   ├── 06_validation.sql               ← Deployment verification
-│   ├── 07_testing.sql                  ← Automated test framework
-│   ├── 08_dashboard.sql                ← Streamlit dashboard
-│   ├── 09_evaluations.sql              ← Cortex Agent Evaluations
-│   └── 99_cleanup/teardown_all.sql     ← Clean removal
-├── semantic_models/                    ← YAML reference files
-├── evaluations/                        ← Evaluation YAML config
-├── streamlit/                          ← Sam's Analytics Dashboard (SiS)
-├── tools/
-│   ├── sam_agent_run.sh                ← REST API client (run + feedback)
-│   └── sync-expiration.sh              ← Propagate expiration date from SSOT
-├── docs/                               ← Detailed guides (01-08)
-└── diagrams/                           ← Architecture diagrams (Mermaid)
+```mermaid
+graph TB
+    subgraph sources["Data Sources · ACCOUNT_USAGE (~45 min latency)"]
+        QH[QUERY_HISTORY]
+        WMH[WAREHOUSE_METERING_HISTORY]
+        WLH[WAREHOUSE_LOAD_HISTORY]
+        QAH[QUERY_ATTRIBUTION_HISTORY]
+    end
+
+    subgraph semantic["Semantic Layer · YAML → CREATE SEMANTIC VIEW"]
+        SV1[SV_SAM_QUERY_PERFORMANCE]
+        SV2[SV_SAM_COST_ANALYSIS]
+        SV3[SV_SAM_WAREHOUSE_OPERATIONS]
+        SV4[SV_SAM_USER_ACTIVITY]
+    end
+
+    subgraph knowledge["Knowledge Sources"]
+        CKE[Cortex Search · Snowflake Docs]
+        WEB[Web Search · Brave API]
+    end
+
+    subgraph agent["Sam-the-Snowman · 11 Tools"]
+        direction LR
+        CA[Cortex Analyst x4]
+        PY[Python Analytics x3]
+        CH[Charts]
+        EM[Email]
+    end
+
+    subgraph consumers["Consumers"]
+        SI[Snowflake Intelligence]
+        ST[Streamlit Dashboard]
+        API[REST API · run + feedback]
+    end
+
+    QH & QAH --> SV1
+    WMH --> SV2
+    WLH --> SV3
+    QH & QAH --> SV4
+
+    SV1 & SV2 & SV3 & SV4 --> CA
+    CKE & WEB --> agent
+    CA & PY & CH & EM --> consumers
 ```
 
 ## Snowflake Objects
@@ -91,15 +111,6 @@ Sam-the-Snowman/
 | Warehouse | `SFE_SAM_SNOWMAN_WH` (X-Small, auto-suspend 60s) |
 
 All objects have `COMMENT = 'DEMO: ... (Expires: 2026-04-18)'`.
-
-## Expiration & Lifecycle
-
-This demo expires on **2026-04-18**. To extend:
-
-```bash
-# Edit the date in deploy_all.sql (SSOT), then propagate:
-bash tools/sync-expiration.sh --apply --date 2026-05-18
-```
 
 ---
 
