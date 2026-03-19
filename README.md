@@ -7,19 +7,42 @@
 
 Snowflake Intelligence agent for query performance, cost optimization, and warehouse operations -- with 11 tools including Cortex Analyst, Cortex Search, web search, Python analytics, email delivery, and charting.
 
+---
+
+**Ask your Snowflake account anything about cost, performance, and warehouses -- get answers with charts, anomaly detection, and email delivery in seconds.**
+
+---
+
 **Pair-programmed by:** SE Community + Cortex Code
 **Created:** 2025-11-25 | **Expires:** 2026-04-18 | **Version:** 9.0 | **Status:** ACTIVE
 
 ## Brand New to GitHub or Cortex Code?
 
-Start with the [Getting Started Guide](../guide-coco-setup/) -- it walks you through downloading the code and installing Cortex Code (the AI assistant that will help you with everything else).
+Start with the [Getting Started Guide](https://github.com/sfc-gh-miwhitaker/sfe-public/tree/main/guide-coco-setup) -- it walks you through downloading the code and installing Cortex Code (the AI assistant that will help you with everything else).
+
+## Quick Start
+
+**Deploy in Snowsight (no clone needed):**
+Copy [`deploy_all.sql`](deploy_all.sql) into a Snowsight worksheet and click **Run All**.
+
+**Develop with Cortex Code:**
+
+```bash
+git clone https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git
+cd Sam-the-Snowman && cortex
+```
 
 ## First Time Here?
 
 1. **Deploy** -- Copy `deploy_all.sql` into Snowsight, click "Run All" (~3-5 min)
 2. **Use** -- Navigate to AI & ML > Agents > Sam-the-Snowman
-3. **Test** -- `CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS();`
-4. **Cleanup** -- Run `sql/99_cleanup/teardown_all.sql` when done
+3. **Try these questions:**
+   - "What are my top 10 slowest queries today?"
+   - "Which warehouses are costing me the most?"
+   - "Are there any cost anomalies I should know about?"
+   - "Give me an efficiency score for my warehouses"
+4. **Test** -- `CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS();`
+5. **Cleanup** -- Run `sql/99_cleanup/teardown_all.sql` when done
 
 **Estimated cost:** ~0.10 credits (~$0.20) + <1 GB storage
 
