@@ -31,7 +31,7 @@
  *
  * Author: SE Community
  * Created: 2025-01-26
- * Expires: 2026-03-19
+ * Expires: 2026-04-18
  * Version: 6.0
  * License: Apache 2.0
  *
@@ -69,7 +69,7 @@ LANGUAGE PYTHON
 RUNTIME_VERSION = '3.12'
 PACKAGES = ('snowflake-snowpark-python', 'pandas')
 HANDLER = 'detect_cost_anomalies'
-COMMENT = 'DEMO: Sam-the-Snowman - Detect cost anomalies using statistical analysis (Expires: 2026-03-19)'
+COMMENT = 'DEMO: Sam-the-Snowman - Detect cost anomalies using statistical analysis (Expires: 2026-04-18)'
 AS
 $$
 import pandas as pd
@@ -199,7 +199,7 @@ LANGUAGE PYTHON
 RUNTIME_VERSION = '3.12'
 PACKAGES = ('snowflake-snowpark-python', 'pandas')
 HANDLER = 'calculate_efficiency_score'
-COMMENT = 'DEMO: Sam-the-Snowman - Calculate warehouse efficiency scores (Expires: 2026-03-19)'
+COMMENT = 'DEMO: Sam-the-Snowman - Calculate warehouse efficiency scores (Expires: 2026-04-18)'
 AS
 $$
 import pandas as pd
@@ -333,7 +333,7 @@ LANGUAGE PYTHON
 RUNTIME_VERSION = '3.12'
 PACKAGES = ('snowflake-snowpark-python', 'pandas')
 HANDLER = 'analyze_trends'
-COMMENT = 'DEMO: Sam-the-Snowman - Week-over-week trend analysis with insights (Expires: 2026-03-19)'
+COMMENT = 'DEMO: Sam-the-Snowman - Week-over-week trend analysis with insights (Expires: 2026-04-18)'
 AS
 $$
 import pandas as pd

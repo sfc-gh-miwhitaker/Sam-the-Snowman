@@ -1,0 +1,64 @@
+# =============================================================================
+# Cortex Agent Evaluation Configuration: Sam-the-Snowman
+# =============================================================================
+# Evaluates Sam-the-Snowman against VQR-derived questions using:
+#   - answer_correctness: Ground truth comparison (natural language descriptions)
+#   - logical_consistency: Reference-free planning/tool-call coherence
+#   - snowflake_optimization_relevance: Custom metric for domain relevance
+#
+# Usage:
+#   CALL EXECUTE_AI_EVALUATION(
+#     'START',
+#     OBJECT_CONSTRUCT('run_name', 'sam-eval-1'),
+#     '@SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_EVALUATION_CONFIG/sam_evaluation_config.yaml'
+#   );
+# =============================================================================
+
+dataset:
+  dataset_type: "CORTEX AGENT"
+  table_name: "SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_EVALUATION_DATA"
+  dataset_name: "SAM_EVALUATION_DATASET"
+  column_mapping:
+    query_text: "INPUT_QUERY"
+    ground_truth: "EXPECTED_OUTCOME"
+
+evaluation:
+  agent_params:
+    agent_name: "SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN"
+    agent_type: "CORTEX AGENT"
+  run_params:
+    label: "Sam-the-Snowman evaluation"
+    description: "Evaluate Sam against VQR-derived questions covering query performance, cost analysis, warehouse operations, and documentation search."
+  source_metadata:
+    type: "DATASET"
+    dataset_name: "SAM_EVALUATION_DATASET"
+
+metrics:
+  - "answer_correctness"
+  - "logical_consistency"
+  - name: "snowflake_optimization_relevance"
+    score_ranges:
+      min_score: [1, 3]
+      median_score: [4, 7]
+      max_score: [8, 10]
+    prompt: |
+      You are evaluating a Snowflake optimization assistant called Sam-the-Snowman.
+      Rate the relevance and quality of the agent's response on a scale of 1-10.
+
+      The user asked: {{input}}
+      The agent responded: {{output}}
+      The expected behavior: {{ground_truth}}
+
+      Scoring criteria:
+      1-3: Response is off-topic, provides wrong metrics, or ignores critical filters
+           (e.g., includes SYSTEM$ warehouses, wrong time range, missing dollar estimates)
+      4-7: Response addresses the question but misses important details
+           (e.g., no recommendations, missing context about data latency, incomplete analysis)
+      8-10: Response directly answers with specific metrics, excludes system warehouses,
+            provides actionable recommendations, and converts credits to dollars
+
+      Additional considerations:
+      - Did the agent use the correct tool(s) for this question?
+      - Did the agent exclude system-managed warehouses (SYSTEM$%)?
+      - Did the agent mention the ~45-minute ACCOUNT_USAGE data latency when relevant?
+      - Did the agent convert credits to estimated dollars ($3/credit)?

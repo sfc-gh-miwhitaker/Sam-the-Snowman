@@ -1,208 +1,106 @@
-![Reference Implementation](https://img.shields.io/badge/Reference-Implementation-blue)
-![Ready to Run](https://img.shields.io/badge/Ready%20to%20Run-Yes-green)
-![Expires](https://img.shields.io/badge/Expires-2026--02--14-orange)
-![Best Practices](https://img.shields.io/badge/Best%20Practices-World%20Class-purple)
+![Expires](https://img.shields.io/badge/Expires-2026--04--18-orange)
 
 # Sam-the-Snowman
 
-> **DEMONSTRATION PROJECT - EXPIRES: 2026-03-19**
-> This demo uses Snowflake features current as of February 2026.
-> After expiration, this repository will be archived and made private.
+> DEMONSTRATION PROJECT - EXPIRES: 2026-04-18
+> This demo uses Snowflake features current as of March 2026.
 
-**Author:** SE Community
-**Purpose:** World-class reference implementation for Snowflake Intelligence agent with semantic views
-**Created:** 2025-11-25 | **Expires:** 2026-03-19 | **Version:** 8.0 | **Status:** ACTIVE
+Snowflake Intelligence agent for query performance, cost optimization, and warehouse operations -- with 11 tools including Cortex Analyst, Cortex Search, web search, Python analytics, email delivery, and charting.
 
----
+**Pair-programmed by:** SE Community + Cortex Code
+**Created:** 2025-11-25 | **Expires:** 2026-04-18 | **Version:** 9.0 | **Status:** ACTIVE
 
-## Why This Project Is Special
+## Brand New to GitHub or Cortex Code?
 
-Sam-the-Snowman is not just a demo - it's a **world-class teaching example** of Snowflake best practices for:
+Start with the [Getting Started Guide](../guide-coco-setup/) -- it walks you through downloading the code and installing Cortex Code (the AI assistant that will help you with everything else).
 
-- **Semantic Views** - Full-featured models with relationships, metrics, filters, time dimensions
-- **Agent Configuration** - Rich orchestration instructions with multi-tool coordination
-- **Verified Queries (VQRs)** - 7+ queries per view covering common use cases
-- **Automated Testing** - Comprehensive test framework with SMOKE, FUNCTIONAL, REGRESSION, and PERFORMANCE tests
-- **Documentation** - Complete guides for deployment, architecture, and expansion
+## First Time Here?
 
-**Use this repository as a template** for building production-grade Snowflake Intelligence agents.
+1. **Deploy** -- Copy `deploy_all.sql` into Snowsight, click "Run All" (~3-5 min)
+2. **Use** -- Navigate to AI & ML > Agents > Sam-the-Snowman
+3. **Test** -- `CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS();`
+4. **Cleanup** -- Run `sql/99_cleanup/teardown_all.sql` when done
 
----
+**Estimated cost:** ~0.10 credits (~$0.20) + <1 GB storage
 
-## Best Practices Demonstrated
+## Development Tools
 
-| Practice | Implementation |
-|----------|---------------|
-| **Table Relationships** | Links QUERY_HISTORY to QUERY_ATTRIBUTION_HISTORY for cost-per-query analysis |
-| **Time Dimensions** | Proper `TIME DIMENSIONS` for START_TIME/END_TIME enabling date intelligence |
-| **Pre-defined Metrics** | 10+ metrics per view (AVG_EXECUTION_TIME, ERROR_RATE, P95, etc.) |
-| **Named Filters** | Reusable filters (LAST_7_DAYS, EXCLUDE_SYSTEM_WAREHOUSES, FAILED_QUERIES) |
-| **Sample Values** | Representative values for categorical dimensions |
-| **Rich Descriptions** | Business context explaining what metrics mean and when to act |
-| **Comprehensive Synonyms** | Natural language variations for better query understanding |
-| **Module Custom Instructions** | Targeted LLM guidance for SQL generation |
-| **Verified Queries** | 7+ curated queries per view with test dates and authors |
-| **Automated Testing** | Stored procedure running SMOKE, FUNCTIONAL, REGRESSION, PERFORMANCE tests |
+This project is designed for AI-pair development.
 
----
+- **AGENTS.md** -- Project instructions for Cortex Code and compatible AI tools
+- **.claude/skills/** -- Project-specific AI skill teaching the AI this project's patterns
+- **Cortex Code in Snowsight** -- Open in a Workspace for AI-assisted development
+- **Cursor** -- Open locally for AI-pair coding
 
-## What You Deploy
+> New to AI-pair development? See [Cortex Code docs](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code)
 
-- **Performance diagnostics** - spotlight slow or error-prone queries and suggest fixes
-- **Cost insight** - track warehouse credit consumption and identify expensive workloads
-- **Warehouse sizing** - highlight queues, concurrency, and right-sizing opportunities
-- **Auto-generated charts** - visualize data with inline Vega-Lite charts via `data_to_chart`
-- **Documentation lookup** - search official Snowflake guidance with Cortex Search
-- **Email delivery** - send HTML summaries to stakeholders directly from Snowflake
-- **Automated testing** - run tests to validate deployment and catch regressions
+## What Sam Demonstrates
 
-**Estimated Cost:** ~0.10 credits (~$0.20) + <1 GB storage (<$0.05/mo)
-
----
-
-## Quick Start (5 Minutes)
-
-1. **Copy** `deploy_all.sql` from this repository
-2. **Open Snowsight** → Create new SQL worksheet
-3. **Paste** the entire script
-4. **Click "Run All"** (Cmd/Ctrl+Shift+Enter)
-5. **Navigate to AI & ML → Agents** → Select `Sam-the-Snowman`
-
-See `QUICKSTART.md` for detailed instructions.
-
----
+| Feature | Implementation |
+|---------|---------------|
+| **Cortex Analyst** | 4 semantic views with relationships, TIME_DIMENSIONS, metrics, filters, VQRs |
+| **Cortex Search** | Snowflake documentation search with `columns_and_descriptions` (GA March 2026) |
+| **Web Search** | Live web results via Brave Search API for recent features and community content |
+| **Agent Evaluations** | Evaluation dataset + config with answer_correctness, logical_consistency, custom metric |
+| **System Instructions** | Dedicated `system` field for persona/guardrails, `response` for formatting |
+| **Standard SQL on SVs** | `SELECT ... FROM semantic_view GROUP BY` (GA March 2026) |
+| **Python Analytics** | Anomaly detection, efficiency scoring, trend analysis via Snowpark |
+| **Agent PROFILE** | `display_name` + `color` for branded Snowflake Intelligence UI |
+| **Automated Testing** | SMOKE, FUNCTIONAL, REGRESSION, PERFORMANCE tests with stored procedure |
+| **REST API** | `sam_agent_run.sh` with `:run` and `:feedback` endpoints |
 
 ## Repository Layout
 
 ```
 Sam-the-Snowman/
-├── README.md                           ← Project overview (you are here)
-├── QUICKSTART.md                       ← 5-minute deployment guide
-├── deploy_all.sql                      ← Single-script deployment
-│
-├── semantic_models/                    ← YAML reference files (best practice examples)
-│   ├── sv_sam_query_performance.yaml   ← Complete semantic model with all features
-│   ├── sv_sam_cost_analysis.yaml       ← Cost tracking semantic model
-│   ├── sv_sam_warehouse_operations.yaml← Capacity planning semantic model
-│   └── sv_sam_user_activity.yaml       ← User-centric analytics semantic model
-│
-├── streamlit/
-│   ├── streamlit_app.py                ← Sam's Analytics Dashboard (SiS app)
-│   └── snowflake.yml                   ← Streamlit configuration
-│
+├── deploy_all.sql                      ← Single-script deployment (SSOT for expiration)
+├── AGENTS.md                           ← AI-pair development instructions
 ├── sql/
-│   ├── 01_scaffolding.sql              ← Database, schema, grants
+│   ├── 01_scaffolding.sql              ← Database, schema, grants, web search enablement
 │   ├── 02_email_integration.sql        ← Email notification setup
-│   ├── 03_deploy_semantic_models.sql   ← Semantic views (YAML-based deployment)
-│   ├── 03c_python_analytics_tool.sql   ← Python analytics procedures
-│   ├── 04_marketplace.sql              ← Snowflake Documentation install
-│   ├── 05_agent.sql                    ← Agent with enhanced routing + chart tool
+│   ├── 03_deploy_semantic_models.sql   ← Semantic views (YAML-based)
+│   ├── 03c_python_analytics_tool.sql   ← Anomaly detection, efficiency, trends
+│   ├── 04_marketplace.sql              ← Snowflake Documentation (CKE)
+│   ├── 05_agent.sql                    ← Agent with 11 tools
 │   ├── 06_validation.sql               ← Deployment verification
 │   ├── 07_testing.sql                  ← Automated test framework
-│   ├── 08_dashboard.sql                ← Streamlit dashboard deployment
+│   ├── 08_dashboard.sql                ← Streamlit dashboard
+│   ├── 09_evaluations.sql              ← Cortex Agent Evaluations
 │   └── 99_cleanup/teardown_all.sql     ← Clean removal
-│
+├── semantic_models/                    ← YAML reference files
+├── evaluations/                        ← Evaluation YAML config
+├── streamlit/                          ← Sam's Analytics Dashboard (SiS)
+├── tools/
+│   ├── sam_agent_run.sh                ← REST API client (run + feedback)
+│   └── sync-expiration.sh              ← Propagate expiration date from SSOT
 ├── docs/                               ← Detailed guides (01-08)
 └── diagrams/                           ← Architecture diagrams (Mermaid)
 ```
 
----
+## Snowflake Objects
 
-## Semantic Model Reference Files
+| Object | Location |
+|--------|----------|
+| Agent | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN` |
+| Semantic views | `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_*` (4 views) |
+| Python procedures | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_*` (3 procs) |
+| Test framework | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS()` |
+| Email procedure | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SFE_SEND_EMAIL()` |
+| Evaluation data | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_EVALUATION_DATA` |
+| Dashboard | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAMS_DASHBOARD` |
+| Warehouse | `SFE_SAM_SNOWMAN_WH` (X-Small, auto-suspend 60s) |
 
-The `/semantic_models/` directory contains **YAML reference files** that demonstrate world-class semantic model structure:
+All objects have `COMMENT = 'DEMO: ... (Expires: 2026-04-18)'`.
 
-```yaml
-# Example from sv_sam_query_performance.yaml
-metrics:
-  - name: ERROR_RATE
-    description: "Percentage of queries that failed. Key quality metric."
-    expr: 100.0 * SUM(CASE WHEN EXECUTION_STATUS = 'FAIL' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)
+## Expiration & Lifecycle
 
-filters:
-  - name: QUERIES_WITH_REMOTE_SPILLING
-    description: "Include queries with severe spilling to remote storage."
-    expr: BYTES_SPILLED_TO_REMOTE_STORAGE > 0
+This demo expires on **2026-04-18**. To extend:
 
-module_custom_instructions:
-  sql_generation: |-
-    CRITICAL: Always exclude system warehouses: WHERE WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
-```
-
-**Use these YAML files as templates** when building your own semantic views.
-
----
-
-## Running Tests
-
-After deployment, validate your installation:
-
-```sql
--- Run all tests
-CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS();
-
--- View test summary
-SELECT * FROM SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.V_TEST_SUMMARY;
-
--- View failed tests only
-SELECT * FROM SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS WHERE STATUS = 'FAIL';
-```
-
-Test categories:
-- **SMOKE** - Basic structure validation (views exist, agent exists)
-- **FUNCTIONAL** - VQR execution (all verified queries run successfully)
-- **REGRESSION** - Edge cases (system warehouse filtering, NULL handling)
-- **PERFORMANCE** - Query timing benchmarks (<30 seconds)
-
----
-
-## Components Created
-
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| Agent | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN` | Orchestrates tools |
-| Semantic views | `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_*` | Performance, cost, operations |
-| Test framework | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS()` | Automated validation |
-| Email procedure | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SFE_SEND_EMAIL()` | HTML email delivery |
-| Demo warehouse | `SFE_SAM_SNOWMAN_WH` | X-Small compute |
-
----
-
-## Documentation Map
-
-| Guide | When to use |
-|-------|-------------|
-| `QUICKSTART.md` | Minimal deployment steps |
-| `docs/01-QUICKSTART.md` | Expanded walkthrough |
-| `docs/02-DEPLOYMENT.md` | Pre-flight checklist |
-| `docs/03-ARCHITECTURE.md` | How components fit together |
-| `docs/04-ADVANCED-DEPLOYMENT.md` | CLI deployment |
-| `docs/05-ROLE-BASED-ACCESS.md` | Access control |
-| `docs/06-TESTING.md` | Test procedures |
-| `docs/07-TROUBLESHOOTING.md` | Common issues |
-| `docs/08-SEMANTIC-VIEW-EXPANSION.md` | Adding new domains |
-
----
-
-## Cleanup
-
-```sql
-USE ROLE ACCOUNTADMIN;
-EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/99_cleanup/teardown_all.sql';
+```bash
+# Edit the date in deploy_all.sql (SSOT), then propagate:
+bash tools/sync-expiration.sh --apply --date 2026-05-18
 ```
 
 ---
 
-## Expiration & Archival
-
-**This demo expires on 2026-03-19.** Fork before expiration to keep your copy.
-
----
-
-## Support & Contributing
-
-- Report issues in the repository issue tracker
-- Run tests before submitting PRs: `CALL SP_RUN_TESTS()`
-- Follow existing patterns for semantic views and VQRs
-
-**Author:** SE Community | **License:** Apache 2.0 | **Version:** 8.0
+**Pair-programmed by:** SE Community + Cortex Code | **License:** Apache 2.0

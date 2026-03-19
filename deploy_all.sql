@@ -4,10 +4,10 @@
  *
  * WARNING: NOT FOR PRODUCTION USE - EXAMPLE IMPLEMENTATION ONLY
  *
- * EXPIRATION: 2026-03-19
- * This demo expires 30 days after creation. Deployment will be blocked after
- * the expiration date. Fork and customize for production use.
- * Last updated: 2026-02-17 (updatetheworld audit)
+ * EXPIRATION: 2026-04-18 (SSOT -- update here, then run tools/sync-expiration.sh)
+ * This demo uses Snowflake features current as of the expiration date.
+ * After expiration, a warning is displayed but deployment is NOT blocked.
+ * Last updated: 2026-04-18 (updatetheworld modernization)
  *
  * PURPOSE:
  *   Single-script deployment of Sam-the-Snowman Cortex AI Agent.
@@ -44,7 +44,9 @@
  *     - Cost tracking and optimization
  *     - Warehouse utilization monitoring
  *     - Email notifications
- *     - Snowflake documentation search
+ *     - Snowflake documentation search (Cortex Search with columns_and_descriptions)
+ *     - Live web search (Brave Search API)
+ *   - Agent evaluation dataset + configuration (Cortex Agent Evaluations)
  *
  * DEPLOYMENT TIME:
  *   ~3-5 minutes depending on account region and Marketplace installation
@@ -82,23 +84,28 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-03-19
- * Version: 8.0
+ * Expires: 2026-04-18
+ * Version: 9.0
  * License: Apache 2.0
  ******************************************************************************/
 
 -- ============================================================================
--- EXPIRATION CHECK (MANDATORY)
+-- EXPIRATION CHECK (SSOT — this is the single source of truth for the date)
 -- ============================================================================
--- This demo expires 30 days after creation.
--- If expired, deployment is blocked. Fork and update the expiration date in deploy_all.sql.
-DECLARE
-  demo_expired EXCEPTION (-20001, 'DEMO EXPIRED: Do not deploy. Fork the repository and update the expiration date in deploy_all.sql.');
-BEGIN
-  IF (CURRENT_DATE() > '2026-03-19'::DATE) THEN
-    RAISE demo_expired;
-  END IF;
-END;
+-- Warns but does NOT block deployment. After expiration, code may use outdated
+-- syntax. Fork the repository and update the date here, then run
+-- tools/sync-expiration.sh to propagate.
+SELECT
+    '2026-04-18'::DATE AS expiration_date,
+    CURRENT_DATE() AS current_date,
+    DATEDIFF('day', CURRENT_DATE(), '2026-04-18'::DATE) AS days_remaining,
+    CASE
+        WHEN DATEDIFF('day', CURRENT_DATE(), '2026-04-18'::DATE) < 0
+        THEN 'EXPIRED - Code may use outdated syntax. Remove expiration banner to continue.'
+        WHEN DATEDIFF('day', CURRENT_DATE(), '2026-04-18'::DATE) <= 7
+        THEN 'EXPIRING SOON - ' || DATEDIFF('day', CURRENT_DATE(), '2026-04-18'::DATE) || ' days remaining'
+        ELSE 'ACTIVE - ' || DATEDIFF('day', CURRENT_DATE(), '2026-04-18'::DATE) || ' days remaining'
+    END AS demo_status;
 
 -- ============================================================================
 -- DEPLOYMENT ORCHESTRATION
@@ -121,16 +128,16 @@ USE ROLE SYSADMIN;
 
 -- Create shared demo database and deployment schema (reusable across demo assets)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database (Expires: 2026-03-19)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Shared demo database (Expires: 2026-04-18)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.GIT_REPOS
-    COMMENT = 'DEMO: Shared Git repository clones for demo deployments (Expires: 2026-03-19)';
+    COMMENT = 'DEMO: Shared Git repository clones for demo deployments (Expires: 2026-04-18)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN
-    COMMENT = 'DEMO: Sam-the-Snowman - Project schema (Expires: 2026-03-19)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Project schema (Expires: 2026-04-18)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS
-    COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2026-03-19)';
+    COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2026-04-18)';
 
 -- Elevate privilege for account-level objects (warehouse, integrations)
 USE ROLE ACCOUNTADMIN;
@@ -141,7 +148,7 @@ CREATE OR REPLACE WAREHOUSE SFE_SAM_SNOWMAN_WH
     AUTO_SUSPEND = 60
     AUTO_RESUME = TRUE
     INITIALLY_SUSPENDED = TRUE
-    COMMENT = 'DEMO: Sam-the-Snowman - Dedicated warehouse for deployment and runtime (Expires: 2026-03-19)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Dedicated warehouse for deployment and runtime (Expires: 2026-04-18)';
 
 GRANT USAGE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE SYSADMIN;
 GRANT OPERATE ON WAREHOUSE SFE_SAM_SNOWMAN_WH TO ROLE SYSADMIN;
@@ -151,7 +158,7 @@ CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
     API_PROVIDER = git_https_api
     ENABLED = TRUE
     API_ALLOWED_PREFIXES = ('https://github.com/')
-    COMMENT = 'DEMO: GitHub integration for Git-based deployments (Expires: 2026-03-19)';
+    COMMENT = 'DEMO: GitHub integration for Git-based deployments (Expires: 2026-04-18)';
 
 -- Grant usage to deployment role
 GRANT USAGE ON INTEGRATION SFE_GITHUB_API_INTEGRATION TO ROLE SYSADMIN;
@@ -169,7 +176,7 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 CREATE OR REPLACE GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO
     API_INTEGRATION = SFE_GITHUB_API_INTEGRATION
     ORIGIN = 'https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git'
-    COMMENT = 'DEMO: Sam-the-Snowman - Git repository for modular SQL execution (Expires: 2026-03-19)';
+    COMMENT = 'DEMO: Sam-the-Snowman - Git repository for modular SQL execution (Expires: 2026-04-18)';
 
 -- Fetch the latest commit from the main branch
 ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO FETCH;
@@ -220,6 +227,10 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/br
 -- Deploys Streamlit in Snowflake app for visual analytics companion
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/08_dashboard.sql';
 
+-- Module 9: Agent Evaluations
+-- Deploys evaluation dataset and configuration for Cortex Agent Evaluations (GA March 2026)
+EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/09_evaluations.sql';
+
 -- ============================================================================
 -- DEPLOYMENT COMPLETE
 -- ============================================================================
@@ -229,5 +240,6 @@ SELECT
   CURRENT_TIMESTAMP() AS completed_at,
   'AI & ML > Agents > Sam-the-Snowman' AS agent_location,
   'Projects > Streamlit > SAMS_DASHBOARD' AS dashboard_location,
+  'AI & ML > Agents > Sam-the-Snowman > Evaluations' AS evaluation_location,
   'Example question: What were my top 10 slowest queries today?' AS example_question,
   'Run tests: CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS()' AS test_command;

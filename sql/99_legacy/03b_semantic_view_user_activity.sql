@@ -30,7 +30,7 @@
  *
  * Author: SE Community
  * Created: 2025-01-26
- * Expires: 2026-03-19
+ * Expires: 2026-04-18
  * Version: 6.1
  * License: Apache 2.0
  *
@@ -166,7 +166,7 @@ METRICS (
         WITH SYNONYMS = ('cost per query', 'average credits')
         COMMENT = 'Average credits consumed per query.'
 )
-COMMENT = 'DEMO: Sam-the-Snowman - User activity analysis. Track query patterns, credit consumption, and error rates by user. Excludes system-managed warehouses. (Expires: 2026-03-19)';
+COMMENT = 'DEMO: Sam-the-Snowman - User activity analysis. Track query patterns, credit consumption, and error rates by user. Excludes system-managed warehouses. (Expires: 2026-04-18)';
 
 
 -- User activity semantic view complete

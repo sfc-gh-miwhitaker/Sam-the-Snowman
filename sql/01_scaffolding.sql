@@ -32,7 +32,7 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-03-19
+ * Expires: 2026-04-18
  * Version: 4.0
  * License: Apache 2.0
  *
@@ -50,20 +50,20 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 
 -- Create the demo database (mandatory for all demo projects)
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-COMMENT = 'DEMO: Demo/Example projects - NOT FOR PRODUCTION (Expires: 2026-03-19)';
+COMMENT = 'DEMO: Demo/Example projects - NOT FOR PRODUCTION (Expires: 2026-04-18)';
 
 -- Shared schema for Snowflake Git repository clones (shared across demos).
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.GIT_REPOS
-COMMENT = 'DEMO: Shared Git repository clones for demo deployments (Expires: 2026-03-19)';
+COMMENT = 'DEMO: Shared Git repository clones for demo deployments (Expires: 2026-04-18)';
 
 -- Project schema (collision-proof) for Sam-the-Snowman objects that are not semantic views.
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN
-COMMENT = 'DEMO: Sam-the-Snowman - Project schema (Expires: 2026-03-19)';
+COMMENT = 'DEMO: Sam-the-Snowman - Project schema (Expires: 2026-04-18)';
 
 -- SEMANTIC_MODELS is the mandatory location for all Cortex Analyst semantic views
 -- All semantic views must use SV_ prefix (e.g., SV_QUERY_PERFORMANCE)
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS
-COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2026-03-19)';
+COMMENT = 'MANDATORY: All semantic views for Cortex Analyst agents (Expires: 2026-04-18)';
 
 -- ============================================================================
 -- CREATE SNOWFLAKE INTELLIGENCE OBJECT (Agent Visibility Control)
@@ -95,6 +95,17 @@ GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO R
 -- Grant management to SYSADMIN (can add/remove agents)
 -- Note: MODIFY privilege allows adding/removing agents from the object
 GRANT MODIFY ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE SYSADMIN;
+
+-- ============================================================================
+-- ENABLE WEB SEARCH FOR CORTEX AGENTS
+-- ============================================================================
+-- Required for the web_search tool type. Uses Brave Search API with zero
+-- data retention (ZDR) — no search queries are stored by Brave.
+BEGIN
+  ALTER ACCOUNT SET CORTEX_ENABLED_WEB_SEARCH = TRUE;
+EXCEPTION
+  WHEN OTHER THEN NULL;
+END;
 
 USE ROLE SYSADMIN;
 

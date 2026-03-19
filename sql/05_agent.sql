@@ -25,8 +25,11 @@
  *   - efficiency_scorer: Composite warehouse health scoring
  *   - trend_analyzer: Week-over-week trend analysis
  *
+ *   Knowledge Tools:
+ *   - snowflake_knowledge_ext_documentation: Cortex Search for documentation (enhanced with columns_and_descriptions)
+ *   - web_search: Live web search for recent features and community solutions
+ *
  *   Other Tools:
- *   - snowflake_knowledge_ext_documentation: Cortex Search for documentation
  *   - cortex_email_tool: Email delivery for reports
  *
  * BEST PRACTICES DEMONSTRATED:
@@ -51,8 +54,8 @@
  *
  * Author: SE Community
  * Created: 2025-11-25
- * Expires: 2026-03-19
- * Version: 6.0
+ * Expires: 2026-04-18
+ * Version: 7.0
  * License: Apache 2.0
  *
  * Usage:
@@ -73,8 +76,8 @@ USE SCHEMA SAM_THE_SNOWMAN;
 -- Create the Sam-the-Snowman agent with domain-specific semantic views.
 -- Note: Agent visibility is managed via the Snowflake Intelligence object.
 CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
-  COMMENT = 'DEMO: Sam-the-Snowman - AI assistant for query performance, cost control, warehouse operations, and user activity analysis (Expires: 2026-03-19)'
-  PROFILE = '{"display_name": "Sam-the-Snowman"}'
+  COMMENT = 'DEMO: Sam-the-Snowman - AI assistant for query performance, cost control, warehouse operations, and user activity analysis (Expires: 2026-04-18)'
+  PROFILE = '{"display_name": "Sam-the-Snowman", "color": "blue"}'
   FROM SPECIFICATION
   $$
   # STANDARD: Always use 'auto' for orchestration model selection.
@@ -89,9 +92,13 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
       tokens: 32000
 
   instructions:
-    response: |-
-      You are Sam-the-Snowman, a Snowflake optimization assistant. Your personality is helpful, precise, and action-oriented.
+    system: |-
+      You are Sam-the-Snowman, a Snowflake optimization assistant.
+      Your personality is helpful, precise, and action-oriented.
+      You only answer questions about Snowflake account performance,
+      costs, and operations. Politely redirect off-topic questions.
 
+    response: |-
       ## Response Guidelines
 
       ### Structure Your Responses
@@ -186,14 +193,21 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
       - User asks "what changed?" or "what's trending?"
       - Keywords: trend, compare, change, week over week, period
 
-      ### Other Tools
+      ### Knowledge Tools (Dual Pattern)
 
-      **snowflake_knowledge_ext_documentation** - Use for questions about:
-      - Snowflake features, capabilities, syntax
-      - Best practices, recommendations
-      - How-to guides, tutorials
-      - Configuration options, parameters
-      - Error code meanings, troubleshooting
+      **snowflake_knowledge_ext_documentation** (Cortex Search) - Use FIRST for:
+      - Official Snowflake documentation, syntax, and features
+      - Best practices and configuration guidance
+      - Error code explanations and troubleshooting
+      - How-to guides and tutorials
+
+      **web_search** - Use as FALLBACK or SUPPLEMENT when:
+      - Cortex Search didn't return a satisfactory answer
+      - User asks about very recent features or releases
+      - User asks about community solutions or third-party tools
+      - User needs the latest blog posts or announcements
+
+      ### Other Tools
 
       **cortex_email_tool** - Use when:
       - User explicitly asks to send an email
@@ -243,17 +257,29 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
 
     sample_questions:
       - question: "What are my top 10 slowest queries today and how can I optimize them?"
+        answer: "I'll analyze query performance data to find your slowest queries, including execution times, warehouse sizes, and optimization suggestions."
       - question: "Which warehouses are costing me the most money this month?"
+        answer: "I'll check warehouse credit consumption data to identify your top cost drivers with dollar estimates at $3/credit."
       - question: "Are my warehouses properly sized based on queue times?"
+        answer: "I'll examine warehouse load history to analyze queue depths, concurrency patterns, and recommend sizing adjustments."
       - question: "Show me queries with errors and suggest how to fix them"
+        answer: "I'll pull failed queries with error codes, then search documentation for resolution steps."
       - question: "What's my daily credit spend trend for the past 30 days?"
+        answer: "I'll chart your daily credit consumption over the past month to show spending patterns and trends."
       - question: "Which queries are spilling to remote storage?"
+        answer: "I'll identify queries with remote spillage — a critical performance signal — and recommend warehouse size changes."
       - question: "Show me warehouse utilization by hour of day"
+        answer: "I'll break down warehouse concurrency patterns by hour to help you identify peak usage windows."
       - question: "What are the most common query error codes?"
+        answer: "I'll aggregate failure patterns by error code and affected users to help prioritize fixes."
       - question: "Who is using the most credits?"
+        answer: "I'll rank users by attributed compute credits to identify top spenders and usage patterns."
       - question: "Are there any cost anomalies I should know about?"
+        answer: "I'll run statistical anomaly detection on your daily costs to flag unusual spending days."
       - question: "Give me an efficiency score for my warehouses"
+        answer: "I'll calculate composite scores (0-100) based on cache, spilling, errors, and queuing for each warehouse."
       - question: "What changed compared to last week?"
+        answer: "I'll compare this week vs last week across costs, query volume, performance, and errors with trend insights."
 
   tools:
     # =========================================================================
@@ -416,6 +442,25 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
           - Configuration and parameter guidance
           - SQL syntax and function reference
 
+    # =========================================================================
+    # WEB SEARCH TOOL
+    # =========================================================================
+    - tool_spec:
+        name: web_search
+        type: web_search
+        description: |-
+          Search the live web for current Snowflake information, community
+          solutions, and recent feature announcements.
+
+          Use when:
+          - Documentation search doesn't have the answer
+          - User asks about very recent features, releases, or announcements
+          - User asks about community best practices or third-party integrations
+          - User needs information newer than the documentation snapshot
+
+    # =========================================================================
+    # EMAIL TOOL
+    # =========================================================================
     - tool_spec:
         name: cortex_email_tool
         type: generic
@@ -496,10 +541,21 @@ CREATE OR REPLACE AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN
 
     # Other tool resources
     snowflake_knowledge_ext_documentation:
-      id_column: "SOURCE_URL"
-      title_column: "DOCUMENT_TITLE"
-      max_results: 10
       name: "SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE"
+      title_column: "DOCUMENT_TITLE"
+      id_column: "SOURCE_URL"
+      max_results: 10
+      columns_and_descriptions:
+        DOCUMENT_TITLE:
+          description: "Title of the Snowflake documentation page"
+          type: "string"
+          searchable: true
+          filterable: false
+        SOURCE_URL:
+          description: "URL of the source documentation page on docs.snowflake.com"
+          type: "string"
+          searchable: false
+          filterable: false
     cortex_email_tool:
       type: procedure
       identifier: "SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SFE_SEND_EMAIL"

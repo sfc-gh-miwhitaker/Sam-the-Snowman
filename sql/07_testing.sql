@@ -35,7 +35,7 @@
  *
  * Author: SE Community
  * Created: 2025-01-20
- * Expires: 2026-03-19
+ * Expires: 2026-04-18
  * Version: 6.0
  * License: Apache 2.0
  *
@@ -65,7 +65,7 @@ CREATE OR REPLACE TRANSIENT TABLE SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
     ERROR_MESSAGE VARCHAR(5000),
     TESTED_AT TIMESTAMP_LTZ DEFAULT CURRENT_TIMESTAMP()
 )
-COMMENT = 'DEMO: Sam-the-Snowman - Test execution results (Expires: 2026-03-19)';
+COMMENT = 'DEMO: Sam-the-Snowman - Test execution results (Expires: 2026-04-18)';
 
 
 -- ============================================================================
@@ -76,7 +76,7 @@ COMMENT = 'DEMO: Sam-the-Snowman - Test execution results (Expires: 2026-03-19)'
 CREATE OR REPLACE PROCEDURE SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS()
 RETURNS TABLE(TEST_CATEGORY VARCHAR, TEST_NAME VARCHAR, STATUS VARCHAR, EXECUTION_TIME_MS NUMBER, ERROR_MESSAGE VARCHAR)
 LANGUAGE SQL
-COMMENT = 'DEMO: Sam-the-Snowman - Execute all tests and return results (Expires: 2026-03-19)'
+COMMENT = 'DEMO: Sam-the-Snowman - Execute all tests and return results (Expires: 2026-04-18)'
 AS
 $$
 DECLARE
@@ -637,6 +637,51 @@ BEGIN
             VALUES ('PERFORMANCE', 'Cost anomaly < 60s', 'SP_SAM_COST_ANOMALIES', 'FAIL', 0, SQLERRM);
     END;
 
+    -- ========================================================================
+    -- Standard SQL Querying of Semantic Views (GA March 2, 2026)
+    -- ========================================================================
+    -- Semantic views can now be queried with standard SELECT ... GROUP BY
+    -- instead of the legacy SEMANTIC_VIEW() table function syntax.
+
+    BEGIN
+        start_time := CURRENT_TIMESTAMP();
+        SELECT COUNT(*) INTO :row_cnt
+        FROM SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_COST_ANALYSIS
+        WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP())
+        GROUP BY WAREHOUSE_NAME
+        LIMIT 10;
+        end_time := CURRENT_TIMESTAMP();
+        exec_time_ms := TIMESTAMPDIFF(MILLISECOND, start_time, end_time);
+
+        INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+            (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ROW_COUNT, ERROR_MESSAGE)
+        VALUES ('FUNCTIONAL', 'Standard SQL: SELECT from semantic view', 'SV_SAM_COST_ANALYSIS', 'PASS', :exec_time_ms, :row_cnt, NULL);
+    EXCEPTION
+        WHEN OTHER THEN
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ERROR_MESSAGE)
+            VALUES ('FUNCTIONAL', 'Standard SQL: SELECT from semantic view', 'SV_SAM_COST_ANALYSIS', 'FAIL', 0, SQLERRM);
+    END;
+
+    BEGIN
+        start_time := CURRENT_TIMESTAMP();
+        SELECT COUNT(*) INTO :row_cnt
+        FROM SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_QUERY_PERFORMANCE
+        WHERE START_TIME >= DATEADD(DAY, -1, CURRENT_TIMESTAMP())
+        LIMIT 5;
+        end_time := CURRENT_TIMESTAMP();
+        exec_time_ms := TIMESTAMPDIFF(MILLISECOND, start_time, end_time);
+
+        INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+            (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ROW_COUNT, ERROR_MESSAGE)
+        VALUES ('FUNCTIONAL', 'Standard SQL: SELECT with filter', 'SV_SAM_QUERY_PERFORMANCE', 'PASS', :exec_time_ms, :row_cnt, NULL);
+    EXCEPTION
+        WHEN OTHER THEN
+            INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
+                (TEST_CATEGORY, TEST_NAME, SEMANTIC_VIEW, STATUS, EXECUTION_TIME_MS, ERROR_MESSAGE)
+            VALUES ('FUNCTIONAL', 'Standard SQL: SELECT with filter', 'SV_SAM_QUERY_PERFORMANCE', 'FAIL', 0, SQLERRM);
+    END;
+
     -- Return summary
     RETURN TABLE(
         SELECT
@@ -670,7 +715,7 @@ GROUP BY TEST_CATEGORY
 ORDER BY TEST_CATEGORY;
 
 COMMENT ON VIEW SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.V_TEST_SUMMARY IS
-    'DEMO: Sam-the-Snowman - Test summary by category (Expires: 2026-03-19)';
+    'DEMO: Sam-the-Snowman - Test summary by category (Expires: 2026-04-18)';
 
 -- ============================================================================
 -- USAGE INSTRUCTIONS

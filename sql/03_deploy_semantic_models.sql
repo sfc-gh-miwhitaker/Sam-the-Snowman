@@ -36,7 +36,7 @@
  *
  * Author: SE Community
  * Created: 2025-01-26
- * Expires: 2026-03-19
+ * Expires: 2026-04-18
  * Version: 7.0
  * License: Apache 2.0
  *
@@ -68,7 +68,7 @@ LANGUAGE PYTHON
 RUNTIME_VERSION = '3.12'
 PACKAGES = ('snowflake-snowpark-python')
 HANDLER = 'deploy_semantic_model'
-COMMENT = 'DEMO: Sam-the-Snowman - Deploy semantic view from YAML file in stage (Expires: 2026-03-19)'
+COMMENT = 'DEMO: Sam-the-Snowman - Deploy semantic view from YAML file in stage (Expires: 2026-04-18)'
 AS
 $$
 import snowflake.snowpark as snowpark
