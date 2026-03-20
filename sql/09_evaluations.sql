@@ -118,8 +118,17 @@ COPY FILES
 -- ============================================================================
 -- GRANT PRIVILEGES
 -- ============================================================================
+-- Per Cortex Agent Evaluations docs, the executing role needs:
+--   SNOWFLAKE.CORTEX_USER database role, EXECUTE TASK ON ACCOUNT,
+--   CREATE DATASET ON SCHEMA, MONITOR on the agent, and READ on the config stage.
 
+USE ROLE ACCOUNTADMIN;
+GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE SYSADMIN;
+GRANT EXECUTE TASK ON ACCOUNT TO ROLE SYSADMIN;
+
+USE ROLE SYSADMIN;
 GRANT MONITOR ON AGENT SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN TO ROLE SYSADMIN;
+GRANT READ ON STAGE SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_EVALUATION_CONFIG TO ROLE SYSADMIN;
 
 -- ============================================================================
 -- USAGE INSTRUCTIONS

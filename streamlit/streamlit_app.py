@@ -15,6 +15,7 @@ import streamlit as st
 import altair as alt
 import pandas as pd
 from datetime import timedelta
+from snowflake.snowpark.context import get_active_session
 
 # Page configuration
 st.set_page_config(
@@ -23,8 +24,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# Connect to Snowflake
-conn = st.connection("snowflake")
+session = get_active_session()
 
 
 # =============================================================================
@@ -34,29 +34,29 @@ conn = st.connection("snowflake")
 @st.cache_data(ttl=timedelta(minutes=10))
 def load_trends():
     """Load week-over-week trend analysis."""
-    return conn.query("CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_TREND_ANALYSIS()")
+    return session.sql("CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_TREND_ANALYSIS()").to_pandas()
 
 
 @st.cache_data(ttl=timedelta(minutes=10))
 def load_efficiency_scores(lookback_days: int = 7):
     """Load warehouse efficiency scores."""
-    return conn.query(
+    return session.sql(
         f"CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_EFFICIENCY_SCORE({lookback_days})"
-    )
+    ).to_pandas()
 
 
 @st.cache_data(ttl=timedelta(minutes=10))
 def load_anomalies(lookback_days: int = 30, threshold: float = 2.0):
     """Load cost anomalies."""
-    return conn.query(
+    return session.sql(
         f"CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_COST_ANOMALIES({lookback_days}, {threshold})"
-    )
+    ).to_pandas()
 
 
 @st.cache_data(ttl=timedelta(minutes=10))
 def load_daily_costs(lookback_days: int = 30):
     """Load daily cost data for sparklines."""
-    return conn.query(f"""
+    return session.sql(f"""
         SELECT
             DATE(START_TIME) AS USAGE_DATE,
             SUM(CREDITS_USED) AS DAILY_CREDITS
@@ -65,13 +65,13 @@ def load_daily_costs(lookback_days: int = 30):
             AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
         GROUP BY USAGE_DATE
         ORDER BY USAGE_DATE
-    """)
+    """).to_pandas()
 
 
 @st.cache_data(ttl=timedelta(minutes=10))
 def load_daily_queries(lookback_days: int = 30):
     """Load daily query counts for sparklines."""
-    return conn.query(f"""
+    return session.sql(f"""
         SELECT
             DATE(START_TIME) AS USAGE_DATE,
             COUNT(*) AS QUERY_COUNT
@@ -80,7 +80,7 @@ def load_daily_queries(lookback_days: int = 30):
             AND WAREHOUSE_NAME NOT LIKE 'SYSTEM$%'
         GROUP BY USAGE_DATE
         ORDER BY USAGE_DATE
-    """)
+    """).to_pandas()
 
 
 # =============================================================================

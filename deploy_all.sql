@@ -36,7 +36,7 @@
  *   - SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO (Git repository clone)
  *   - SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN schema (project schema)
  *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS schema (shared semantic views)
- *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_* (3 semantic views)
+ *   - SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_* (4 semantic views)
  *   - Email notification integration + stored procedure (optional)
  *   - Snowflake Documentation (from Marketplace)
  *   - Sam-the-Snowman Cortex AI Agent with tools:
