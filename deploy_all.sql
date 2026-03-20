@@ -199,9 +199,9 @@ EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/br
 -- Sets up notification integration and email delivery stored procedure
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/02_email_integration.sql';
 
--- Module 3: Semantic Models (YAML-based deployment)
--- Deploys semantic views from YAML files with full feature support:
--- TIME_DIMENSIONS, FILTERS, VERIFIED_QUERIES, sample_values, custom_instructions
+-- Module 3: Semantic Models
+-- Deploys 4 semantic views via SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML with inline YAML.
+-- Full feature support: TIME_DIMENSIONS, FILTERS, VERIFIED_QUERIES, sample_values
 EXECUTE IMMEDIATE FROM '@SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO/branches/main/sql/03_deploy_semantic_models.sql';
 
 -- Module 3c: Python Analytics Tools

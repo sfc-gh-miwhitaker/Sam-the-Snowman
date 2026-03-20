@@ -7,7 +7,7 @@ Snowflake Intelligence agent demonstrating Cortex Analyst, Cortex Search, web se
 - `sql/99_cleanup/teardown_all.sql` -- Complete cleanup
 - `sql/` -- Individual SQL scripts (numbered 01-09)
 - `.claude/skills/sam-the-snowman/` -- Project-specific AI skill
-- `semantic_models/` -- YAML reference files for semantic views
+- `sql/03_deploy_semantic_models.sql` -- Semantic view definitions (inline YAML)
 - `evaluations/` -- Cortex Agent Evaluation config
 - `tools/` -- CLI utilities (REST API client, expiration sync)
 
