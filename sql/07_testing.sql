@@ -85,6 +85,7 @@ DECLARE
     exec_time_ms NUMBER;
     row_cnt NUMBER;
     error_msg VARCHAR;
+    res RESULTSET;
 BEGIN
     -- Clear previous results
     TRUNCATE TABLE SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS;
@@ -683,7 +684,7 @@ BEGIN
     END;
 
     -- Return summary
-    RETURN TABLE(
+    res := (
         SELECT
             TEST_CATEGORY,
             TEST_NAME,
@@ -693,6 +694,7 @@ BEGIN
         FROM SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.TEST_RESULTS
         ORDER BY TEST_ID
     );
+    RETURN TABLE(res);
 END;
 $$;
 
