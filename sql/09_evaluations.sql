@@ -62,36 +62,35 @@ COMMENT = 'DEMO: Sam-the-Snowman - Evaluation dataset for Cortex Agent Evaluatio
 
 INSERT INTO SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_EVALUATION_DATA
     (INPUT_QUERY, EXPECTED_OUTCOME)
-VALUES
-    ('What were my top 10 slowest queries today?',
-     PARSE_JSON('{"ground_truth_output": "Response should list up to 10 queries ordered by TOTAL_ELAPSED_TIME descending, including QUERY_ID, duration in seconds, warehouse name, and user. System warehouses (SYSTEM$%) should be excluded."}')),
-
-    ('Which warehouses are costing me the most this month?',
-     PARSE_JSON('{"ground_truth_output": "Response should show warehouses ranked by CREDITS_USED from WAREHOUSE_METERING_HISTORY for the current month, with dollar estimates at approximately $3/credit. System warehouses should be excluded."}')),
-
-    ('Are there any cost anomalies I should know about?',
-     PARSE_JSON('{"ground_truth_output": "Response should invoke the cost_anomaly_detector tool and report any days with z-scores above the threshold, including severity level, percent above baseline, and the top contributing warehouse."}')),
-
-    ('Give me an efficiency score for my warehouses',
-     PARSE_JSON('{"ground_truth_output": "Response should invoke the efficiency_scorer tool and present scores from 0-100 with letter grades (A-F) for each warehouse, including cache, spill, error, and queue sub-scores with recommendations."}')),
-
-    ('What changed compared to last week?',
-     PARSE_JSON('{"ground_truth_output": "Response should invoke the trend_analyzer tool and compare this week vs last week for credits, query count, average duration, error rate, active warehouses, and active users with percentage changes."}')),
-
-    ('Which queries are spilling to remote storage?',
-     PARSE_JSON('{"ground_truth_output": "Response should list queries with BYTES_SPILLED_TO_REMOTE_STORAGE > 0 from the past 7 days, including spill amount in GB, warehouse size, and duration. Should recommend upsizing warehouses or query optimization."}')),
-
-    ('Who is using the most credits?',
-     PARSE_JSON('{"ground_truth_output": "Response should rank users by attributed compute credits using QUERY_ATTRIBUTION_HISTORY, showing query count and total credits per user. System warehouses should be excluded."}')),
-
-    ('How do I enable multi-cluster warehouses?',
-     PARSE_JSON('{"ground_truth_output": "Response should use the documentation search tool (Cortex Search or web search) and provide guidance on ALTER WAREHOUSE with MAX_CLUSTER_COUNT and scaling policy settings."}')),
-
-    ('Show me warehouse utilization by hour of day',
-     PARSE_JSON('{"ground_truth_output": "Response should query WAREHOUSE_LOAD_HISTORY grouped by hour, showing AVG_RUNNING concurrency patterns. Should offer to visualize with a chart."}')),
-
-    ('What are the most common query error codes?',
-     PARSE_JSON('{"ground_truth_output": "Response should aggregate failed queries by ERROR_CODE and ERROR_MESSAGE from the past 7 days, showing failure count and affected users, ordered by frequency."}'));
+SELECT 'What were my top 10 slowest queries today?',
+       PARSE_JSON('{"ground_truth_output": "Response should list up to 10 queries ordered by TOTAL_ELAPSED_TIME descending, including QUERY_ID, duration in seconds, warehouse name, and user. System warehouses (SYSTEM$%) should be excluded."}')
+UNION ALL
+SELECT 'Which warehouses are costing me the most this month?',
+       PARSE_JSON('{"ground_truth_output": "Response should show warehouses ranked by CREDITS_USED from WAREHOUSE_METERING_HISTORY for the current month, with dollar estimates at approximately $3/credit. System warehouses should be excluded."}')
+UNION ALL
+SELECT 'Are there any cost anomalies I should know about?',
+       PARSE_JSON('{"ground_truth_output": "Response should invoke the cost_anomaly_detector tool and report any days with z-scores above the threshold, including severity level, percent above baseline, and the top contributing warehouse."}')
+UNION ALL
+SELECT 'Give me an efficiency score for my warehouses',
+       PARSE_JSON('{"ground_truth_output": "Response should invoke the efficiency_scorer tool and present scores from 0-100 with letter grades (A-F) for each warehouse, including cache, spill, error, and queue sub-scores with recommendations."}')
+UNION ALL
+SELECT 'What changed compared to last week?',
+       PARSE_JSON('{"ground_truth_output": "Response should invoke the trend_analyzer tool and compare this week vs last week for credits, query count, average duration, error rate, active warehouses, and active users with percentage changes."}')
+UNION ALL
+SELECT 'Which queries are spilling to remote storage?',
+       PARSE_JSON('{"ground_truth_output": "Response should list queries with BYTES_SPILLED_TO_REMOTE_STORAGE > 0 from the past 7 days, including spill amount in GB, warehouse size, and duration. Should recommend upsizing warehouses or query optimization."}')
+UNION ALL
+SELECT 'Who is using the most credits?',
+       PARSE_JSON('{"ground_truth_output": "Response should rank users by attributed compute credits using QUERY_ATTRIBUTION_HISTORY, showing query count and total credits per user. System warehouses should be excluded."}')
+UNION ALL
+SELECT 'How do I enable multi-cluster warehouses?',
+       PARSE_JSON('{"ground_truth_output": "Response should use the documentation search tool (Cortex Search or web search) and provide guidance on ALTER WAREHOUSE with MAX_CLUSTER_COUNT and scaling policy settings."}')
+UNION ALL
+SELECT 'Show me warehouse utilization by hour of day',
+       PARSE_JSON('{"ground_truth_output": "Response should query WAREHOUSE_LOAD_HISTORY grouped by hour, showing AVG_RUNNING concurrency patterns. Should offer to visualize with a chart."}')
+UNION ALL
+SELECT 'What are the most common query error codes?',
+       PARSE_JSON('{"ground_truth_output": "Response should aggregate failed queries by ERROR_CODE and ERROR_MESSAGE from the past 7 days, showing failure count and affected users, ordered by frequency."}');
 
 -- ============================================================================
 -- EVALUATION INFRASTRUCTURE
