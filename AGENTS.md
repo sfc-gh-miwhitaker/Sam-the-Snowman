@@ -1,49 +1,69 @@
-# Sam-the-Snowman
+# Sam-the-Snowman (Walkthrough Edition)
 
-Snowflake Intelligence agent demonstrating Cortex Analyst, Cortex Search, web search, Python analytics, agent evaluations, and Streamlit dashboard -- all deployed from a single `deploy_all.sql`.
+Notebook-first learning project for building a Cortex Agent the right way:
+1) naive baseline and 2) ontology-powered upgrade.
+
+The domain is **Drift Entertainment**, a fully fictional deterministic dataset
+committed as Parquet in `datasets/drift/`.
 
 ## Project Structure
-- `deploy_all.sql` -- Single entry point (Run All in Snowsight)
-- `sql/99_cleanup/teardown_all.sql` -- Complete cleanup
-- `sql/` -- Individual SQL scripts (numbered 01-09)
-- `.claude/skills/sam-the-snowman/` -- Project-specific AI skill
-- `sql/03_deploy_semantic_models.sql` -- Semantic view definitions (inline YAML)
-- `evaluations/` -- Cortex Agent Evaluation config
-- `tools/` -- CLI utilities (REST API client, expiration sync)
+
+- `notebooks/` -- Main course chapters (`ch00` ... `ch09`)
+- `notebooks/cookbook/` -- Optional chapter 7 expansions (`7a` ... `7g`)
+- `datasets/drift/` -- Generated Parquet inputs + dataset license
+- `tools/generate_drift_data.py` -- Deterministic dataset generator (fixed seed)
+- `assets/` -- Reusable SQL snippets used by notebooks
+- `evaluations/` -- Shared hard-question benchmark and evaluation config
+- `docs/` -- `GLOSSARY.md`, `TROUBLESHOOTING.md`, `ARCHITECTURE-POSTER.md`
 
 ## Snowflake Environment
-- Database: SNOWFLAKE_EXAMPLE
-- Schema: SAM_THE_SNOWMAN (project), SEMANTIC_MODELS (shared views)
-- Warehouse: SFE_SAM_SNOWMAN_WH
+
+- Database: `SNOWFLAKE_EXAMPLE`
+- Schemas:
+  - `SAM_DRIFT` (everything project-specific: data, ontology, agent, evaluation tables)
+  - `SEMANTIC_MODELS` (shared semantic view catalog)
+  - `GIT_REPOS` (shared git repository registry)
+- Warehouse: `SFE_SAM_SNOWMAN_WH`
+- Agent: `SNOWFLAKE_EXAMPLE.SAM_DRIFT.SAM_THE_SNOWMAN`
 
 ## Development Standards
-- SQL: Explicit columns, sargable predicates, QUALIFY for window functions
-- Objects: COMMENT with expiration date on all objects
-- Deploy: One-command deployment via deploy_all.sql
-- Agent model: Always `auto` -- never pin a specific model
-- Expiration SSOT: `deploy_all.sql` header, then `tools/sync-expiration.sh`
-- To extend: edit the date in `deploy_all.sql`, then `bash tools/sync-expiration.sh --apply --date YYYY-MM-DD`
+
+- SQL:
+  - Explicit columns and deterministic ordering in walkthrough examples
+  - Use stable date windows (`2020-01-01` through `2024-12-31`) for reproducibility
+- Objects:
+  - Every created object must include `COMMENT = 'DEMO: ... (Expires: YYYY-MM-DD)'`
+  - Keep SFE naming conventions (`SFE_`, `SAM_`, `SV_SAM_`, `VW_ONT_`, `ONT_*`)
+- Agent:
+  - Orchestration model must remain `auto`
+  - Base and ontology semantic view routing must be explicit in tool descriptions
+- Dataset:
+  - Do not add real-world artist/customer names
+  - Regenerate via `tools/generate_drift_data.py` with fixed seed
 
 ## When Helping with This Project
-- Follow SFE naming conventions (SFE_ prefix for account-level objects)
-- Use QUALIFY instead of subqueries for window function filtering
-- Keep deploy_all.sql as the single entry point
-- All new objects need `COMMENT = 'DEMO: ... (Expires: YYYY-MM-DD)'`
-- Semantic views go in `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS` (shared schema)
-- New tools need entries in both `tool_spec` and `tool_resources` in 05_agent.sql
-- VQRs in semantic models should use relative dates, not hardcoded timestamps
+
+- Treat `notebooks/ch00_welcome_to_sam.ipynb` as the default entry point.
+- Keep the hard-question benchmark unchanged unless explicitly requested:
+  1. Top customers + top genre by revenue
+  2. Customer vs employee country comparison
+  3. Support rep revenue + genre driver
+  4. Jazz vs Rock YoY trend (2020-2024)
+  5. Playlist popularity vs sales crossover
+- Preserve the naive -> ontology narrative; chapter 2 should fail before chapter 6 improves.
+- Prefer adding explanations in notebooks over adding hidden automation.
 
 ## Helping New Users
 
-If the user seems confused, asks basic questions like "what is this" or "how do I start", or appears unfamiliar with the tools:
+If someone is confused or new to Cortex Agents:
 
-1. **Greet them warmly** and explain what this project does in one plain-English sentence
-2. **Check deployment status** -- ask if they've run `deploy_all.sql` in Snowsight yet
-3. **Guide step-by-step** -- if not deployed, walk them through:
-   - Opening Snowsight (the Snowflake web interface)
-   - Creating a new SQL worksheet
-   - Pasting the contents of `deploy_all.sql`
-   - Clicking "Run All" (the play button with two arrows)
-4. **Suggest what to try** -- after deployment, give 2-3 specific things they can do
+1. Explain the project in one sentence:
+   - "You are building Sam twice (naive then ontology-powered) on deterministic Drift data."
+2. Ask whether they have opened `notebooks/ch00_welcome_to_sam.ipynb`.
+3. If not, guide them through Snowsight notebook creation from this repo.
+4. Suggest first success checks:
+   - Confirm Drift row counts in chapter 0
+   - Run the first naive prompt in chapter 1
+   - Run the first hard question in chapter 2
 
-**Assume no technical background.** Define terms when you use them. "Snowsight is the Snowflake web interface where you run SQL" is better than just "run this in Snowsight."
+Assume mixed experience levels and define terms plainly when used.

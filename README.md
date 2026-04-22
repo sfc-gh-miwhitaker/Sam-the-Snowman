@@ -1,141 +1,96 @@
-![Expires](https://img.shields.io/badge/Expires-2026--04--18-orange)
+# Sam-the-Snowman Walkthrough
 
-# Sam-the-Snowman
+You build the same Snowflake Cortex Agent twice: first a thin baseline that feels fast
+and breaks under pressure, then an ontology-powered version that holds up on hard questions.
 
-> DEMONSTRATION PROJECT - EXPIRES: 2026-04-18
-> This demo uses Snowflake features current as of March 2026.
+The walkthrough is delivered as Snowflake Notebooks and uses a fully fictional, deterministic
+dataset for **Drift Entertainment** so every learner sees the same results.
 
-Snowflake Intelligence agent for query performance, cost optimization, and warehouse operations -- with 11 tools including Cortex Analyst, Cortex Search, web search, Python analytics, email delivery, and charting.
+## The Situation at Drift
 
----
+It is Monday. You are Drift Entertainment's newest Analytics Engineer. Drift is a
+15-year-old indie music distributor with ~350 artists across 25 genres, customers in
+24 countries, a lean support team, and curated playlists that drive discovery.
 
-**Ask your Snowflake account anything about cost, performance, and warehouses -- get answers with charts, anomaly detection, and email delivery in seconds.**
+Last quarter, the founder told investors Jazz was Drift's fastest-growing genre.
+The number came from a one-off query that used the wrong revenue logic. Jazz was not
+the fastest, and the correction had to be made on the next call. Since then, Monday
+exec Q&A has become a spreadsheet reconciliation debate.
 
----
+Your manager Priya gives you two weeks to build an AI analyst the team can trust.
+Internally, they call it Sam, the data snowman: cold, clean, clear. This walkthrough
+shows how to build Sam twice so you can see why the first version fails and why the
+second version sticks.
 
-**Pair-programmed by:** SE Community + Cortex Code
-**Created:** 2025-11-25 | **Expires:** 2026-04-18 | **Version:** 9.0 | **Status:** ACTIVE
+## Who This Is For
 
-## Brand New to GitHub or Cortex Code?
+- Snowflake engineers, customer data engineers, and partner builders
+- Comfortable with SQL and Snowsight
+- New to production-grade Cortex Agent design patterns
 
-Start with the [Getting Started Guide](https://github.com/sfc-gh-miwhitaker/sfe-public/tree/main/guide-coco-setup) -- it walks you through downloading the code and installing Cortex Code (the AI assistant that will help you with everything else).
+## What You Build
 
-## Quick Start
+- A naive agent that works on easy prompts, plus baseline evidence Priya can use to show where it fails
+- Ontology layers (metadata + concrete + abstract views) that reduce ambiguity in people, media, and sales questions
+- Curated semantic views with explicit metric definitions and VQRs Priya can defend in Monday Q&A
+- A rebuilt agent that scores materially higher on the same evaluation set before Sam goes live
 
-**Deploy in Snowsight (no clone needed):**
-Copy [`deploy_all.sql`](deploy_all.sql) into a Snowsight worksheet and click **Run All**.
+## Prerequisites
 
-**Develop with Cortex Code:**
+- Snowflake account access with `ACCOUNTADMIN` (or equivalent delegated permissions)
+- Ability to run Snowflake Notebooks in Snowsight
+- A running warehouse (the walkthrough defaults to `SFE_SAM_SNOWMAN_WH`)
+- Optional: Cortex Code for AI pair assistance
 
-```bash
-git clone https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git
-cd Sam-the-Snowman && cortex
-```
+## Start Here
 
-## First Time Here?
+1. Open Snowsight and create a Notebook from this repository.
+2. Begin with [`notebooks/ch00_welcome_to_sam.ipynb`](notebooks/ch00_welcome_to_sam.ipynb).
+3. Follow chapters in order through chapter 6.
+4. Pick any cookbook branch in chapter 7.
+5. Finish with chapter 8 and chapter 9 teardown.
 
-1. **Deploy** -- Copy `deploy_all.sql` into Snowsight, click "Run All" (~3-5 min)
-2. **Enable web search** -- Snowsight > AI & ML > Agents > Settings > Web search toggle (one-time per account)
-3. **Use** -- Navigate to AI & ML > Agents > Sam-the-Snowman
-4. **Try these questions:**
-   - "What are my top 10 slowest queries today?"
-   - "Which warehouses are costing me the most?"
-   - "Are there any cost anomalies I should know about?"
-   - "Give me an efficiency score for my warehouses"
-5. **Test** -- `CALL SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS();`
-6. **Cleanup** -- Run `sql/99_cleanup/teardown_all.sql` when done
+## Chapter Map (Golden Path)
 
-**Estimated cost:** ~0.10 credits (~$0.20) + <1 GB storage
+| Chapter | Notebook | Time | Outcome | Why it matters at Drift |
+|---|---|---:|---|---|
+| 0 | [`notebooks/ch00_welcome_to_sam.ipynb`](notebooks/ch00_welcome_to_sam.ipynb) | 15 min | Set up `SNOWFLAKE_EXAMPLE.SAM_DRIFT` and load deterministic dataset | So every teammate starts from identical data and gets identical numbers. |
+| 1 | [`notebooks/ch01_first_agent.ipynb`](notebooks/ch01_first_agent.ipynb) | 20 min | Build first naive agent with FastGen semantic view | So Priya can show quick momentum while exposing current risk. |
+| 2 | [`notebooks/ch02_break_it_on_purpose.ipynb`](notebooks/ch02_break_it_on_purpose.ipynb) | 25 min | Run the five hard questions and baseline evals | So the Monday Q&A failure modes are visible before redesign. |
+| 3 | [`notebooks/ch03_think_in_entities.ipynb`](notebooks/ch03_think_in_entities.ipynb) | 25 min | Understand ontology design for this domain | So Sam reasons in business entities instead of raw table names. |
+| 4 | [`notebooks/ch04_build_ontology_layer.ipynb`](notebooks/ch04_build_ontology_layer.ipynb) | 30 min | Deploy Layers 1-3 (`ONT_*`, `V_*`, `VW_ONT_*`) | So Sam stops mixing up customers, employees, media, and sales events. |
+| 5 | [`notebooks/ch05_upgrade_semantic_views.ipynb`](notebooks/ch05_upgrade_semantic_views.ipynb) | 25 min | Build `SV_SAM_DRIFT_BASE` and `SV_SAM_DRIFT_ONTOLOGY` | So revenue and coverage metrics are defined once and reused correctly. |
+| 6 | [`notebooks/ch06_rebuild_and_compare.ipynb`](notebooks/ch06_rebuild_and_compare.ipynb) | 25 min | Rebuild agent and compare score improvements | So leadership can see concrete quality gains against the same benchmark. |
+| 7 | [`notebooks/cookbook/`](notebooks/cookbook/) | 20-40 min each | Optional capability expansions | So new capabilities are added only after core reliability is proven. |
+| 8 | [`notebooks/ch08_evaluate_and_iterate.ipynb`](notebooks/ch08_evaluate_and_iterate.ipynb) | 25 min | Tune prompts and metrics with eval loops | So Priya can defend Sam with repeatable scores, not anecdotes. |
+| 9 | [`notebooks/ch09_teardown_and_take_home.ipynb`](notebooks/ch09_teardown_and_take_home.ipynb) | 10 min | Teardown + "take this to your domain" checklist | So the pattern transfers cleanly to your real production domain. |
 
-## Development Tools
+## Cookbook Branches
 
-This project is designed for AI-pair development.
+- [`notebooks/cookbook/ch07a_add_cortex_search.ipynb`](notebooks/cookbook/ch07a_add_cortex_search.ipynb)
+- [`notebooks/cookbook/ch07b_add_web_search.ipynb`](notebooks/cookbook/ch07b_add_web_search.ipynb)
+- [`notebooks/cookbook/ch07c_add_python_analytics.ipynb`](notebooks/cookbook/ch07c_add_python_analytics.ipynb)
+- [`notebooks/cookbook/ch07d_add_email_delivery.ipynb`](notebooks/cookbook/ch07d_add_email_delivery.ipynb)
+- [`notebooks/cookbook/ch07e_add_graph_tools.ipynb`](notebooks/cookbook/ch07e_add_graph_tools.ipynb)
+- [`notebooks/cookbook/ch07f_add_rest_api.ipynb`](notebooks/cookbook/ch07f_add_rest_api.ipynb)
+- [`notebooks/cookbook/ch07g_add_streamlit_companion.ipynb`](notebooks/cookbook/ch07g_add_streamlit_companion.ipynb)
 
-- **AGENTS.md** -- Project instructions for Cortex Code and compatible AI tools
-- **.claude/skills/** -- Project-specific AI skill teaching the AI this project's patterns
-- **Cortex Code in Snowsight** -- Open in a Workspace for AI-assisted development
-- **Cortex Code CLI** -- `cortex -w /path/to/Sam-the-Snowman`
-- **Cursor** -- Open locally for AI-pair coding
+## Repo Structure
 
-> New to AI-pair development? See [Cortex Code docs](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code)
+- `notebooks/` - chapter notebooks and cookbook branches
+- `datasets/drift/` - deterministic Parquet inputs (generated with fixed seed)
+- `tools/generate_drift_data.py` - source-of-truth dataset generator
+- `assets/` - reusable SQL snippets consumed by notebooks
+- `evaluations/` - shared evaluation dataset and Cortex Agent Evaluation config
+- `docs/` - glossary, troubleshooting, architecture poster
 
-## What Sam Demonstrates
+## Notes
 
-| Feature | Implementation |
-|---------|---------------|
-| **Cortex Analyst** | 4 semantic views with relationships, TIME_DIMENSIONS, metrics, filters, VQRs |
-| **Cortex Search** | Snowflake documentation search with `columns_and_descriptions` (GA March 2026) |
-| **Web Search** | Live web results via Brave Search API for recent features and community content |
-| **Agent Evaluations** | Evaluation dataset + config with answer_correctness, logical_consistency, custom metric |
-| **System Instructions** | Dedicated `system` field for persona/guardrails, `response` for formatting |
-| **Standard SQL on SVs** | `SELECT ... FROM semantic_view GROUP BY` (GA March 2026) |
-| **Python Analytics** | Anomaly detection, efficiency scoring, trend analysis via Snowpark |
-| **Agent PROFILE** | `display_name` + `color` for branded Snowflake Intelligence UI |
-| **Automated Testing** | SMOKE, FUNCTIONAL, REGRESSION, PERFORMANCE tests with stored procedure |
-| **REST API** | `sam_agent_run.sh` with `:run` and `:feedback` endpoints |
-
-## Architecture
-
-```mermaid
-graph TB
-    subgraph sources["Data Sources · ACCOUNT_USAGE (~45 min latency)"]
-        QH[QUERY_HISTORY]
-        WMH[WAREHOUSE_METERING_HISTORY]
-        WLH[WAREHOUSE_LOAD_HISTORY]
-        QAH[QUERY_ATTRIBUTION_HISTORY]
-    end
-
-    subgraph semantic["Semantic Layer · YAML → CREATE SEMANTIC VIEW"]
-        SV1[SV_SAM_QUERY_PERFORMANCE]
-        SV2[SV_SAM_COST_ANALYSIS]
-        SV3[SV_SAM_WAREHOUSE_OPERATIONS]
-        SV4[SV_SAM_USER_ACTIVITY]
-    end
-
-    subgraph knowledge["Knowledge Sources"]
-        CKE[Cortex Search · Snowflake Docs]
-        WEB[Web Search · Brave API]
-    end
-
-    subgraph agent["Sam-the-Snowman · 11 Tools"]
-        direction LR
-        CA[Cortex Analyst x4]
-        PY[Python Analytics x3]
-        CH[Charts]
-        EM[Email]
-    end
-
-    subgraph consumers["Consumers"]
-        SI[Snowflake Intelligence]
-        ST[Streamlit Dashboard]
-        API[REST API · run + feedback]
-    end
-
-    QH & QAH --> SV1
-    WMH --> SV2
-    WLH --> SV3
-    QH & QAH --> SV4
-
-    SV1 & SV2 & SV3 & SV4 --> CA
-    CKE & WEB --> agent
-    CA & PY & CH & EM --> consumers
-```
-
-## Snowflake Objects
-
-| Object | Location |
-|--------|----------|
-| Agent | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_THE_SNOWMAN` |
-| Semantic views | `SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS.SV_SAM_*` (4 views) |
-| Python procedures | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_SAM_*` (3 procs) |
-| Test framework | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SP_RUN_TESTS()` |
-| Email procedure | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SFE_SEND_EMAIL()` |
-| Evaluation data | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAM_EVALUATION_DATA` |
-| Dashboard | `SNOWFLAKE_EXAMPLE.SAM_THE_SNOWMAN.SAMS_DASHBOARD` |
-| Warehouse | `SFE_SAM_SNOWMAN_WH` (X-Small, auto-suspend 60s) |
-
-All objects have `COMMENT = 'DEMO: ... (Expires: 2026-04-18)'`.
+- This project is a **teaching walkthrough**, not a production package.
+- All generated objects follow the SFE naming and comment conventions documented in `AGENTS.md`.
+- All Drift Entertainment entities are fictional and released under Apache 2.0.
 
 ---
 
-**Pair-programmed by:** SE Community + Cortex Code | **License:** Apache 2.0
+**Maintainers:** SE Community + Cortex Code
+**License:** Apache 2.0
