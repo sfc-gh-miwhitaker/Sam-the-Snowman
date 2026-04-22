@@ -1,5 +1,12 @@
 # Sam-the-Snowman Walkthrough
 
+![Expires](https://img.shields.io/badge/Expires-2026--05--22-green)
+
+> DEMONSTRATION PROJECT — validated against Snowflake features current as of April 2026.
+
+**Pair-programmed by:** SE Community + Cortex Code
+**Created:** 2026-04-22 | **Expires:** 2026-05-22 | **Status:** ACTIVE
+
 You build the same Snowflake Cortex Agent twice: first a thin baseline that feels fast
 and breaks under pressure, then an ontology-powered version that holds up on hard questions.
 
@@ -44,11 +51,83 @@ second version sticks.
 
 ## Start Here
 
-1. Open Snowsight and create a Notebook from this repository.
-2. Begin with [`notebooks/ch00_welcome_to_sam.ipynb`](notebooks/ch00_welcome_to_sam.ipynb).
-3. Follow chapters in order through chapter 6.
-4. Pick any cookbook branch in chapter 7.
-5. Finish with chapter 8 and chapter 9 teardown.
+This repo runs as Snowflake Notebooks inside a git-backed **Snowsight Workspace**. The
+setup is a one-time task; after that you just open a chapter and run it. Plan on ~5
+minutes for setup.
+
+### One-time setup: git-backed workspace in Snowsight
+
+You need the `ACCOUNTADMIN` role for step 1. If someone else runs your Snowflake
+account, send them steps 1 and 2 and you can pick up at step 3.
+
+**1. Create the GitHub API integration.**
+
+This tells Snowflake it is allowed to talk to public repositories under the
+`sfc-gh-miwhitaker` GitHub namespace. You only do this once per account. If
+`SFE_GITHUB_API_INTEGRATION` already exists, skip to step 2.
+
+Open a Snowflake worksheet (the SQL editor in Snowsight) and run:
+
+```sql
+USE ROLE ACCOUNTADMIN;
+
+CREATE OR REPLACE API INTEGRATION SFE_GITHUB_API_INTEGRATION
+  API_PROVIDER = git_https_api
+  API_ALLOWED_PREFIXES = ('https://github.com/sfc-gh-miwhitaker')
+  ENABLED = TRUE
+  COMMENT = 'Public GitHub integration for SFE walkthroughs';
+
+GRANT USAGE ON INTEGRATION SFE_GITHUB_API_INTEGRATION TO ROLE SYSADMIN;
+```
+
+The same API integration is reused later by chapter 0 when it creates a SQL-level
+git repository clone for loading the Parquet datasets. You will not be asked to do
+this again.
+
+**2. Create the workspace from this repository.**
+
+In Snowsight:
+
+1. In the left sidebar, select **Projects » Workspaces**.
+2. Click the **+ Add new** button (top-right of the workspace list), then choose
+   **From Git repository**.
+3. Paste this repository URL into the **Repository URL** field:
+   `https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman`
+4. Optional: rename the workspace to something you recognize, for example
+   `Sam-the-Snowman`.
+5. From the **API Integration** dropdown, pick `SFE_GITHUB_API_INTEGRATION`.
+6. For **Authentication method**, select **Public repository**. This means no
+   username, password, token, or OAuth popup — Snowflake reads the repo directly.
+   You will not be able to push commits from Snowsight back to this repo, which is
+   the correct behavior for a walkthrough.
+7. Click **Create**.
+
+Snowsight opens the workspace with the repository file tree on the left. Everything
+you see in [this README](README.md) is now visible inside Snowsight.
+
+**3. Open the first notebook.**
+
+From the workspace file tree, expand the `notebooks/` folder and open
+[`ch00_welcome_to_sam.ipynb`](notebooks/ch00_welcome_to_sam.ipynb). Snowsight renders
+`.ipynb` files as Snowflake Notebooks automatically.
+
+### Run the walkthrough
+
+1. Work through [`ch00_welcome_to_sam.ipynb`](notebooks/ch00_welcome_to_sam.ipynb) to
+   load data and verify your environment.
+2. Follow chapters in order through chapter 6.
+3. Pick any cookbook branch in chapter 7.
+4. Finish with chapter 8 and chapter 9 teardown.
+
+### Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `Projects » Workspaces` does not appear in the sidebar | Your account is still on the old Worksheets-only UI. Ask an admin to opt your account into Workspaces (it became default starting September 2025). |
+| `From Git repository` option is missing in the workspace dialog | Your role needs `USAGE` on an API integration. Re-run step 1 as `ACCOUNTADMIN`, then run the `GRANT USAGE` line for the role you are using. |
+| Workspace creation fails with "API integration does not allow this URL" | The `API_ALLOWED_PREFIXES` value in step 1 must match the namespace of the repo URL you paste. This repo lives under `sfc-gh-miwhitaker`; keep the prefix as shown. |
+| `SFE_GITHUB_API_INTEGRATION` already exists but you are not sure if it is configured correctly | Run `DESCRIBE INTEGRATION SFE_GITHUB_API_INTEGRATION;` and confirm `API_ALLOWED_PREFIXES` contains `https://github.com/sfc-gh-miwhitaker` (or a broader prefix like `https://github.com/`). |
+| You get `Object does not exist` when chapter 0 runs `CREATE OR REPLACE GIT REPOSITORY` | The API integration from step 1 is missing or not granted to your current role. Re-run step 1. |
 
 ## Chapter Map (Golden Path)
 
@@ -80,9 +159,27 @@ second version sticks.
 - `notebooks/` - chapter notebooks and cookbook branches
 - `datasets/drift/` - deterministic Parquet inputs (generated with fixed seed)
 - `tools/generate_drift_data.py` - source-of-truth dataset generator
+- `tools/sync_expiration.py` - single-command expiration-date sync (see "Expiration" below)
 - `assets/` - reusable SQL snippets consumed by notebooks
 - `evaluations/` - shared evaluation dataset and Cortex Agent Evaluation config
 - `docs/` - glossary, troubleshooting, architecture poster
+
+## Expiration
+
+This walkthrough is validated on a rolling 30-day cadence. The date shown in the badge
+above is the **single source of truth** — every notebook, SQL asset, and object COMMENT
+is kept in sync with it.
+
+To refresh: edit the `**Expires:**` line above, then run:
+
+```bash
+python tools/sync_expiration.py              # sync everything to the README date
+python tools/sync_expiration.py 2026-06-22   # set a new date and sync in one step
+python tools/sync_expiration.py --check      # CI-friendly consistency check
+```
+
+Chapter 0's first cell reports `days_remaining` and status at runtime so learners see
+freshness before they run anything else.
 
 ## Notes
 

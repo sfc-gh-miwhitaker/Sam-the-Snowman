@@ -34,6 +34,11 @@ committed as Parquet in `datasets/drift/`.
 - Objects:
   - Every created object must include `COMMENT = 'DEMO: ... (Expires: YYYY-MM-DD)'`
   - Keep SFE naming conventions (`SFE_`, `SAM_`, `SV_SAM_`, `VW_ONT_`, `ONT_*`)
+- Expiration (single source of truth):
+  - SSOT is the `**Expires:**` line + shields.io badge at the top of `README.md`
+  - Every `(Expires: YYYY-MM-DD)` COMMENT and the `SET DEMO_EXPIRES = '...'` banner in `ch00` are derived — never hand-edit them
+  - To rotate the date: `python tools/sync_expiration.py YYYY-MM-DD` (or edit the README line then run with no args)
+  - CI/pre-commit friendly check: `python tools/sync_expiration.py --check`
 - Agent:
   - Orchestration model must remain `auto`
   - Base and ontology semantic view routing must be explicit in tool descriptions

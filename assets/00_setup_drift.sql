@@ -2,23 +2,23 @@
 USE ROLE ACCOUNTADMIN;
 
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_EXAMPLE
-  COMMENT = 'DEMO: Shared walkthrough database (Expires: 2026-04-18)';
+  COMMENT = 'DEMO: Shared walkthrough database (Expires: 2026-05-22)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.GIT_REPOS
-  COMMENT = 'DEMO: Shared git repository clones (Expires: 2026-04-18)';
+  COMMENT = 'DEMO: Shared git repository clones (Expires: 2026-05-22)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SAM_DRIFT
-  COMMENT = 'DEMO: Drift walkthrough schema (Expires: 2026-04-18)';
+  COMMENT = 'DEMO: Drift walkthrough schema (Expires: 2026-05-22)';
 
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_EXAMPLE.SEMANTIC_MODELS
-  COMMENT = 'DEMO: Shared semantic views schema (Expires: 2026-04-18)';
+  COMMENT = 'DEMO: Shared semantic views schema (Expires: 2026-05-22)';
 
 CREATE OR REPLACE WAREHOUSE SFE_SAM_SNOWMAN_WH
   WAREHOUSE_SIZE = 'XSMALL'
   AUTO_SUSPEND = 60
   AUTO_RESUME = TRUE
   INITIALLY_SUSPENDED = TRUE
-  COMMENT = 'DEMO: Sam walkthrough warehouse (Expires: 2026-04-18)';
+  COMMENT = 'DEMO: Sam walkthrough warehouse (Expires: 2026-05-22)';
 
 USE ROLE SYSADMIN;
 USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
@@ -26,6 +26,6 @@ USE WAREHOUSE SFE_SAM_SNOWMAN_WH;
 CREATE OR REPLACE GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO
   API_INTEGRATION = SFE_GITHUB_API_INTEGRATION
   ORIGIN = 'https://github.com/sfc-gh-miwhitaker/Sam-the-Snowman.git'
-  COMMENT = 'DEMO: Sam repository clone for walkthrough notebooks (Expires: 2026-04-18)';
+  COMMENT = 'DEMO: Sam repository clone for walkthrough notebooks (Expires: 2026-05-22)';
 
 ALTER GIT REPOSITORY SNOWFLAKE_EXAMPLE.GIT_REPOS.SFE_SAM_THE_SNOWMAN_REPO FETCH;
