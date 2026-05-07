@@ -129,12 +129,14 @@ From the workspace file tree, expand the `notebooks/` folder and open
 | `SFE_GITHUB_API_INTEGRATION` already exists but you are not sure if it is configured correctly | Run `DESCRIBE INTEGRATION SFE_GITHUB_API_INTEGRATION;` and confirm `API_ALLOWED_PREFIXES` contains `https://github.com/sfc-gh-miwhitaker` (or a broader prefix like `https://github.com/`). |
 | You get `Object does not exist` when chapter 0 runs `CREATE OR REPLACE GIT REPOSITORY` | The API integration from step 1 is missing or not granted to your current role. Re-run step 1. |
 
+For notebook execution, semantic-view, and agent errors encountered after setup, see [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md).
+
 ## Chapter Map (Golden Path)
 
 | Chapter | Notebook | Time | Outcome | Why it matters at Drift |
 |---|---|---:|---|---|
 | 0 | [`notebooks/ch00_welcome_to_sam.ipynb`](notebooks/ch00_welcome_to_sam.ipynb) | 15 min | Set up `SNOWFLAKE_EXAMPLE.SAM_DRIFT` and load deterministic dataset | So every teammate starts from identical data and gets identical numbers. |
-| 1 | [`notebooks/ch01_first_agent.ipynb`](notebooks/ch01_first_agent.ipynb) | 20 min | Build first naive agent with FastGen semantic view | So Priya can show quick momentum while exposing current risk. |
+| 1 | [`notebooks/ch01_first_agent.ipynb`](notebooks/ch01_first_agent.ipynb) | 20 min | Build first naive agent with thin semantic view (`SV_SAM_DRIFT_NAIVE`) | So Priya can show quick momentum while exposing current risk. |
 | 2 | [`notebooks/ch02_break_it_on_purpose.ipynb`](notebooks/ch02_break_it_on_purpose.ipynb) | 25 min | Run the five hard questions and baseline evals | So the Monday Q&A failure modes are visible before redesign. |
 | 3 | [`notebooks/ch03_think_in_entities.ipynb`](notebooks/ch03_think_in_entities.ipynb) | 25 min | Understand ontology design for this domain | So Sam reasons in business entities instead of raw table names. |
 | 4 | [`notebooks/ch04_build_ontology_layer.ipynb`](notebooks/ch04_build_ontology_layer.ipynb) | 30 min | Deploy Layers 1-3 (`ONT_*`, `V_*`, `VW_ONT_*`) | So Sam stops mixing up customers, employees, media, and sales events. |
@@ -146,23 +148,28 @@ From the workspace file tree, expand the `notebooks/` folder and open
 
 ## Cookbook Branches
 
-- [`notebooks/cookbook/ch07a_add_cortex_search.ipynb`](notebooks/cookbook/ch07a_add_cortex_search.ipynb)
-- [`notebooks/cookbook/ch07b_add_web_search.ipynb`](notebooks/cookbook/ch07b_add_web_search.ipynb)
-- [`notebooks/cookbook/ch07c_add_python_analytics.ipynb`](notebooks/cookbook/ch07c_add_python_analytics.ipynb)
-- [`notebooks/cookbook/ch07d_add_email_delivery.ipynb`](notebooks/cookbook/ch07d_add_email_delivery.ipynb)
-- [`notebooks/cookbook/ch07e_add_graph_tools.ipynb`](notebooks/cookbook/ch07e_add_graph_tools.ipynb)
-- [`notebooks/cookbook/ch07f_add_rest_api.ipynb`](notebooks/cookbook/ch07f_add_rest_api.ipynb)
-- [`notebooks/cookbook/ch07g_add_streamlit_companion.ipynb`](notebooks/cookbook/ch07g_add_streamlit_companion.ipynb)
+| Chapter | Notebook | Description |
+|---|---|---|
+| 7A | [`notebooks/cookbook/ch07a_add_cortex_search.ipynb`](notebooks/cookbook/ch07a_add_cortex_search.ipynb) | Add a documentation retrieval tool using Cortex Search |
+| 7B | [`notebooks/cookbook/ch07b_add_web_search.ipynb`](notebooks/cookbook/ch07b_add_web_search.ipynb) | Add web search for fresh announcements with guardrails |
+| 7C | [`notebooks/cookbook/ch07c_add_python_analytics.ipynb`](notebooks/cookbook/ch07c_add_python_analytics.ipynb) | Add Snowpark anomaly detection on invoice revenue trends |
+| 7D | [`notebooks/cookbook/ch07d_add_email_delivery.ipynb`](notebooks/cookbook/ch07d_add_email_delivery.ipynb) | Add notification integration for scheduled summaries |
+| 7E | [`notebooks/cookbook/ch07e_add_graph_tools.ipynb`](notebooks/cookbook/ch07e_add_graph_tools.ipynb) | Add hierarchy traversal for manager chains and media taxonomies |
+| 7F | [`notebooks/cookbook/ch07f_add_rest_api.ipynb`](notebooks/cookbook/ch07f_add_rest_api.ipynb) | Call the agent via REST for automated regression checks |
+| 7G | [`notebooks/cookbook/ch07g_add_streamlit_companion.ipynb`](notebooks/cookbook/ch07g_add_streamlit_companion.ipynb) | Publish a Streamlit dashboard paired with Sam's responses |
 
 ## Repo Structure
 
 - `notebooks/` - chapter notebooks and cookbook branches
-- `datasets/drift/` - deterministic Parquet inputs (generated with fixed seed)
+- `datasets/drift/` - deterministic Parquet inputs; [`datasets/drift/README.md`](datasets/drift/README.md) has row counts and regeneration instructions
 - `tools/generate_drift_data.py` - source-of-truth dataset generator
 - `tools/sync_expiration.py` - single-command expiration-date sync (see "Expiration" below)
 - `assets/` - reusable SQL snippets consumed by notebooks
-- `evaluations/` - shared evaluation dataset and Cortex Agent Evaluation config
-- `docs/` - glossary, troubleshooting, architecture poster
+- `evaluations/` - shared benchmark artifacts; [`evaluations/README.md`](evaluations/README.md) has manual-usage instructions
+- `docs/`
+  - [`GLOSSARY.md`](docs/GLOSSARY.md) — key terms and naming conventions
+  - [`TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) — notebook, semantic-view, and agent errors
+  - [`ARCHITECTURE-POSTER.md`](docs/ARCHITECTURE-POSTER.md) — end-to-end data-flow diagram
 
 ## Expiration
 
